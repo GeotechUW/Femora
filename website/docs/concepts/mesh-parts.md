@@ -509,7 +509,7 @@ soil_box = model.meshpart.volume.uniform_rectangular_grid(
 )
 ```
 
-The exact region APIs are covered later in [Tags, Sources, Regions, and Groups](tags-sources-regions-and-groups.md).
+The exact region workflow is covered later in [Regions and Groups](regions-and-groups.md).
 
 ---
 

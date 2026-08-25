@@ -175,25 +175,45 @@ Mesh parts are source geometry before assembly. The assembler combines them into
 
     Compile independent geometry and interfaces into one assembled model.
 
--   :material-tag-multiple-outline: **[Tags, Sources, Regions, and Groups](tags-sources-regions-and-groups.md)**
+-   :material-graph-outline: **[Partitioning](partitioning-and-parallel-execution.md)**
 
-    Organize and query the assembled finite element mesh for assignment and output.
+    Divide assembly sections into subdomains while retaining control over computational ownership.
 
--   :material-waveform: **[Loads, Time Series, and Patterns](loads-time-series-and-patterns.md)**
+-   :material-cube-scan: **[The Assembled Model](assembled-model.md)**
 
-    Define static or dynamic forcing in a reusable way.
+    Understand the final `pyvista.UnstructuredGrid` and the point and cell data carried into later operations.
 
--   :material-database-export-outline: **[Damping, Recorders, and Outputs](damping-recorders-and-outputs.md)**
+-   :material-pound: **[Tags and IDs](tags-and-ids.md)**
 
-    Configure energy dissipation, solver outputs, and exported grids.
+    Learn how Femora identifies managed definitions, mesh data, and exported solver objects.
 
--   :material-cog-play-outline: **[Process and Analysis](process-and-analysis.md)**
+-   :material-vector-selection: **[Regions and Groups](regions-and-groups.md)**
 
-    Choose solver settings and place analyses into an ordered workflow.
+    Apply physical scope before assembly and create reusable selections afterward.
 
--   :material-cpu-64-bit: **[Partitioning and Parallel Execution](partitioning-and-parallel-execution.md)**
+-   :material-waves: **[Damping](damping.md)**
 
-    Divide the assembled mesh into subdomains for parallel OpenSees workflows.
+    Define an energy-dissipation law and assign it to the intended model region.
+
+-   :material-lock-outline: **[Constraints](constraints.md)**
+
+    Restrain nodal motion and define kinematic relationships between assembled nodes.
+
+-   :material-weight: **[Loading](loading.md)**
+
+    Connect model targets, reference values, time histories, and loading patterns.
+
+-   :material-record-rec: **[Recorders and Actions](recorders-and-actions.md)**
+
+    Observe runtime response and define deliberate transitions between simulation stages.
+
+-   :material-cog-play-outline: **[Analysis](analysis.md)**
+
+    Choose a coherent numerical strategy for advancing load or time.
+
+-   :material-format-list-numbered: **[Process](process.md)**
+
+    Arrange patterns, recorders, actions, and analyses into the final executable timeline.
 
 </div>
 

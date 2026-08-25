@@ -5,7 +5,7 @@ icon: material/vector-link
 
 # Interfaces
 
-Interfaces describe relationships between mesh parts that should be resolved during assembly instead of being hard-coded into one conforming mesh up front.
+Interfaces describe relationships between mesh parts that should be executed through the assembly pipeline instead of being hard-coded into one conforming mesh up front.
 
 In other words, mesh parts define geometry separately, and interfaces tell Femora how those separate pieces should interact when the global model is compiled.
 
@@ -17,19 +17,19 @@ Think of interfaces as **declared relationships** rather than finished connectiv
 
 ```mermaid
 flowchart LR
-    parts["Mesh parts<br/>independent geometry"]
+    meshparts["Mesh parts<br/>independent geometry"]
     interface["Interface declaration<br/>relationship rule"]
-    assembly{{"Assembly<br/>search + resolve"}}
-    model["Assembled model<br/>new constraints / metadata / updates"]
+    assembly{{"Assembly pipeline<br/>event-driven execution"}}
+    result["Resolved interface result<br/>assembled-model updates"]
 
-    parts --> interface
+    meshparts --> interface
     interface --> assembly
-    assembly --> model
+    assembly --> result
 
     classDef stage stroke-width:1px;
     classDef compile stroke-width:2px;
 
-    class parts,interface,model stage;
+    class meshparts,interface,result stage;
     class assembly compile;
 ```
 
@@ -39,7 +39,7 @@ An interface usually means one of these ideas:
 - one set of cells should search for nearby host cells
 - one boundary treatment should be generated from the assembled model
 
-The important point is that the interface is **declared before assembly**, but most of its real work happens **during assembly events**.
+The important point is that the interface is **declared before assembly**, but its real work is **event-driven inside the assembly pipeline**.
 
 ???+ note "Interfaces are not just geometry"
     A mesh part answers: "what geometry do I have?" An interface answers: "how should two already-defined parts relate once Femora sees the full assembled model?"
@@ -50,18 +50,10 @@ The important point is that the interface is **declared before assembly**, but m
 
 Interfaces belong after mesh parts and before assembly.
 
-```text
-Building blocks
-  -> mesh parts
-  -> interfaces
-  -> assembly
-  -> constraints, loads, damping, recorders, analysis
-```
-
 That ordering matters because an interface usually needs:
 
 1. mesh parts to already exist
-2. the assembled mesh to perform search, filtering, or conflict resolution
+2. one or more assembly stages to perform search, filtering, boundary processing, or conflict resolution
 
 So interfaces sit at the boundary between **local modeling** and **global compilation**.
 
@@ -69,9 +61,7 @@ So interfaces sit at the boundary between **local modeling** and **global compil
 
 ## What Interfaces Mean In Femora
 
-Femora interfaces are model objects managed under `model.interface`.
-
-They are useful when you do **not** want to force everything into one perfectly matching mesh by hand. Instead, you let Femora inspect the assembled model and generate the needed relationships.
+Femora interfaces are model objects managed under `model.interface`. They are useful when you do **not** want to force everything into one perfectly matching mesh by hand. Instead, you let Femora inspect the assembled model and generate the needed relationships.
 
 Current interface ideas in Femora include:
 
@@ -81,20 +71,30 @@ Current interface ideas in Femora include:
 | Embedded node interface | Node-based embedding relationship | Specialized node-to-domain coupling |
 | Boundary absorber | New absorbing boundary layers derived from the assembled model | Truncating wave-reflecting boundaries |
 
-This page focuses on the concept. The exact API surface comes from the interface manager and interface components.
-
 ---
 
-## The Main Workflow
+## Before vs After Assembly
 
-For most users, the interface workflow is:
+Explicitly contrast how the model sees the pieces before assembly versus how it sees the generated interface result after assembly.
 
-1. Create the mesh parts independently.
-2. Declare the interface by naming the participating parts.
-3. Run assembly.
-4. Let Femora resolve the relationship during event-driven assembly steps.
-
-This is different from manually writing node-by-node constraints after export. The interface stays as a higher-level modeling object inside Femora.
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 2rem 0;">
+  <div style="border: 1px solid var(--md-default-fg-color--lightest); border-radius: 8px; padding: 1.5rem; background: rgba(169, 116, 97, 0.08);">
+    <h3 style="margin-top: 0; color: var(--md-typeset-color);">Before Assembly</h3>
+    <ul style="margin-bottom: 0;">
+      <li><b>Independent Parts:</b> A pile mesh part and a soil mesh part exist separately.</li>
+      <li><b>No Connections:</b> They share space but do not interact.</li>
+      <li><b>Interface Rule:</b> A lightweight object holding radius, penalty params, and mesh references.</li>
+    </ul>
+  </div>
+  <div style="border: 1px solid var(--md-default-fg-color--lightest); border-radius: 8px; padding: 1.5rem; background: rgba(59, 130, 246, 0.08);">
+    <h3 style="margin-top: 0; color: var(--md-typeset-color);">After Assembly</h3>
+    <ul style="margin-bottom: 0;">
+      <li><b>Unified Global Grid:</b> One assembled <code>pyvista.UnstructuredGrid</code>.</li>
+      <li><b>Host Discovery:</b> Surrounding soil cells are tagged as hosts.</li>
+      <li><b>Generated Interface Result:</b> Interface-driven cells, metadata, or coupling updates are added depending on the interface type.</li>
+    </ul>
+  </div>
+</div>
 
 ---
 
@@ -128,7 +128,7 @@ This is different from manually writing node-by-node constraints after export. T
     model.assembler.assemble()
     ```
 
-    Here the interface is declared before assembly, but the surrounding-solid search and embedded relationship generation happen only when the assembled model exists.
+    Here the interface is declared before assembly, but the surrounding-solid search and embedded relationship generation happen only when the required assembly stage is reached.
 
 === "Boundary absorber"
 
@@ -149,7 +149,7 @@ This is different from manually writing node-by-node constraints after export. T
     model.assembler.assemble()
     ```
 
-    In this pattern, the interface logic inspects the assembled boundary and then creates the absorbing treatment after assembly begins.
+    In this pattern, the interface logic inspects the assembled boundary and then creates the absorbing treatment during the relevant assembly-time stage.
 
 === "Embedded nodes in a host mesh"
 
@@ -172,58 +172,72 @@ This is different from manually writing node-by-node constraints after export. T
     model.assembler.assemble()
     ```
 
-    The constrained part is sampled after assembly, host cells are searched, and Femora generates the embedded interface contribution from those discovered relationships.
+## Visualizing Generated Interfaces
 
----
+After `model.assembler.assemble()`, you can often call `plot()` on an interface object to inspect what Femora actually selected and added. These plot helpers are useful for debugging because they show the **resolved interface result**, not just the declaration.
 
-## Inspecting Interfaces After Assembly
+The exact plotting options depend on the interface type, but the basic usage pattern is:
 
-After `model.assembler.assemble()`, the embedded interfaces can be plotted directly to inspect what Femora actually selected.
+```python
+model.assembler.assemble()
+interface.plot()
+```
 
-=== "Beam-solid plot"
+### Embedded Beam-Solid Plot
 
-    ```python
-    interface = model.interface.beam_solid_interface(
-        name="pile_soil_interface",
-        beam_part="pile",
-        solid_parts=["soil_box"],
-        radius=0.50,
-    )
+```python
+interface = model.interface.beam_solid_interface(
+    name="pile_soil_interface",
+    beam_part="pile",
+    solid_parts=["soil_box"],
+    radius=0.50,
+)
 
-    model.assembler.assemble()
-    interface.plot()
-    ```
+model.assembler.assemble()
+interface.plot()
+```
 
-=== "Embedded-node plot"
+<div style="margin: 1.25rem 0; border: 1px solid var(--md-default-fg-color--lightest); border-radius: 12px; overflow: hidden; background: var(--md-default-bg-color);">
+  <div style="position: relative; width: 100%; aspect-ratio: 16/9; background: #fafafa;">
+    <iframe src="../../assets/interfaces/embedded_beam_solid_plot.html" style="width: 100%; height: 100%; border: none;" title="Embedded Beam-Solid Interactive Visual"></iframe>
+  </div>
+</div>
 
-    ```python
-    interface = model.interface.node_interface(
-        name="building_foundation_interface",
-        constrained_node="building",
-        retained_nodes=["foundation"],
-    )
+This view is useful because it shows:
 
-    model.assembler.assemble()
-    interface.plot()
-    ```
+- the beam path owned by the interface
+- the surrounding host solid cells selected by the search
+- the geometric search envelope used by the interface
 
-The plot helpers are useful because they show the **resolved interface result**, not just the declaration. That makes it much easier to confirm that the right cells, points, and search region were actually used.
+If those highlights do not match the intended physical relationship, the interface definition should be adjusted before export or analysis.
 
-???+ tip "Read the plot like a debugging view"
-    For a beam-solid interface, the usual reading is:
+### Embedded Node Plot
 
-    - black line cells: the beam path owned by the interface
-    - orange solid cells: the surrounding host cells selected by the search
-    - blue envelope: the geometric radius/envelope used for discovery
+```python
+interface = model.interface.node_interface(
+    name="building_foundation_interface",
+    constrained_node="building",
+    retained_nodes=["foundation"],
+)
 
-    For an embedded-node interface, the usual reading is:
+model.assembler.assemble()
+interface.plot()
+```
 
-    - black geometry: the constrained mesh part
-    - orange cells: the retained host cells that received the embedded search hits
-    - blue points: constrained points used by the interface
-    - red markers: generated interface cells added to the assembled model
+<div style="margin: 1.25rem 0; border: 1px solid var(--md-default-fg-color--lightest); border-radius: 12px; overflow: hidden; background: var(--md-default-bg-color);">
+  <div style="position: relative; width: 100%; aspect-ratio: 16/9; background: #fafafa;">
+    <iframe src="../../assets/interfaces/embedded_node_plot.html" style="width: 100%; height: 100%; border: none;" title="Embedded Node Interactive Visual"></iframe>
+  </div>
+</div>
 
-    If those highlights do not match what you intended physically, the interface definition should be adjusted before export or analysis.
+This view is useful because it shows:
+
+- the constrained mesh part
+- the retained host cells used by the interface
+- the constrained points selected for embedding
+- the generated interface cells added to the assembled model
+
+Each interface may expose different plotting options, but the main idea is the same: inspect the resolved relationship before continuing to export or analysis.
 
 ---
 
@@ -247,31 +261,11 @@ Conceptually, an interface is a model object that waits for the right assembly s
 
 ---
 
-## What Happens Under The Hood
-
-The interface system is event-driven.
-
-The manager and component code show that interfaces subscribe to model events such as:
-
-- `POST_ASSEMBLE`
-- `RESOLVE_CORE_CONFLICTS`
-
-That means Femora can:
-
-- wait until the full assembled mesh exists
-- search only the relevant cells or parts
-- generate embedded/contact information
-- resolve conflicts when parallel cores or overlapping interface results need cleanup
-
-This is the main reason interfaces belong conceptually before assembly but computationally act during assembly.
-
----
-
 ## What Interfaces Are Not
 
 Interfaces are not the same thing as ordinary constraints.
 
-- Interfaces start from mesh-part relationships and assembly-time search.
+- Interfaces start from mesh-part relationships and assembly-pipeline events.
 - Constraints usually start from already-known nodes, DOFs, or assembled selections.
 
 So even though both can eventually affect the solver domain, they solve different modeling problems.
@@ -286,7 +280,7 @@ Constraints belong later in the concept chain because users usually think about 
     If two mesh parts are meant to become one continuous domain and their coincident points should simply be merged, ordinary assembly point merging is the simpler path. Use an interface only when you need a declared relationship beyond shared nodes.
 
 ???+ warning "Do not think of interfaces as immediate solver commands"
-    Creating an interface object does not finish the connection. The heavy work usually happens when `model.assembler.assemble()` triggers the relevant model events.
+    Creating an interface object does not finish the connection. The heavy work happens when `model.assembler.assemble()` triggers the relevant model events for that interface type.
 
 ???+ warning "Make the participating parts explicit when needed"
     For embedded workflows, restricting the relevant solid parts is often clearer and more controllable than letting the search operate over everything.
