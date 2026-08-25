@@ -5,14 +5,59 @@
 # SPDX-License-Identifier: Apache-2.0
 # =============================================================================
 
-"""Tests for OpenSees runtime configuration."""
-
+from io import StringIO
 import os
 from pathlib import Path
 
 import pytest
 
 from femora import runtime
+
+
+class _FakeProcess:
+    def __init__(self, output: str, return_code: int = 0):
+        self.stdout = StringIO(output)
+        self._return_code = return_code
+
+    def wait(self) -> int:
+        return self._return_code
+
+
+class _FakeTqdm:
+    instances = []
+    messages = []
+
+    def __init__(self, *, total, desc, **_kwargs):
+        self.total = total
+        self.desc = desc
+        self.n = 0
+        self.closed = False
+        self.instances.append(self)
+
+    def update(self, amount):
+        self.n += amount
+
+    def close(self):
+        self.closed = True
+
+    @classmethod
+    def write(cls, message):
+        cls.messages.append(message)
+
+
+@pytest.fixture(autouse=True)
+def reset_fake_tqdm():
+    _FakeTqdm.instances.clear()
+    _FakeTqdm.messages.clear()
+
+
+def _configure_process(monkeypatch, output: str, return_code: int = 0):
+    monkeypatch.setattr(runtime, "tqdm", _FakeTqdm)
+    monkeypatch.setattr(
+        runtime.subprocess,
+        "Popen",
+        lambda *_args, **_kwargs: _FakeProcess(output, return_code),
+    )
 
 
 def test_setup_local_registers_explicit_executable(
@@ -52,3 +97,40 @@ def test_setup_accepts_google_colab_alias(
 def test_setup_rejects_unknown_environment() -> None:
     with pytest.raises(ValueError, match="environment must be"):
         runtime.setup("cluster")
+
+
+def test_run_tracks_managed_analysis_progress(tmp_path, monkeypatch):
+    script = tmp_path / "model.tcl"
+    executable = tmp_path / "OpenSees"
+    script.write_text("wipe\n", encoding="ascii")
+    executable.write_text("", encoding="ascii")
+    _configure_process(
+        monkeypatch,
+        "FEMORA_PROGRESS|START|Dynamic response|10\n"
+        "FEMORA_PROGRESS|UPDATE|Dynamic response|4|10\n"
+        "FEMORA_PROGRESS|UPDATE|Dynamic response|10|10\n",
+    )
+
+    completed = runtime.run(script, executable=executable)
+
+    assert completed.returncode == 0
+    assert len(_FakeTqdm.instances) == 1
+    assert _FakeTqdm.instances[0].n == 10
+    assert _FakeTqdm.instances[0].closed
+
+
+def test_run_raises_when_analysis_reports_failure(tmp_path, monkeypatch):
+    script = tmp_path / "model.tcl"
+    executable = tmp_path / "OpenSees"
+    script.write_text("wipe\n", encoding="ascii")
+    executable.write_text("", encoding="ascii")
+    _configure_process(
+        monkeypatch,
+        "FEMORA_PROGRESS|START|Dynamic response|10\n"
+        "FEMORA_PROGRESS|ERROR|Dynamic response|3|-3\n",
+    )
+
+    with pytest.raises(runtime.RuntimeExecutionError, match="failed at step 3"):
+        runtime.run(script, executable=executable)
+
+    assert "failed at step 3" in _FakeTqdm.messages[0]

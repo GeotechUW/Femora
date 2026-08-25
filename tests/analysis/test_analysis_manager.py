@@ -87,6 +87,9 @@ def test_add_analysis_tags_and_tcl(mesh_maker):
     tcl = analysis.to_tcl()
     assert "analysis Transient" in tcl
     assert "constraints Plain" in tcl
+    assert "FEMORA_PROGRESS|START|TransientRun|$FemoraAnalysisTotal" in tcl
+    assert "if {$Ok != 0}" in tcl
+    assert "FEMORA_PROGRESS|UPDATE|TransientRun" in tcl
     assert "wipeAnalysis" in tcl
 
 

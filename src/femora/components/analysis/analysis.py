@@ -210,6 +210,8 @@ class Analysis(AnalysisComponent):
         Returns:
             The TCL command string.
         """
+        progress_name = self.name.replace("|", "/").replace("\n", " ")
+
         # Generate TCL commands for each component
         commands = []
         commands.append("if {$pid == 0} {" + f'puts [string repeat "=" 120] ' + "}")
@@ -225,14 +227,34 @@ class Analysis(AnalysisComponent):
         # Add analysis command
         commands.append(f"analysis {self.analysis_type}")
 
-        # add analyze command with parameters
+        if self.final_time is not None:
+            total_steps = (
+                f"[expr {{max(1, int(ceil(({self.final_time} - [getTime]) "
+                f"/ {self.dt})))}}]"
+            )
+        else:
+            total_steps = str(self.num_steps)
+
+        commands.extend(
+            [
+                "set FemoraAnalysisStep 0",
+                f"set FemoraAnalysisTotal {total_steps}",
+                "set FemoraProgressStride [expr {max(1, int(ceil(double($FemoraAnalysisTotal) / 1000.0)))}]",
+                f'if {{$pid == 0}} {{puts "FEMORA_PROGRESS|START|{progress_name}|$FemoraAnalysisTotal"; flush stdout}}',
+            ]
+        )
+
+        # Run one increment at a time so failures and progress remain observable.
         if self.analysis_type == "Static":
-            commands.append(f"analyze {self.num_steps}")
+            commands.append("while {$FemoraAnalysisStep < $FemoraAnalysisTotal} {")
+            commands.append("\tset Ok [analyze 1]")
+            commands.extend(self._step_status_commands(progress_name))
+            commands.append("}")
         elif self.analysis_type in ["Transient", "VariableTransient"]:
             if self.final_time is not None:
                 commands.append("while {[getTime] < %f} {" % self.final_time)
-                commands.append('\tif {$pid == 0} {puts "Time : [getTime]"}\n')
-                commands.append(f"\tset Ok [analyze 1 {self.dt}]\n")
+                commands.append(f"\tset Ok [analyze 1 {self.dt}]")
+                commands.extend(self._step_status_commands(progress_name))
                 commands.append("}")
             elif self.analysis_type == "Transient" and self.dt_min is not None and self.dt_max is not None:
                 commands.append(f"set numSteps {self.num_steps}")
@@ -244,21 +266,34 @@ class Analysis(AnalysisComponent):
                 commands.append("\t} else {")
                 commands.append("\t\tset dt [expr {$dt_min + double($AnalysisStep)/($numSteps-1)*($dt_max-$dt_min)}]")
                 commands.append("\t}")
-                commands.append('\tif {$pid==0} {puts "$AnalysisStep/$numSteps dt=$dt"}')
                 commands.append("\tset Ok [analyze 1 $dt]")
+                commands.extend(self._step_status_commands(progress_name))
                 commands.append("}")
             else:
-                commands.append(f"set AnalysisStep 0")
-                commands.append("while {"+f" $AnalysisStep < {self.num_steps}"+"} {")
-                commands.append('\tif {$pid==0} {puts "$AnalysisStep' +f'/{self.num_steps}"' +"}")
+                commands.append("while {$FemoraAnalysisStep < $FemoraAnalysisTotal} {")
                 commands.append(f"\tset Ok [analyze 1 {self.dt}]")
-                commands.append(f"\tincr AnalysisStep 1")
+                commands.extend(self._step_status_commands(progress_name))
                 commands.append("}")
 
         # wipe analysis command
         commands.append("wipeAnalysis")
 
         return "\n".join(commands)
+
+    @staticmethod
+    def _step_status_commands(progress_name: str) -> list[str]:
+        """Return Tcl commands that report progress and stop on failed steps."""
+        return [
+            "\tif {$Ok != 0} {",
+            f'\t\tif {{$pid == 0}} {{puts stderr "FEMORA_PROGRESS|ERROR|{progress_name}|[expr {{$FemoraAnalysisStep + 1}}]|$Ok"; flush stderr}}',
+            f'\t\terror "Femora analysis \'{progress_name}\' failed at step [expr {{$FemoraAnalysisStep + 1}}] with code $Ok"',
+            "\t}",
+            "\tincr FemoraAnalysisStep",
+            "\tif {$pid == 0 && (($FemoraAnalysisStep % $FemoraProgressStride) == 0 || $FemoraAnalysisStep == $FemoraAnalysisTotal)} {",
+            f'\t\tputs "FEMORA_PROGRESS|UPDATE|{progress_name}|$FemoraAnalysisStep|$FemoraAnalysisTotal"',
+            "\t\tflush stdout",
+            "\t}",
+        ]
 
 
 __all__ = ["Analysis", "AnalysisManager"]

@@ -22,6 +22,8 @@ import tempfile
 from typing import Optional, Union
 from urllib.request import urlopen
 
+from tqdm.auto import tqdm
+
 
 DEFAULT_COLAB_RELEASE_URL = (
     "https://github.com/amnp95/OpenSees/releases/download/opensees-colab-latest"
@@ -32,6 +34,10 @@ _RUNTIME_MARKER = "FEMORA_OPENSEES_RUNTIME_OK"
 
 class RuntimeSetupError(RuntimeError):
     """Raised when Femora cannot configure or validate an OpenSees runtime."""
+
+
+class RuntimeExecutionError(RuntimeError):
+    """Raised when an OpenSees process or managed analysis fails."""
 
 
 @dataclass(frozen=True)
@@ -266,9 +272,122 @@ def setup(
     return _setup_colab(executable, install_dir, release_url, force, timeout)
 
 
+def run(
+    tcl_file: Union[str, Path],
+    *,
+    executable: Optional[Union[str, Path]] = None,
+    cwd: Optional[Union[str, Path]] = None,
+    show_output: bool = False,
+) -> subprocess.CompletedProcess[str]:
+    """Run an exported Tcl model with live managed-analysis progress.
+
+    Femora progress records are rendered as ``tqdm`` bars. OpenSees warnings,
+    errors, and failed-step diagnostics are printed immediately. Set
+    ``show_output=True`` to also display ordinary solver output.
+
+    Args:
+        tcl_file: Exported OpenSees Tcl model.
+        executable: OpenSees executable. When omitted, uses
+            ``FEMORA_OPENSEES`` and then ``PATH``.
+        cwd: Solver working directory. Defaults to the Tcl file's directory.
+        show_output: Stream all OpenSees output in addition to diagnostics.
+
+    Returns:
+        The completed OpenSees process and its captured combined output.
+
+    Raises:
+        RuntimeSetupError: If no usable OpenSees executable can be resolved.
+        RuntimeExecutionError: If OpenSees or a managed analysis fails.
+    """
+    script = Path(tcl_file).expanduser().resolve()
+    if not script.is_file():
+        raise FileNotFoundError(f"Tcl model was not found: '{script}'")
+
+    configured = executable or os.environ.get("FEMORA_OPENSEES")
+    solver = Path(configured).expanduser() if configured else None
+    if solver is None:
+        discovered = shutil.which("OpenSees") or shutil.which("OpenSees.exe")
+        solver = Path(discovered) if discovered else None
+    if solver is None or not solver.is_file():
+        raise RuntimeSetupError(
+            "OpenSees was not found. Pass executable=..., set FEMORA_OPENSEES, "
+            "or add OpenSees to PATH."
+        )
+    solver = solver.resolve()
+
+    working_directory = Path(cwd).expanduser().resolve() if cwd else script.parent
+    command = [str(solver), str(script)]
+    progress_bar = None
+    output_lines: list[str] = []
+    analysis_error: Optional[str] = None
+    diagnostic_pattern = re.compile(
+        r"\b(warning|error|failed|failure|singular|invalid)\b", re.IGNORECASE
+    )
+
+    try:
+        process = subprocess.Popen(
+            command,
+            cwd=working_directory,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+            bufsize=1,
+            errors="replace",
+        )
+    except OSError as exc:
+        raise RuntimeExecutionError(
+            f"Unable to start OpenSees at '{solver}'"
+        ) from exc
+
+    assert process.stdout is not None
+    for raw_line in process.stdout:
+        output_lines.append(raw_line)
+        line = raw_line.rstrip("\r\n")
+        fields = line.split("|")
+
+        if len(fields) >= 4 and fields[0] == "FEMORA_PROGRESS":
+            event, name = fields[1], fields[2]
+            if event == "START":
+                if progress_bar is not None:
+                    progress_bar.close()
+                progress_bar = tqdm(
+                    total=int(fields[3]),
+                    desc=name,
+                    unit="step",
+                    dynamic_ncols=True,
+                )
+            elif event == "UPDATE" and progress_bar is not None:
+                current = int(fields[3])
+                progress_bar.update(max(0, current - progress_bar.n))
+            elif event == "ERROR":
+                analysis_error = (
+                    f"Analysis '{name}' failed at step {fields[3]} "
+                    f"with OpenSees code {fields[4] if len(fields) > 4 else 'unknown'}"
+                )
+                tqdm.write(analysis_error)
+            continue
+
+        if show_output or diagnostic_pattern.search(line):
+            tqdm.write(line)
+
+    return_code = process.wait()
+    if progress_bar is not None:
+        progress_bar.close()
+
+    output = "".join(output_lines)
+    completed = subprocess.CompletedProcess(command, return_code, output, None)
+    if return_code != 0 or analysis_error is not None:
+        summary = analysis_error or f"OpenSees exited with code {return_code}"
+        tail = "\n".join(output.splitlines()[-20:])
+        raise RuntimeExecutionError(f"{summary}\n{tail}" if tail else summary)
+    return completed
+
+
 __all__ = [
     "DEFAULT_COLAB_RELEASE_URL",
     "RuntimeInfo",
+    "RuntimeExecutionError",
     "RuntimeSetupError",
+    "run",
     "setup",
 ]
