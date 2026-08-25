@@ -23,6 +23,34 @@ TUTORIALS = (
     ROOT / "examples" / "tutorials" / "elastic_cantilever.py",
 )
 
+COLAB_SETUP_MARKDOWN = """## Configure the Colab runtime
+
+This generated cell installs Femora and configures the packaged OpenSees runtime.
+It is intentionally not part of the canonical local Python example.
+"""
+
+COLAB_SETUP_CODE = """import importlib.util
+import subprocess
+import sys
+
+if importlib.util.find_spec("femora") is None:
+    subprocess.check_call(
+        [
+            sys.executable,
+            "-m",
+            "pip",
+            "install",
+            "--quiet",
+            "https://github.com/GeotechUW/Femora/archive/refs/heads/main.zip",
+        ]
+    )
+
+import femora as fm
+
+runtime = fm.runtime.setup("colab")
+print(f"OpenSees {runtime.version or 'runtime'} configured at {runtime.executable}")
+"""
+
 
 def _render_notebook(source: Path) -> str:
     notebook = jupytext.read(source, fmt="py:percent")
@@ -32,6 +60,17 @@ def _render_notebook(source: Path) -> str:
         and notebook.cells[0].source.startswith("# ===")
     ):
         notebook.cells.pop(0)
+    insert_at = 1 if notebook.cells and notebook.cells[0].cell_type == "markdown" else 0
+    notebook.cells[insert_at:insert_at] = [
+        nbformat.v4.new_markdown_cell(
+            COLAB_SETUP_MARKDOWN,
+            metadata={"tags": ["colab-bootstrap"]},
+        ),
+        nbformat.v4.new_code_cell(
+            COLAB_SETUP_CODE,
+            metadata={"tags": ["colab-bootstrap"]},
+        ),
+    ]
     notebook.metadata["kernelspec"] = {
         "display_name": "Python 3",
         "language": "python",
