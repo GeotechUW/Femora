@@ -1331,10 +1331,10 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#1-create-the-building-blocks" class="md-nav__link">
+  <a href="#1-configure-the-example" class="md-nav__link">
     <span class="md-ellipsis">
       
-        1. Create The Building Blocks
+        1. Configure The Example
       
     </span>
   </a>
@@ -1342,10 +1342,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#2-mesh-and-assemble-the-member" class="md-nav__link">
+  <a href="#2-create-the-building-blocks" class="md-nav__link">
     <span class="md-ellipsis">
       
-        2. Mesh And Assemble The Member
+        2. Create The Building Blocks
       
     </span>
   </a>
@@ -1353,10 +1353,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#3-constrain-and-select-the-assembled-nodes" class="md-nav__link">
+  <a href="#3-mesh-and-assemble-the-member" class="md-nav__link">
     <span class="md-ellipsis">
       
-        3. Constrain And Select The Assembled Nodes
+        3. Mesh And Assemble The Member
       
     </span>
   </a>
@@ -1364,10 +1364,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#4-apply-the-load-and-record-the-response" class="md-nav__link">
+  <a href="#4-constrain-and-select-the-assembled-nodes" class="md-nav__link">
     <span class="md-ellipsis">
       
-        4. Apply The Load And Record The Response
+        4. Constrain And Select The Assembled Nodes
       
     </span>
   </a>
@@ -1375,10 +1375,21 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#5-define-the-analysis-and-process" class="md-nav__link">
+  <a href="#5-apply-the-load-and-record-the-response" class="md-nav__link">
     <span class="md-ellipsis">
       
-        5. Define The Analysis And Process
+        5. Apply The Load And Record The Response
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6-define-the-analysis-and-process" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Define The Analysis And Process
       
     </span>
   </a>
@@ -12380,10 +12391,10 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#1-create-the-building-blocks" class="md-nav__link">
+  <a href="#1-configure-the-example" class="md-nav__link">
     <span class="md-ellipsis">
       
-        1. Create The Building Blocks
+        1. Configure The Example
       
     </span>
   </a>
@@ -12391,10 +12402,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#2-mesh-and-assemble-the-member" class="md-nav__link">
+  <a href="#2-create-the-building-blocks" class="md-nav__link">
     <span class="md-ellipsis">
       
-        2. Mesh And Assemble The Member
+        2. Create The Building Blocks
       
     </span>
   </a>
@@ -12402,10 +12413,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#3-constrain-and-select-the-assembled-nodes" class="md-nav__link">
+  <a href="#3-mesh-and-assemble-the-member" class="md-nav__link">
     <span class="md-ellipsis">
       
-        3. Constrain And Select The Assembled Nodes
+        3. Mesh And Assemble The Member
       
     </span>
   </a>
@@ -12413,10 +12424,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#4-apply-the-load-and-record-the-response" class="md-nav__link">
+  <a href="#4-constrain-and-select-the-assembled-nodes" class="md-nav__link">
     <span class="md-ellipsis">
       
-        4. Apply The Load And Record The Response
+        4. Constrain And Select The Assembled Nodes
       
     </span>
   </a>
@@ -12424,10 +12435,21 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#5-define-the-analysis-and-process" class="md-nav__link">
+  <a href="#5-apply-the-load-and-record-the-response" class="md-nav__link">
     <span class="md-ellipsis">
       
-        5. Define The Analysis And Process
+        5. Apply The Load And Record The Response
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6-define-the-analysis-and-process" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Define The Analysis And Process
       
     </span>
   </a>
@@ -12542,43 +12564,63 @@
 <p>Use <strong>Open in Colab</strong> above for a browser-based run. The first code cell installs
 Femora from GitHub, and <code>fm.runtime.setup("colab")</code> downloads and validates the
 portable OpenSees runtime automatically.</p>
-<p>For a local run, pass the OpenSees executable directly:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">python</span> <span class="n">examples</span><span class="p">/</span><span class="n">tutorials</span><span class="p">/</span><span class="n">elastic_cantilever</span><span class="p">.</span><span class="n">py</span> <span class="p">`</span>
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="p">-</span><span class="n">-opensees</span> <span class="n">D</span><span class="p">:\</span><span class="n">path</span><span class="p">\</span><span class="n">to</span><span class="p">\</span><span class="n">OpenSees</span><span class="p">.</span><span class="n">exe</span>
+<p>For a local run, configure the OpenSees executable and run the Python file:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nv">$env:FEMORA_OPENSEES</span> <span class="p">=</span> <span class="s2">"D:\path\to\OpenSees.exe"</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="n">python</span> <span class="n">examples</span><span class="p">/</span><span class="n">tutorials</span><span class="p">/</span><span class="n">elastic_cantilever</span><span class="p">.</span><span class="n">py</span>
 </code></pre></div>
-<p>Alternatively, configure the executable once and omit <code>--opensees</code>:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nv">$env:FEMORA_OPENSEES</span> <span class="p">=</span> <span class="s2">"D:\path\to\OpenSees.exe"</span>
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="n">python</span> <span class="n">examples</span><span class="p">/</span><span class="n">tutorials</span><span class="p">/</span><span class="n">elastic_cantilever</span><span class="p">.</span><span class="n">py</span>
-</code></pre></div>
-<p>Without an OpenSees executable, the script still assembles and exports the model. Add <code>--plot</code> to inspect the assembled mesh interactively.</p>
+<p>Without <code>FEMORA_OPENSEES</code>, the script still assembles and exports the model.
+Set <code>PLOT_MODEL = True</code> in the configuration block to inspect the assembled
+mesh interactively.</p>
 <h2 id="walk-through-the-model">Walk Through The Model</h2>
-<h3 id="1-create-the-building-blocks">1. Create The Building Blocks</h3>
+<h3 id="1-configure-the-example">1. Configure The Example</h3>
+<p>The engineering properties and run options are collected at the top of the
+script. These values are shared by the model definition and the analytical
+check, so a controlled change only needs to be made once.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="n">LENGTH</span> <span class="o">=</span> <span class="mf">4.0</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="n">TIP_LOAD</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1_000.0</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="n">ELASTIC_MODULUS</span> <span class="o">=</span> <span class="mf">200.0e9</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="n">AREA</span> <span class="o">=</span> <span class="mf">0.04</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="n">SECOND_MOMENT</span> <span class="o">=</span> <span class="mf">1.333333333e-4</span>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="n">SHEAR_MODULUS</span> <span class="o">=</span> <span class="mf">76.923e9</span>
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="n">TORSIONAL_CONSTANT</span> <span class="o">=</span> <span class="mf">2.25e-4</span>
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="n">OUTPUT_DIR</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">"example_outputs"</span><span class="p">)</span> <span class="o">/</span> <span class="s2">"elastic_cantilever"</span>
+<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="n">OPENSEES</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"FEMORA_OPENSEES"</span><span class="p">)</span>
+<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="n">PLOT_MODEL</span> <span class="o">=</span> <span class="kc">False</span>
+</code></pre></div>
+<h3 id="2-create-the-building-blocks">2. Create The Building Blocks</h3>
 <p>The section stores the member stiffness properties. The transformation defines the local axes, and the element combines both into an OpenSees beam formulation.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="n">model</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="n">model_name</span><span class="o">=</span><span class="s2">"elastic_cantilever"</span><span class="p">,</span> <span class="n">model_path</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">output_dir</span><span class="p">))</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="n">OUTPUT_DIR</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>
-<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="n">section</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">section</span><span class="o">.</span><span class="n">beam</span><span class="o">.</span><span class="n">elastic</span><span class="p">(</span>
-<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>    <span class="n">user_name</span><span class="o">=</span><span class="s2">"cantilever_section"</span><span class="p">,</span>
-<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>    <span class="n">E</span><span class="o">=</span><span class="mf">200.0e9</span><span class="p">,</span>
-<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>    <span class="n">A</span><span class="o">=</span><span class="mf">0.04</span><span class="p">,</span>
-<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>    <span class="n">Iz</span><span class="o">=</span><span class="mf">1.333333333e-4</span><span class="p">,</span>
-<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>    <span class="n">Iy</span><span class="o">=</span><span class="mf">1.333333333e-4</span><span class="p">,</span>
-<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>    <span class="n">G</span><span class="o">=</span><span class="mf">76.923e9</span><span class="p">,</span>
-<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>    <span class="n">J</span><span class="o">=</span><span class="mf">2.25e-4</span><span class="p">,</span>
-<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="p">)</span>
-<a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a><span class="n">transformation</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">transformation</span><span class="o">.</span><span class="n">transformation3d</span><span class="p">(</span>
-<a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a>    <span class="n">transf_type</span><span class="o">=</span><span class="s2">"Linear"</span><span class="p">,</span>
-<a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a>    <span class="n">vecxz_x</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
-<a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a>    <span class="n">vecxz_y</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
-<a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a>    <span class="n">vecxz_z</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="n">model</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>    <span class="n">model_name</span><span class="o">=</span><span class="s2">"elastic_cantilever"</span><span class="p">,</span>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>    <span class="n">model_path</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">OUTPUT_DIR</span><span class="o">.</span><span class="n">resolve</span><span class="p">()),</span>
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="p">)</span>
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="n">model</span><span class="o">.</span><span class="n">set_results_folder</span><span class="p">(</span><span class="n">OUTPUT_DIR</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span><span class="o">.</span><span class="n">as_posix</span><span class="p">())</span>
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>
+<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="n">section</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">section</span><span class="o">.</span><span class="n">beam</span><span class="o">.</span><span class="n">elastic</span><span class="p">(</span>
+<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>    <span class="n">user_name</span><span class="o">=</span><span class="s2">"cantilever_section"</span><span class="p">,</span>
+<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>    <span class="n">E</span><span class="o">=</span><span class="n">ELASTIC_MODULUS</span><span class="p">,</span>
+<a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a>    <span class="n">A</span><span class="o">=</span><span class="n">AREA</span><span class="p">,</span>
+<a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a>    <span class="n">Iz</span><span class="o">=</span><span class="n">SECOND_MOMENT</span><span class="p">,</span>
+<a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a>    <span class="n">Iy</span><span class="o">=</span><span class="n">SECOND_MOMENT</span><span class="p">,</span>
+<a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a>    <span class="n">G</span><span class="o">=</span><span class="n">SHEAR_MODULUS</span><span class="p">,</span>
+<a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a>    <span class="n">J</span><span class="o">=</span><span class="n">TORSIONAL_CONSTANT</span><span class="p">,</span>
 <a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a><span class="p">)</span>
-<a id="__codelineno-2-18" name="__codelineno-2-18" href="#__codelineno-2-18"></a><span class="n">beam_element</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">element</span><span class="o">.</span><span class="n">beam</span><span class="o">.</span><span class="n">elastic</span><span class="p">(</span>
-<a id="__codelineno-2-19" name="__codelineno-2-19" href="#__codelineno-2-19"></a>    <span class="n">ndof</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span>
-<a id="__codelineno-2-20" name="__codelineno-2-20" href="#__codelineno-2-20"></a>    <span class="n">section</span><span class="o">=</span><span class="n">section</span><span class="p">,</span>
-<a id="__codelineno-2-21" name="__codelineno-2-21" href="#__codelineno-2-21"></a>    <span class="n">transformation</span><span class="o">=</span><span class="n">transformation</span><span class="p">,</span>
-<a id="__codelineno-2-22" name="__codelineno-2-22" href="#__codelineno-2-22"></a><span class="p">)</span>
+<a id="__codelineno-2-18" name="__codelineno-2-18" href="#__codelineno-2-18"></a><span class="n">transformation</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">transformation</span><span class="o">.</span><span class="n">transformation3d</span><span class="p">(</span>
+<a id="__codelineno-2-19" name="__codelineno-2-19" href="#__codelineno-2-19"></a>    <span class="n">transf_type</span><span class="o">=</span><span class="s2">"Linear"</span><span class="p">,</span>
+<a id="__codelineno-2-20" name="__codelineno-2-20" href="#__codelineno-2-20"></a>    <span class="n">vecxz_x</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+<a id="__codelineno-2-21" name="__codelineno-2-21" href="#__codelineno-2-21"></a>    <span class="n">vecxz_y</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+<a id="__codelineno-2-22" name="__codelineno-2-22" href="#__codelineno-2-22"></a>    <span class="n">vecxz_z</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+<a id="__codelineno-2-23" name="__codelineno-2-23" href="#__codelineno-2-23"></a><span class="p">)</span>
+<a id="__codelineno-2-24" name="__codelineno-2-24" href="#__codelineno-2-24"></a><span class="n">beam_element</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">element</span><span class="o">.</span><span class="n">beam</span><span class="o">.</span><span class="n">elastic</span><span class="p">(</span>
+<a id="__codelineno-2-25" name="__codelineno-2-25" href="#__codelineno-2-25"></a>    <span class="n">ndof</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span>
+<a id="__codelineno-2-26" name="__codelineno-2-26" href="#__codelineno-2-26"></a>    <span class="n">section</span><span class="o">=</span><span class="n">section</span><span class="p">,</span>
+<a id="__codelineno-2-27" name="__codelineno-2-27" href="#__codelineno-2-27"></a>    <span class="n">transformation</span><span class="o">=</span><span class="n">transformation</span><span class="p">,</span>
+<a id="__codelineno-2-28" name="__codelineno-2-28" href="#__codelineno-2-28"></a><span class="p">)</span>
 </code></pre></div>
 <p>Femora's managers assign tags and retain the relationships among these objects. You provide the engineering properties; the managers handle their model ownership and solver references.</p>
-<h3 id="2-mesh-and-assemble-the-member">2. Mesh And Assemble The Member</h3>
+<h3 id="3-mesh-and-assemble-the-member">3. Mesh And Assemble The Member</h3>
 <p>The line mesh part creates four cells between the two end coordinates. The assembly section then compiles that part into a serial model.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="n">model</span><span class="o">.</span><span class="n">meshpart</span><span class="o">.</span><span class="n">line</span><span class="o">.</span><span class="n">single_line</span><span class="p">(</span>
 <a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>    <span class="n">user_name</span><span class="o">=</span><span class="s2">"cantilever"</span><span class="p">,</span>
@@ -12586,7 +12628,7 @@ portable OpenSees runtime automatically.</p>
 <a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>    <span class="n">x0</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
 <a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>    <span class="n">y0</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
 <a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>    <span class="n">z0</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
-<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>    <span class="n">x1</span><span class="o">=</span><span class="mf">4.0</span><span class="p">,</span>
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>    <span class="n">x1</span><span class="o">=</span><span class="n">LENGTH</span><span class="p">,</span>
 <a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>    <span class="n">y1</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
 <a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>    <span class="n">z1</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
 <a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a>    <span class="n">number_of_lines</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
@@ -12596,10 +12638,10 @@ portable OpenSees runtime automatically.</p>
 <a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a>    <span class="n">num_partitions</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
 <a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a>    <span class="n">merge_points</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
 <a id="__codelineno-3-16" name="__codelineno-3-16" href="#__codelineno-3-16"></a><span class="p">)</span>
-<a id="__codelineno-3-17" name="__codelineno-3-17" href="#__codelineno-3-17"></a><span class="n">model</span><span class="o">.</span><span class="n">assembler</span><span class="o">.</span><span class="n">assemble</span><span class="p">(</span><span class="n">merge_points</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<a id="__codelineno-3-17" name="__codelineno-3-17" href="#__codelineno-3-17"></a><span class="n">model</span><span class="o">.</span><span class="n">assembler</span><span class="o">.</span><span class="n">assemble</span><span class="p">(</span><span class="n">merge_points</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">progress_callback</span><span class="o">=</span><span class="k">lambda</span> <span class="o">*</span><span class="n">_</span><span class="p">:</span> <span class="kc">None</span><span class="p">)</span>
 </code></pre></div>
 <p><code>num_partitions=0</code> explicitly keeps this assembly section serial. After assembly, <code>model.assembled_mesh</code> is a PyVista <code>UnstructuredGrid</code> with five points and four line cells.</p>
-<h3 id="3-constrain-and-select-the-assembled-nodes">3. Constrain And Select The Assembled Nodes</h3>
+<h3 id="4-constrain-and-select-the-assembled-nodes">4. Constrain And Select The Assembled Nodes</h3>
 <p>The fixed condition is applied to the plane at <code>x=0</code>. The tip is selected from the assembled model by position, so the script does not depend on a manually predicted node tag.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="n">model</span><span class="o">.</span><span class="n">constraint</span><span class="o">.</span><span class="n">sp</span><span class="o">.</span><span class="n">fix_x</span><span class="p">(</span>
 <a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>    <span class="n">xCoordinate</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
@@ -12608,32 +12650,36 @@ portable OpenSees runtime automatically.</p>
 <a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="p">)</span>
 <a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>
 <a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="n">tip_nodes</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">mask</span><span class="o">.</span><span class="n">nodes</span><span class="o">.</span><span class="n">near_point</span><span class="p">(</span>
-<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>    <span class="n">point</span><span class="o">=</span><span class="p">(</span><span class="mf">4.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">),</span>
+<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>    <span class="n">point</span><span class="o">=</span><span class="p">(</span><span class="n">LENGTH</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">),</span>
 <a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a>    <span class="n">radius</span><span class="o">=</span><span class="mf">1.0e-9</span><span class="p">,</span>
 <a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a><span class="p">)</span>
+<a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a><span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">tip_nodes</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+<a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a>    <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Expected one cantilever tip node, found </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">tip_nodes</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </code></pre></div>
 <div class="admonition tip">
 <p class="admonition-title">Prefer selections over hard-coded solver tags</p>
 <p>Spatial masks keep downstream operations tied to the model geometry. This is safer when discretization, assembly order, or tag starts change.</p>
 </div>
-<h3 id="4-apply-the-load-and-record-the-response">4. Apply The Load And Record The Response</h3>
+<h3 id="5-apply-the-load-and-record-the-response">5. Apply The Load And Record The Response</h3>
 <p>A linear time series ramps the plain pattern from zero to the full load. The node load and recorder both use the selected tip node.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="n">load_history</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">time_series</span><span class="o">.</span><span class="n">linear</span><span class="p">(</span><span class="n">factor</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
 <a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="n">lateral_load</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">pattern</span><span class="o">.</span><span class="n">plain</span><span class="p">(</span><span class="n">time_series</span><span class="o">=</span><span class="n">load_history</span><span class="p">)</span>
 <a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="n">lateral_load</span><span class="o">.</span><span class="n">add_load</span><span class="o">.</span><span class="n">node</span><span class="p">(</span>
 <a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>    <span class="n">node_mask</span><span class="o">=</span><span class="n">tip_nodes</span><span class="p">,</span>
-<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>    <span class="n">values</span><span class="o">=</span><span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="o">-</span><span class="mf">1_000.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span>
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>    <span class="n">values</span><span class="o">=</span><span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">TIP_LOAD</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span>
 <a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="p">)</span>
 <a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>
-<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a><span class="n">tip_recorder</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">recorder</span><span class="o">.</span><span class="n">node</span><span class="p">(</span>
-<a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a>    <span class="n">file_name</span><span class="o">=</span><span class="n">displacement_file</span><span class="o">.</span><span class="n">as_posix</span><span class="p">(),</span>
-<a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a>    <span class="n">nodes</span><span class="o">=</span><span class="n">tip_nodes</span><span class="o">.</span><span class="n">to_tags</span><span class="p">(),</span>
-<a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a>    <span class="n">dofs</span><span class="o">=</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span>
-<a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a>    <span class="n">resp_type</span><span class="o">=</span><span class="s2">"disp"</span><span class="p">,</span>
-<a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a>    <span class="n">time</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-<a id="__codelineno-5-14" name="__codelineno-5-14" href="#__codelineno-5-14"></a><span class="p">)</span>
+<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a><span class="n">displacement_file</span> <span class="o">=</span> <span class="n">OUTPUT_DIR</span> <span class="o">/</span> <span class="s2">"tip_displacement.out"</span>
+<a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a><span class="n">tip_recorder</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">recorder</span><span class="o">.</span><span class="n">node</span><span class="p">(</span>
+<a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a>    <span class="n">file_name</span><span class="o">=</span><span class="n">displacement_file</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span><span class="o">.</span><span class="n">as_posix</span><span class="p">(),</span>
+<a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a>    <span class="n">nodes</span><span class="o">=</span><span class="n">tip_nodes</span><span class="o">.</span><span class="n">to_tags</span><span class="p">(),</span>
+<a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a>    <span class="n">dofs</span><span class="o">=</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span>
+<a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a>    <span class="n">resp_type</span><span class="o">=</span><span class="s2">"disp"</span><span class="p">,</span>
+<a id="__codelineno-5-14" name="__codelineno-5-14" href="#__codelineno-5-14"></a>    <span class="n">time</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<a id="__codelineno-5-15" name="__codelineno-5-15" href="#__codelineno-5-15"></a>    <span class="n">precision</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span>
+<a id="__codelineno-5-16" name="__codelineno-5-16" href="#__codelineno-5-16"></a><span class="p">)</span>
 </code></pre></div>
-<h3 id="5-define-the-analysis-and-process">5. Define The Analysis And Process</h3>
+<h3 id="6-define-the-analysis-and-process">6. Define The Analysis And Process</h3>
 <p>The analysis owns the numerical solution settings. The process determines when the load pattern, recorder, and analysis appear in the exported Tcl script.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="n">static_analysis</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">static</span><span class="p">(</span>
 <a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>    <span class="n">name</span><span class="o">=</span><span class="s2">"tip_load"</span><span class="p">,</span>
@@ -12717,273 +12763,231 @@ u_{tip} = \frac{P L^3}{3 E I}
 <a id="__codelineno-8-16" name="__codelineno-8-16" href="#__codelineno-8-16"></a>
 <a id="__codelineno-8-17" name="__codelineno-8-17" href="#__codelineno-8-17"></a><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 <a id="__codelineno-8-18" name="__codelineno-8-18" href="#__codelineno-8-18"></a>
-<a id="__codelineno-8-19" name="__codelineno-8-19" href="#__codelineno-8-19"></a><span class="kn">import</span><span class="w"> </span><span class="nn">argparse</span>
-<a id="__codelineno-8-20" name="__codelineno-8-20" href="#__codelineno-8-20"></a><span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Sequence</span>
-<a id="__codelineno-8-21" name="__codelineno-8-21" href="#__codelineno-8-21"></a><span class="kn">import</span><span class="w"> </span><span class="nn">importlib.util</span>
-<a id="__codelineno-8-22" name="__codelineno-8-22" href="#__codelineno-8-22"></a><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
-<a id="__codelineno-8-23" name="__codelineno-8-23" href="#__codelineno-8-23"></a><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
-<a id="__codelineno-8-24" name="__codelineno-8-24" href="#__codelineno-8-24"></a><span class="kn">import</span><span class="w"> </span><span class="nn">subprocess</span>
-<a id="__codelineno-8-25" name="__codelineno-8-25" href="#__codelineno-8-25"></a><span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+<a id="__codelineno-8-19" name="__codelineno-8-19" href="#__codelineno-8-19"></a><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<a id="__codelineno-8-20" name="__codelineno-8-20" href="#__codelineno-8-20"></a><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<a id="__codelineno-8-21" name="__codelineno-8-21" href="#__codelineno-8-21"></a><span class="kn">import</span><span class="w"> </span><span class="nn">subprocess</span>
+<a id="__codelineno-8-22" name="__codelineno-8-22" href="#__codelineno-8-22"></a>
+<a id="__codelineno-8-23" name="__codelineno-8-23" href="#__codelineno-8-23"></a><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<a id="__codelineno-8-24" name="__codelineno-8-24" href="#__codelineno-8-24"></a>
+<a id="__codelineno-8-25" name="__codelineno-8-25" href="#__codelineno-8-25"></a><span class="kn">from</span><span class="w"> </span><span class="nn">femora</span><span class="w"> </span><span class="kn">import</span> <span class="n">Model</span>
 <a id="__codelineno-8-26" name="__codelineno-8-26" href="#__codelineno-8-26"></a>
 <a id="__codelineno-8-27" name="__codelineno-8-27" href="#__codelineno-8-27"></a>
-<a id="__codelineno-8-28" name="__codelineno-8-28" href="#__codelineno-8-28"></a><span class="k">def</span><span class="w"> </span><span class="nf">_running_in_colab</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<a id="__codelineno-8-29" name="__codelineno-8-29" href="#__codelineno-8-29"></a><span class="w">    </span><span class="sd">"""Return whether this script is executing in Google Colab."""</span>
-<a id="__codelineno-8-30" name="__codelineno-8-30" href="#__codelineno-8-30"></a>    <span class="k">try</span><span class="p">:</span>
-<a id="__codelineno-8-31" name="__codelineno-8-31" href="#__codelineno-8-31"></a>        <span class="k">return</span> <span class="n">importlib</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">find_spec</span><span class="p">(</span><span class="s2">"google.colab"</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-<a id="__codelineno-8-32" name="__codelineno-8-32" href="#__codelineno-8-32"></a>    <span class="k">except</span> <span class="p">(</span><span class="ne">ImportError</span><span class="p">,</span> <span class="ne">ModuleNotFoundError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span>
-<a id="__codelineno-8-33" name="__codelineno-8-33" href="#__codelineno-8-33"></a>        <span class="k">return</span> <span class="kc">False</span>
-<a id="__codelineno-8-34" name="__codelineno-8-34" href="#__codelineno-8-34"></a>
+<a id="__codelineno-8-28" name="__codelineno-8-28" href="#__codelineno-8-28"></a><span class="n">LENGTH</span> <span class="o">=</span> <span class="mf">4.0</span>
+<a id="__codelineno-8-29" name="__codelineno-8-29" href="#__codelineno-8-29"></a><span class="n">TIP_LOAD</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1_000.0</span>
+<a id="__codelineno-8-30" name="__codelineno-8-30" href="#__codelineno-8-30"></a><span class="n">ELASTIC_MODULUS</span> <span class="o">=</span> <span class="mf">200.0e9</span>
+<a id="__codelineno-8-31" name="__codelineno-8-31" href="#__codelineno-8-31"></a><span class="n">AREA</span> <span class="o">=</span> <span class="mf">0.04</span>
+<a id="__codelineno-8-32" name="__codelineno-8-32" href="#__codelineno-8-32"></a><span class="n">SECOND_MOMENT</span> <span class="o">=</span> <span class="mf">1.333333333e-4</span>
+<a id="__codelineno-8-33" name="__codelineno-8-33" href="#__codelineno-8-33"></a><span class="n">SHEAR_MODULUS</span> <span class="o">=</span> <span class="mf">76.923e9</span>
+<a id="__codelineno-8-34" name="__codelineno-8-34" href="#__codelineno-8-34"></a><span class="n">TORSIONAL_CONSTANT</span> <span class="o">=</span> <span class="mf">2.25e-4</span>
 <a id="__codelineno-8-35" name="__codelineno-8-35" href="#__codelineno-8-35"></a>
-<a id="__codelineno-8-36" name="__codelineno-8-36" href="#__codelineno-8-36"></a><span class="n">IN_COLAB</span> <span class="o">=</span> <span class="n">_running_in_colab</span><span class="p">()</span>
-<a id="__codelineno-8-37" name="__codelineno-8-37" href="#__codelineno-8-37"></a><span class="k">if</span> <span class="n">IN_COLAB</span> <span class="ow">and</span> <span class="n">importlib</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">find_spec</span><span class="p">(</span><span class="s2">"femora"</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-<a id="__codelineno-8-38" name="__codelineno-8-38" href="#__codelineno-8-38"></a>    <span class="n">subprocess</span><span class="o">.</span><span class="n">check_call</span><span class="p">(</span>
-<a id="__codelineno-8-39" name="__codelineno-8-39" href="#__codelineno-8-39"></a>        <span class="p">[</span>
-<a id="__codelineno-8-40" name="__codelineno-8-40" href="#__codelineno-8-40"></a>            <span class="n">sys</span><span class="o">.</span><span class="n">executable</span><span class="p">,</span>
-<a id="__codelineno-8-41" name="__codelineno-8-41" href="#__codelineno-8-41"></a>            <span class="s2">"-m"</span><span class="p">,</span>
-<a id="__codelineno-8-42" name="__codelineno-8-42" href="#__codelineno-8-42"></a>            <span class="s2">"pip"</span><span class="p">,</span>
-<a id="__codelineno-8-43" name="__codelineno-8-43" href="#__codelineno-8-43"></a>            <span class="s2">"install"</span><span class="p">,</span>
-<a id="__codelineno-8-44" name="__codelineno-8-44" href="#__codelineno-8-44"></a>            <span class="s2">"--quiet"</span><span class="p">,</span>
-<a id="__codelineno-8-45" name="__codelineno-8-45" href="#__codelineno-8-45"></a>            <span class="s2">"https://github.com/GeotechUW/Femora/archive/refs/heads/main.zip"</span><span class="p">,</span>
-<a id="__codelineno-8-46" name="__codelineno-8-46" href="#__codelineno-8-46"></a>        <span class="p">]</span>
-<a id="__codelineno-8-47" name="__codelineno-8-47" href="#__codelineno-8-47"></a>    <span class="p">)</span>
-<a id="__codelineno-8-48" name="__codelineno-8-48" href="#__codelineno-8-48"></a>
-<a id="__codelineno-8-49" name="__codelineno-8-49" href="#__codelineno-8-49"></a><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-<a id="__codelineno-8-50" name="__codelineno-8-50" href="#__codelineno-8-50"></a>
-<a id="__codelineno-8-51" name="__codelineno-8-51" href="#__codelineno-8-51"></a><span class="kn">import</span><span class="w"> </span><span class="nn">femora</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">fm</span>
-<a id="__codelineno-8-52" name="__codelineno-8-52" href="#__codelineno-8-52"></a><span class="kn">from</span><span class="w"> </span><span class="nn">femora</span><span class="w"> </span><span class="kn">import</span> <span class="n">Model</span>
-<a id="__codelineno-8-53" name="__codelineno-8-53" href="#__codelineno-8-53"></a>
-<a id="__codelineno-8-54" name="__codelineno-8-54" href="#__codelineno-8-54"></a>
-<a id="__codelineno-8-55" name="__codelineno-8-55" href="#__codelineno-8-55"></a><span class="k">if</span> <span class="n">IN_COLAB</span><span class="p">:</span>
-<a id="__codelineno-8-56" name="__codelineno-8-56" href="#__codelineno-8-56"></a>    <span class="n">runtime</span> <span class="o">=</span> <span class="n">fm</span><span class="o">.</span><span class="n">runtime</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="s2">"colab"</span><span class="p">)</span>
-<a id="__codelineno-8-57" name="__codelineno-8-57" href="#__codelineno-8-57"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"OpenSees </span><span class="si">{</span><span class="n">runtime</span><span class="o">.</span><span class="n">version</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="s1">'runtime'</span><span class="si">}</span><span class="s2"> configured at </span><span class="si">{</span><span class="n">runtime</span><span class="o">.</span><span class="n">executable</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-<a id="__codelineno-8-58" name="__codelineno-8-58" href="#__codelineno-8-58"></a>
-<a id="__codelineno-8-59" name="__codelineno-8-59" href="#__codelineno-8-59"></a>
-<a id="__codelineno-8-60" name="__codelineno-8-60" href="#__codelineno-8-60"></a><span class="n">LENGTH</span> <span class="o">=</span> <span class="mf">4.0</span>
-<a id="__codelineno-8-61" name="__codelineno-8-61" href="#__codelineno-8-61"></a><span class="n">TIP_LOAD</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1_000.0</span>
-<a id="__codelineno-8-62" name="__codelineno-8-62" href="#__codelineno-8-62"></a><span class="n">ELASTIC_MODULUS</span> <span class="o">=</span> <span class="mf">200.0e9</span>
-<a id="__codelineno-8-63" name="__codelineno-8-63" href="#__codelineno-8-63"></a><span class="n">AREA</span> <span class="o">=</span> <span class="mf">0.04</span>
-<a id="__codelineno-8-64" name="__codelineno-8-64" href="#__codelineno-8-64"></a><span class="n">SECOND_MOMENT</span> <span class="o">=</span> <span class="mf">1.333333333e-4</span>
-<a id="__codelineno-8-65" name="__codelineno-8-65" href="#__codelineno-8-65"></a><span class="n">SHEAR_MODULUS</span> <span class="o">=</span> <span class="mf">76.923e9</span>
-<a id="__codelineno-8-66" name="__codelineno-8-66" href="#__codelineno-8-66"></a><span class="n">TORSIONAL_CONSTANT</span> <span class="o">=</span> <span class="mf">2.25e-4</span>
-<a id="__codelineno-8-67" name="__codelineno-8-67" href="#__codelineno-8-67"></a>
-<a id="__codelineno-8-68" name="__codelineno-8-68" href="#__codelineno-8-68"></a>
-<a id="__codelineno-8-69" name="__codelineno-8-69" href="#__codelineno-8-69"></a><span class="c1"># %% [markdown]</span>
-<a id="__codelineno-8-70" name="__codelineno-8-70" href="#__codelineno-8-70"></a><span class="c1"># ## Build and assemble the model</span>
-<a id="__codelineno-8-71" name="__codelineno-8-71" href="#__codelineno-8-71"></a><span class="c1">#</span>
-<a id="__codelineno-8-72" name="__codelineno-8-72" href="#__codelineno-8-72"></a><span class="c1"># The section and transformation define the beam behavior. Femora then creates</span>
-<a id="__codelineno-8-73" name="__codelineno-8-73" href="#__codelineno-8-73"></a><span class="c1"># four line elements, assembles them, and applies the fixed support and tip load.</span>
-<a id="__codelineno-8-74" name="__codelineno-8-74" href="#__codelineno-8-74"></a>
-<a id="__codelineno-8-75" name="__codelineno-8-75" href="#__codelineno-8-75"></a><span class="c1"># %%</span>
-<a id="__codelineno-8-76" name="__codelineno-8-76" href="#__codelineno-8-76"></a><span class="k">def</span><span class="w"> </span><span class="nf">build_model</span><span class="p">(</span><span class="n">output_dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Model</span><span class="p">,</span> <span class="n">Path</span><span class="p">,</span> <span class="n">Path</span><span class="p">]:</span>
-<a id="__codelineno-8-77" name="__codelineno-8-77" href="#__codelineno-8-77"></a><span class="w">    </span><span class="sd">"""Create, assemble, and configure the cantilever model."""</span>
-<a id="__codelineno-8-78" name="__codelineno-8-78" href="#__codelineno-8-78"></a>    <span class="n">output_dir</span> <span class="o">=</span> <span class="n">output_dir</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
-<a id="__codelineno-8-79" name="__codelineno-8-79" href="#__codelineno-8-79"></a>    <span class="n">output_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<a id="__codelineno-8-80" name="__codelineno-8-80" href="#__codelineno-8-80"></a>
-<a id="__codelineno-8-81" name="__codelineno-8-81" href="#__codelineno-8-81"></a>    <span class="n">model</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="n">model_name</span><span class="o">=</span><span class="s2">"elastic_cantilever"</span><span class="p">,</span> <span class="n">model_path</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">output_dir</span><span class="p">))</span>
-<a id="__codelineno-8-82" name="__codelineno-8-82" href="#__codelineno-8-82"></a>    <span class="n">model</span><span class="o">.</span><span class="n">set_results_folder</span><span class="p">(</span><span class="n">output_dir</span><span class="o">.</span><span class="n">as_posix</span><span class="p">())</span>
+<a id="__codelineno-8-36" name="__codelineno-8-36" href="#__codelineno-8-36"></a><span class="n">OUTPUT_DIR</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">"example_outputs"</span><span class="p">)</span> <span class="o">/</span> <span class="s2">"elastic_cantilever"</span>
+<a id="__codelineno-8-37" name="__codelineno-8-37" href="#__codelineno-8-37"></a><span class="n">OPENSEES</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"FEMORA_OPENSEES"</span><span class="p">)</span>
+<a id="__codelineno-8-38" name="__codelineno-8-38" href="#__codelineno-8-38"></a><span class="n">PLOT_MODEL</span> <span class="o">=</span> <span class="kc">False</span>
+<a id="__codelineno-8-39" name="__codelineno-8-39" href="#__codelineno-8-39"></a>
+<a id="__codelineno-8-40" name="__codelineno-8-40" href="#__codelineno-8-40"></a>
+<a id="__codelineno-8-41" name="__codelineno-8-41" href="#__codelineno-8-41"></a><span class="c1"># %% [markdown]</span>
+<a id="__codelineno-8-42" name="__codelineno-8-42" href="#__codelineno-8-42"></a><span class="c1"># ## Create the building blocks</span>
+<a id="__codelineno-8-43" name="__codelineno-8-43" href="#__codelineno-8-43"></a><span class="c1">#</span>
+<a id="__codelineno-8-44" name="__codelineno-8-44" href="#__codelineno-8-44"></a><span class="c1"># The section and transformation define the beam behavior. The element combines</span>
+<a id="__codelineno-8-45" name="__codelineno-8-45" href="#__codelineno-8-45"></a><span class="c1"># those reusable definitions into the formulation used by the line mesh part.</span>
+<a id="__codelineno-8-46" name="__codelineno-8-46" href="#__codelineno-8-46"></a>
+<a id="__codelineno-8-47" name="__codelineno-8-47" href="#__codelineno-8-47"></a><span class="c1"># %%</span>
+<a id="__codelineno-8-48" name="__codelineno-8-48" href="#__codelineno-8-48"></a><span class="n">OUTPUT_DIR</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<a id="__codelineno-8-49" name="__codelineno-8-49" href="#__codelineno-8-49"></a>
+<a id="__codelineno-8-50" name="__codelineno-8-50" href="#__codelineno-8-50"></a><span class="n">model</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span>
+<a id="__codelineno-8-51" name="__codelineno-8-51" href="#__codelineno-8-51"></a>    <span class="n">model_name</span><span class="o">=</span><span class="s2">"elastic_cantilever"</span><span class="p">,</span>
+<a id="__codelineno-8-52" name="__codelineno-8-52" href="#__codelineno-8-52"></a>    <span class="n">model_path</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">OUTPUT_DIR</span><span class="o">.</span><span class="n">resolve</span><span class="p">()),</span>
+<a id="__codelineno-8-53" name="__codelineno-8-53" href="#__codelineno-8-53"></a><span class="p">)</span>
+<a id="__codelineno-8-54" name="__codelineno-8-54" href="#__codelineno-8-54"></a><span class="n">model</span><span class="o">.</span><span class="n">set_results_folder</span><span class="p">(</span><span class="n">OUTPUT_DIR</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span><span class="o">.</span><span class="n">as_posix</span><span class="p">())</span>
+<a id="__codelineno-8-55" name="__codelineno-8-55" href="#__codelineno-8-55"></a>
+<a id="__codelineno-8-56" name="__codelineno-8-56" href="#__codelineno-8-56"></a><span class="n">section</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">section</span><span class="o">.</span><span class="n">beam</span><span class="o">.</span><span class="n">elastic</span><span class="p">(</span>
+<a id="__codelineno-8-57" name="__codelineno-8-57" href="#__codelineno-8-57"></a>    <span class="n">user_name</span><span class="o">=</span><span class="s2">"cantilever_section"</span><span class="p">,</span>
+<a id="__codelineno-8-58" name="__codelineno-8-58" href="#__codelineno-8-58"></a>    <span class="n">E</span><span class="o">=</span><span class="n">ELASTIC_MODULUS</span><span class="p">,</span>
+<a id="__codelineno-8-59" name="__codelineno-8-59" href="#__codelineno-8-59"></a>    <span class="n">A</span><span class="o">=</span><span class="n">AREA</span><span class="p">,</span>
+<a id="__codelineno-8-60" name="__codelineno-8-60" href="#__codelineno-8-60"></a>    <span class="n">Iz</span><span class="o">=</span><span class="n">SECOND_MOMENT</span><span class="p">,</span>
+<a id="__codelineno-8-61" name="__codelineno-8-61" href="#__codelineno-8-61"></a>    <span class="n">Iy</span><span class="o">=</span><span class="n">SECOND_MOMENT</span><span class="p">,</span>
+<a id="__codelineno-8-62" name="__codelineno-8-62" href="#__codelineno-8-62"></a>    <span class="n">G</span><span class="o">=</span><span class="n">SHEAR_MODULUS</span><span class="p">,</span>
+<a id="__codelineno-8-63" name="__codelineno-8-63" href="#__codelineno-8-63"></a>    <span class="n">J</span><span class="o">=</span><span class="n">TORSIONAL_CONSTANT</span><span class="p">,</span>
+<a id="__codelineno-8-64" name="__codelineno-8-64" href="#__codelineno-8-64"></a><span class="p">)</span>
+<a id="__codelineno-8-65" name="__codelineno-8-65" href="#__codelineno-8-65"></a><span class="n">transformation</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">transformation</span><span class="o">.</span><span class="n">transformation3d</span><span class="p">(</span>
+<a id="__codelineno-8-66" name="__codelineno-8-66" href="#__codelineno-8-66"></a>    <span class="n">transf_type</span><span class="o">=</span><span class="s2">"Linear"</span><span class="p">,</span>
+<a id="__codelineno-8-67" name="__codelineno-8-67" href="#__codelineno-8-67"></a>    <span class="n">vecxz_x</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+<a id="__codelineno-8-68" name="__codelineno-8-68" href="#__codelineno-8-68"></a>    <span class="n">vecxz_y</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+<a id="__codelineno-8-69" name="__codelineno-8-69" href="#__codelineno-8-69"></a>    <span class="n">vecxz_z</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+<a id="__codelineno-8-70" name="__codelineno-8-70" href="#__codelineno-8-70"></a><span class="p">)</span>
+<a id="__codelineno-8-71" name="__codelineno-8-71" href="#__codelineno-8-71"></a><span class="n">beam_element</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">element</span><span class="o">.</span><span class="n">beam</span><span class="o">.</span><span class="n">elastic</span><span class="p">(</span>
+<a id="__codelineno-8-72" name="__codelineno-8-72" href="#__codelineno-8-72"></a>    <span class="n">ndof</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span>
+<a id="__codelineno-8-73" name="__codelineno-8-73" href="#__codelineno-8-73"></a>    <span class="n">section</span><span class="o">=</span><span class="n">section</span><span class="p">,</span>
+<a id="__codelineno-8-74" name="__codelineno-8-74" href="#__codelineno-8-74"></a>    <span class="n">transformation</span><span class="o">=</span><span class="n">transformation</span><span class="p">,</span>
+<a id="__codelineno-8-75" name="__codelineno-8-75" href="#__codelineno-8-75"></a><span class="p">)</span>
+<a id="__codelineno-8-76" name="__codelineno-8-76" href="#__codelineno-8-76"></a>
+<a id="__codelineno-8-77" name="__codelineno-8-77" href="#__codelineno-8-77"></a>
+<a id="__codelineno-8-78" name="__codelineno-8-78" href="#__codelineno-8-78"></a><span class="c1"># %% [markdown]</span>
+<a id="__codelineno-8-79" name="__codelineno-8-79" href="#__codelineno-8-79"></a><span class="c1"># ## Mesh and assemble the member</span>
+<a id="__codelineno-8-80" name="__codelineno-8-80" href="#__codelineno-8-80"></a><span class="c1">#</span>
+<a id="__codelineno-8-81" name="__codelineno-8-81" href="#__codelineno-8-81"></a><span class="c1"># Femora creates four independent line elements and compiles them into the</span>
+<a id="__codelineno-8-82" name="__codelineno-8-82" href="#__codelineno-8-82"></a><span class="c1"># assembled model.</span>
 <a id="__codelineno-8-83" name="__codelineno-8-83" href="#__codelineno-8-83"></a>
-<a id="__codelineno-8-84" name="__codelineno-8-84" href="#__codelineno-8-84"></a>    <span class="n">section</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">section</span><span class="o">.</span><span class="n">beam</span><span class="o">.</span><span class="n">elastic</span><span class="p">(</span>
-<a id="__codelineno-8-85" name="__codelineno-8-85" href="#__codelineno-8-85"></a>        <span class="n">user_name</span><span class="o">=</span><span class="s2">"cantilever_section"</span><span class="p">,</span>
-<a id="__codelineno-8-86" name="__codelineno-8-86" href="#__codelineno-8-86"></a>        <span class="n">E</span><span class="o">=</span><span class="n">ELASTIC_MODULUS</span><span class="p">,</span>
-<a id="__codelineno-8-87" name="__codelineno-8-87" href="#__codelineno-8-87"></a>        <span class="n">A</span><span class="o">=</span><span class="n">AREA</span><span class="p">,</span>
-<a id="__codelineno-8-88" name="__codelineno-8-88" href="#__codelineno-8-88"></a>        <span class="n">Iz</span><span class="o">=</span><span class="n">SECOND_MOMENT</span><span class="p">,</span>
-<a id="__codelineno-8-89" name="__codelineno-8-89" href="#__codelineno-8-89"></a>        <span class="n">Iy</span><span class="o">=</span><span class="n">SECOND_MOMENT</span><span class="p">,</span>
-<a id="__codelineno-8-90" name="__codelineno-8-90" href="#__codelineno-8-90"></a>        <span class="n">G</span><span class="o">=</span><span class="n">SHEAR_MODULUS</span><span class="p">,</span>
-<a id="__codelineno-8-91" name="__codelineno-8-91" href="#__codelineno-8-91"></a>        <span class="n">J</span><span class="o">=</span><span class="n">TORSIONAL_CONSTANT</span><span class="p">,</span>
-<a id="__codelineno-8-92" name="__codelineno-8-92" href="#__codelineno-8-92"></a>    <span class="p">)</span>
-<a id="__codelineno-8-93" name="__codelineno-8-93" href="#__codelineno-8-93"></a>    <span class="n">transformation</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">transformation</span><span class="o">.</span><span class="n">transformation3d</span><span class="p">(</span>
-<a id="__codelineno-8-94" name="__codelineno-8-94" href="#__codelineno-8-94"></a>        <span class="n">transf_type</span><span class="o">=</span><span class="s2">"Linear"</span><span class="p">,</span>
-<a id="__codelineno-8-95" name="__codelineno-8-95" href="#__codelineno-8-95"></a>        <span class="n">vecxz_x</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
-<a id="__codelineno-8-96" name="__codelineno-8-96" href="#__codelineno-8-96"></a>        <span class="n">vecxz_y</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
-<a id="__codelineno-8-97" name="__codelineno-8-97" href="#__codelineno-8-97"></a>        <span class="n">vecxz_z</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
-<a id="__codelineno-8-98" name="__codelineno-8-98" href="#__codelineno-8-98"></a>    <span class="p">)</span>
-<a id="__codelineno-8-99" name="__codelineno-8-99" href="#__codelineno-8-99"></a>    <span class="n">beam_element</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">element</span><span class="o">.</span><span class="n">beam</span><span class="o">.</span><span class="n">elastic</span><span class="p">(</span>
-<a id="__codelineno-8-100" name="__codelineno-8-100" href="#__codelineno-8-100"></a>        <span class="n">ndof</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span>
-<a id="__codelineno-8-101" name="__codelineno-8-101" href="#__codelineno-8-101"></a>        <span class="n">section</span><span class="o">=</span><span class="n">section</span><span class="p">,</span>
-<a id="__codelineno-8-102" name="__codelineno-8-102" href="#__codelineno-8-102"></a>        <span class="n">transformation</span><span class="o">=</span><span class="n">transformation</span><span class="p">,</span>
-<a id="__codelineno-8-103" name="__codelineno-8-103" href="#__codelineno-8-103"></a>    <span class="p">)</span>
-<a id="__codelineno-8-104" name="__codelineno-8-104" href="#__codelineno-8-104"></a>
-<a id="__codelineno-8-105" name="__codelineno-8-105" href="#__codelineno-8-105"></a>    <span class="n">model</span><span class="o">.</span><span class="n">meshpart</span><span class="o">.</span><span class="n">line</span><span class="o">.</span><span class="n">single_line</span><span class="p">(</span>
-<a id="__codelineno-8-106" name="__codelineno-8-106" href="#__codelineno-8-106"></a>        <span class="n">user_name</span><span class="o">=</span><span class="s2">"cantilever"</span><span class="p">,</span>
-<a id="__codelineno-8-107" name="__codelineno-8-107" href="#__codelineno-8-107"></a>        <span class="n">element</span><span class="o">=</span><span class="n">beam_element</span><span class="p">,</span>
-<a id="__codelineno-8-108" name="__codelineno-8-108" href="#__codelineno-8-108"></a>        <span class="n">x0</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
-<a id="__codelineno-8-109" name="__codelineno-8-109" href="#__codelineno-8-109"></a>        <span class="n">y0</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
-<a id="__codelineno-8-110" name="__codelineno-8-110" href="#__codelineno-8-110"></a>        <span class="n">z0</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
-<a id="__codelineno-8-111" name="__codelineno-8-111" href="#__codelineno-8-111"></a>        <span class="n">x1</span><span class="o">=</span><span class="n">LENGTH</span><span class="p">,</span>
-<a id="__codelineno-8-112" name="__codelineno-8-112" href="#__codelineno-8-112"></a>        <span class="n">y1</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
-<a id="__codelineno-8-113" name="__codelineno-8-113" href="#__codelineno-8-113"></a>        <span class="n">z1</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
-<a id="__codelineno-8-114" name="__codelineno-8-114" href="#__codelineno-8-114"></a>        <span class="n">number_of_lines</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
-<a id="__codelineno-8-115" name="__codelineno-8-115" href="#__codelineno-8-115"></a>    <span class="p">)</span>
-<a id="__codelineno-8-116" name="__codelineno-8-116" href="#__codelineno-8-116"></a>    <span class="n">model</span><span class="o">.</span><span class="n">assembler</span><span class="o">.</span><span class="n">create_section</span><span class="p">(</span>
-<a id="__codelineno-8-117" name="__codelineno-8-117" href="#__codelineno-8-117"></a>        <span class="p">[</span><span class="s2">"cantilever"</span><span class="p">],</span>
-<a id="__codelineno-8-118" name="__codelineno-8-118" href="#__codelineno-8-118"></a>        <span class="n">num_partitions</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-<a id="__codelineno-8-119" name="__codelineno-8-119" href="#__codelineno-8-119"></a>        <span class="n">merge_points</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-<a id="__codelineno-8-120" name="__codelineno-8-120" href="#__codelineno-8-120"></a>    <span class="p">)</span>
-<a id="__codelineno-8-121" name="__codelineno-8-121" href="#__codelineno-8-121"></a>    <span class="n">model</span><span class="o">.</span><span class="n">assembler</span><span class="o">.</span><span class="n">assemble</span><span class="p">(</span><span class="n">merge_points</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">progress_callback</span><span class="o">=</span><span class="k">lambda</span> <span class="o">*</span><span class="n">_</span><span class="p">:</span> <span class="kc">None</span><span class="p">)</span>
-<a id="__codelineno-8-122" name="__codelineno-8-122" href="#__codelineno-8-122"></a>
-<a id="__codelineno-8-123" name="__codelineno-8-123" href="#__codelineno-8-123"></a>    <span class="n">model</span><span class="o">.</span><span class="n">constraint</span><span class="o">.</span><span class="n">sp</span><span class="o">.</span><span class="n">fix_x</span><span class="p">(</span>
-<a id="__codelineno-8-124" name="__codelineno-8-124" href="#__codelineno-8-124"></a>        <span class="n">xCoordinate</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
-<a id="__codelineno-8-125" name="__codelineno-8-125" href="#__codelineno-8-125"></a>        <span class="n">dofs</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
-<a id="__codelineno-8-126" name="__codelineno-8-126" href="#__codelineno-8-126"></a>        <span class="n">tol</span><span class="o">=</span><span class="mf">1.0e-9</span><span class="p">,</span>
-<a id="__codelineno-8-127" name="__codelineno-8-127" href="#__codelineno-8-127"></a>    <span class="p">)</span>
-<a id="__codelineno-8-128" name="__codelineno-8-128" href="#__codelineno-8-128"></a>
-<a id="__codelineno-8-129" name="__codelineno-8-129" href="#__codelineno-8-129"></a>    <span class="n">tip_nodes</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">mask</span><span class="o">.</span><span class="n">nodes</span><span class="o">.</span><span class="n">near_point</span><span class="p">(</span>
-<a id="__codelineno-8-130" name="__codelineno-8-130" href="#__codelineno-8-130"></a>        <span class="n">point</span><span class="o">=</span><span class="p">(</span><span class="n">LENGTH</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">),</span>
-<a id="__codelineno-8-131" name="__codelineno-8-131" href="#__codelineno-8-131"></a>        <span class="n">radius</span><span class="o">=</span><span class="mf">1.0e-9</span><span class="p">,</span>
-<a id="__codelineno-8-132" name="__codelineno-8-132" href="#__codelineno-8-132"></a>    <span class="p">)</span>
-<a id="__codelineno-8-133" name="__codelineno-8-133" href="#__codelineno-8-133"></a>    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">tip_nodes</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
-<a id="__codelineno-8-134" name="__codelineno-8-134" href="#__codelineno-8-134"></a>        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Expected one cantilever tip node, found </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">tip_nodes</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-<a id="__codelineno-8-135" name="__codelineno-8-135" href="#__codelineno-8-135"></a>
-<a id="__codelineno-8-136" name="__codelineno-8-136" href="#__codelineno-8-136"></a>    <span class="n">load_history</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">time_series</span><span class="o">.</span><span class="n">linear</span><span class="p">(</span><span class="n">factor</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
-<a id="__codelineno-8-137" name="__codelineno-8-137" href="#__codelineno-8-137"></a>    <span class="n">lateral_load</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">pattern</span><span class="o">.</span><span class="n">plain</span><span class="p">(</span><span class="n">time_series</span><span class="o">=</span><span class="n">load_history</span><span class="p">)</span>
-<a id="__codelineno-8-138" name="__codelineno-8-138" href="#__codelineno-8-138"></a>    <span class="n">lateral_load</span><span class="o">.</span><span class="n">add_load</span><span class="o">.</span><span class="n">node</span><span class="p">(</span>
-<a id="__codelineno-8-139" name="__codelineno-8-139" href="#__codelineno-8-139"></a>        <span class="n">node_mask</span><span class="o">=</span><span class="n">tip_nodes</span><span class="p">,</span>
-<a id="__codelineno-8-140" name="__codelineno-8-140" href="#__codelineno-8-140"></a>        <span class="n">values</span><span class="o">=</span><span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">TIP_LOAD</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span>
-<a id="__codelineno-8-141" name="__codelineno-8-141" href="#__codelineno-8-141"></a>    <span class="p">)</span>
-<a id="__codelineno-8-142" name="__codelineno-8-142" href="#__codelineno-8-142"></a>
-<a id="__codelineno-8-143" name="__codelineno-8-143" href="#__codelineno-8-143"></a>    <span class="n">displacement_file</span> <span class="o">=</span> <span class="n">output_dir</span> <span class="o">/</span> <span class="s2">"tip_displacement.out"</span>
-<a id="__codelineno-8-144" name="__codelineno-8-144" href="#__codelineno-8-144"></a>    <span class="n">tip_recorder</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">recorder</span><span class="o">.</span><span class="n">node</span><span class="p">(</span>
-<a id="__codelineno-8-145" name="__codelineno-8-145" href="#__codelineno-8-145"></a>        <span class="n">file_name</span><span class="o">=</span><span class="n">displacement_file</span><span class="o">.</span><span class="n">as_posix</span><span class="p">(),</span>
-<a id="__codelineno-8-146" name="__codelineno-8-146" href="#__codelineno-8-146"></a>        <span class="n">nodes</span><span class="o">=</span><span class="n">tip_nodes</span><span class="o">.</span><span class="n">to_tags</span><span class="p">(),</span>
-<a id="__codelineno-8-147" name="__codelineno-8-147" href="#__codelineno-8-147"></a>        <span class="n">dofs</span><span class="o">=</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span>
-<a id="__codelineno-8-148" name="__codelineno-8-148" href="#__codelineno-8-148"></a>        <span class="n">resp_type</span><span class="o">=</span><span class="s2">"disp"</span><span class="p">,</span>
-<a id="__codelineno-8-149" name="__codelineno-8-149" href="#__codelineno-8-149"></a>        <span class="n">time</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-<a id="__codelineno-8-150" name="__codelineno-8-150" href="#__codelineno-8-150"></a>        <span class="n">precision</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span>
-<a id="__codelineno-8-151" name="__codelineno-8-151" href="#__codelineno-8-151"></a>    <span class="p">)</span>
-<a id="__codelineno-8-152" name="__codelineno-8-152" href="#__codelineno-8-152"></a>
-<a id="__codelineno-8-153" name="__codelineno-8-153" href="#__codelineno-8-153"></a>    <span class="n">static_analysis</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">static</span><span class="p">(</span>
-<a id="__codelineno-8-154" name="__codelineno-8-154" href="#__codelineno-8-154"></a>        <span class="n">name</span><span class="o">=</span><span class="s2">"tip_load"</span><span class="p">,</span>
-<a id="__codelineno-8-155" name="__codelineno-8-155" href="#__codelineno-8-155"></a>        <span class="n">constraint_handler</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">constraint</span><span class="o">.</span><span class="n">transformation</span><span class="p">(),</span>
-<a id="__codelineno-8-156" name="__codelineno-8-156" href="#__codelineno-8-156"></a>        <span class="n">numberer</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">numberer</span><span class="o">.</span><span class="n">rcm</span><span class="p">(),</span>
-<a id="__codelineno-8-157" name="__codelineno-8-157" href="#__codelineno-8-157"></a>        <span class="n">system</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">system</span><span class="o">.</span><span class="n">bandgeneral</span><span class="p">(),</span>
-<a id="__codelineno-8-158" name="__codelineno-8-158" href="#__codelineno-8-158"></a>        <span class="n">algorithm</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">algorithm</span><span class="o">.</span><span class="n">linear</span><span class="p">(),</span>
-<a id="__codelineno-8-159" name="__codelineno-8-159" href="#__codelineno-8-159"></a>        <span class="n">test</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">test</span><span class="o">.</span><span class="n">normunbalance</span><span class="p">(</span><span class="n">tol</span><span class="o">=</span><span class="mf">1.0e-10</span><span class="p">,</span> <span class="n">max_iter</span><span class="o">=</span><span class="mi">10</span><span class="p">),</span>
-<a id="__codelineno-8-160" name="__codelineno-8-160" href="#__codelineno-8-160"></a>        <span class="n">integrator</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">integrator</span><span class="o">.</span><span class="n">loadcontrol</span><span class="p">(</span><span class="n">incr</span><span class="o">=</span><span class="mf">0.1</span><span class="p">),</span>
-<a id="__codelineno-8-161" name="__codelineno-8-161" href="#__codelineno-8-161"></a>        <span class="n">num_steps</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
-<a id="__codelineno-8-162" name="__codelineno-8-162" href="#__codelineno-8-162"></a>    <span class="p">)</span>
-<a id="__codelineno-8-163" name="__codelineno-8-163" href="#__codelineno-8-163"></a>
-<a id="__codelineno-8-164" name="__codelineno-8-164" href="#__codelineno-8-164"></a>    <span class="n">model</span><span class="o">.</span><span class="n">process</span><span class="o">.</span><span class="n">add_step</span><span class="p">(</span><span class="n">lateral_load</span><span class="p">,</span> <span class="s2">"Apply the cantilever tip load"</span><span class="p">)</span>
-<a id="__codelineno-8-165" name="__codelineno-8-165" href="#__codelineno-8-165"></a>    <span class="n">model</span><span class="o">.</span><span class="n">process</span><span class="o">.</span><span class="n">add_step</span><span class="p">(</span><span class="n">tip_recorder</span><span class="p">,</span> <span class="s2">"Record the tip displacement"</span><span class="p">)</span>
-<a id="__codelineno-8-166" name="__codelineno-8-166" href="#__codelineno-8-166"></a>    <span class="n">model</span><span class="o">.</span><span class="n">process</span><span class="o">.</span><span class="n">add_step</span><span class="p">(</span><span class="n">static_analysis</span><span class="p">,</span> <span class="s2">"Run the linear static analysis"</span><span class="p">)</span>
-<a id="__codelineno-8-167" name="__codelineno-8-167" href="#__codelineno-8-167"></a>
-<a id="__codelineno-8-168" name="__codelineno-8-168" href="#__codelineno-8-168"></a>    <span class="n">tcl_file</span> <span class="o">=</span> <span class="n">output_dir</span> <span class="o">/</span> <span class="s2">"elastic_cantilever.tcl"</span>
-<a id="__codelineno-8-169" name="__codelineno-8-169" href="#__codelineno-8-169"></a>    <span class="n">vtk_file</span> <span class="o">=</span> <span class="n">output_dir</span> <span class="o">/</span> <span class="s2">"elastic_cantilever.vtk"</span>
-<a id="__codelineno-8-170" name="__codelineno-8-170" href="#__codelineno-8-170"></a>    <span class="n">model</span><span class="o">.</span><span class="n">export_to_tcl</span><span class="p">(</span>
-<a id="__codelineno-8-171" name="__codelineno-8-171" href="#__codelineno-8-171"></a>        <span class="n">filename</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">tcl_file</span><span class="p">),</span>
-<a id="__codelineno-8-172" name="__codelineno-8-172" href="#__codelineno-8-172"></a>        <span class="n">progress_callback</span><span class="o">=</span><span class="k">lambda</span> <span class="o">*</span><span class="n">_</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-8-173" name="__codelineno-8-173" href="#__codelineno-8-173"></a>    <span class="p">)</span>
-<a id="__codelineno-8-174" name="__codelineno-8-174" href="#__codelineno-8-174"></a>    <span class="n">model</span><span class="o">.</span><span class="n">export_to_vtk</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">vtk_file</span><span class="p">),</span> <span class="n">write_info_json</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<a id="__codelineno-8-175" name="__codelineno-8-175" href="#__codelineno-8-175"></a>    <span class="k">return</span> <span class="n">model</span><span class="p">,</span> <span class="n">tcl_file</span><span class="p">,</span> <span class="n">displacement_file</span>
-<a id="__codelineno-8-176" name="__codelineno-8-176" href="#__codelineno-8-176"></a>
-<a id="__codelineno-8-177" name="__codelineno-8-177" href="#__codelineno-8-177"></a>
-<a id="__codelineno-8-178" name="__codelineno-8-178" href="#__codelineno-8-178"></a><span class="c1"># %% [markdown]</span>
-<a id="__codelineno-8-179" name="__codelineno-8-179" href="#__codelineno-8-179"></a><span class="c1"># ## Run OpenSees and verify the response</span>
-<a id="__codelineno-8-180" name="__codelineno-8-180" href="#__codelineno-8-180"></a><span class="c1">#</span>
-<a id="__codelineno-8-181" name="__codelineno-8-181" href="#__codelineno-8-181"></a><span class="c1"># These helpers run the exported Tcl model and compare the recorded displacement</span>
-<a id="__codelineno-8-182" name="__codelineno-8-182" href="#__codelineno-8-182"></a><span class="c1"># against the closed-form cantilever solution.</span>
+<a id="__codelineno-8-84" name="__codelineno-8-84" href="#__codelineno-8-84"></a><span class="c1"># %%</span>
+<a id="__codelineno-8-85" name="__codelineno-8-85" href="#__codelineno-8-85"></a><span class="n">model</span><span class="o">.</span><span class="n">meshpart</span><span class="o">.</span><span class="n">line</span><span class="o">.</span><span class="n">single_line</span><span class="p">(</span>
+<a id="__codelineno-8-86" name="__codelineno-8-86" href="#__codelineno-8-86"></a>    <span class="n">user_name</span><span class="o">=</span><span class="s2">"cantilever"</span><span class="p">,</span>
+<a id="__codelineno-8-87" name="__codelineno-8-87" href="#__codelineno-8-87"></a>    <span class="n">element</span><span class="o">=</span><span class="n">beam_element</span><span class="p">,</span>
+<a id="__codelineno-8-88" name="__codelineno-8-88" href="#__codelineno-8-88"></a>    <span class="n">x0</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+<a id="__codelineno-8-89" name="__codelineno-8-89" href="#__codelineno-8-89"></a>    <span class="n">y0</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+<a id="__codelineno-8-90" name="__codelineno-8-90" href="#__codelineno-8-90"></a>    <span class="n">z0</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+<a id="__codelineno-8-91" name="__codelineno-8-91" href="#__codelineno-8-91"></a>    <span class="n">x1</span><span class="o">=</span><span class="n">LENGTH</span><span class="p">,</span>
+<a id="__codelineno-8-92" name="__codelineno-8-92" href="#__codelineno-8-92"></a>    <span class="n">y1</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+<a id="__codelineno-8-93" name="__codelineno-8-93" href="#__codelineno-8-93"></a>    <span class="n">z1</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+<a id="__codelineno-8-94" name="__codelineno-8-94" href="#__codelineno-8-94"></a>    <span class="n">number_of_lines</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+<a id="__codelineno-8-95" name="__codelineno-8-95" href="#__codelineno-8-95"></a><span class="p">)</span>
+<a id="__codelineno-8-96" name="__codelineno-8-96" href="#__codelineno-8-96"></a><span class="n">model</span><span class="o">.</span><span class="n">assembler</span><span class="o">.</span><span class="n">create_section</span><span class="p">(</span>
+<a id="__codelineno-8-97" name="__codelineno-8-97" href="#__codelineno-8-97"></a>    <span class="p">[</span><span class="s2">"cantilever"</span><span class="p">],</span>
+<a id="__codelineno-8-98" name="__codelineno-8-98" href="#__codelineno-8-98"></a>    <span class="n">num_partitions</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+<a id="__codelineno-8-99" name="__codelineno-8-99" href="#__codelineno-8-99"></a>    <span class="n">merge_points</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<a id="__codelineno-8-100" name="__codelineno-8-100" href="#__codelineno-8-100"></a><span class="p">)</span>
+<a id="__codelineno-8-101" name="__codelineno-8-101" href="#__codelineno-8-101"></a><span class="n">model</span><span class="o">.</span><span class="n">assembler</span><span class="o">.</span><span class="n">assemble</span><span class="p">(</span><span class="n">merge_points</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">progress_callback</span><span class="o">=</span><span class="k">lambda</span> <span class="o">*</span><span class="n">_</span><span class="p">:</span> <span class="kc">None</span><span class="p">)</span>
+<a id="__codelineno-8-102" name="__codelineno-8-102" href="#__codelineno-8-102"></a>
+<a id="__codelineno-8-103" name="__codelineno-8-103" href="#__codelineno-8-103"></a>
+<a id="__codelineno-8-104" name="__codelineno-8-104" href="#__codelineno-8-104"></a><span class="c1"># %% [markdown]</span>
+<a id="__codelineno-8-105" name="__codelineno-8-105" href="#__codelineno-8-105"></a><span class="c1"># ## Constrain and select the assembled nodes</span>
+<a id="__codelineno-8-106" name="__codelineno-8-106" href="#__codelineno-8-106"></a><span class="c1">#</span>
+<a id="__codelineno-8-107" name="__codelineno-8-107" href="#__codelineno-8-107"></a><span class="c1"># Fix the root and locate the tip geometrically instead of predicting its solver</span>
+<a id="__codelineno-8-108" name="__codelineno-8-108" href="#__codelineno-8-108"></a><span class="c1"># tag.</span>
+<a id="__codelineno-8-109" name="__codelineno-8-109" href="#__codelineno-8-109"></a>
+<a id="__codelineno-8-110" name="__codelineno-8-110" href="#__codelineno-8-110"></a><span class="c1"># %%</span>
+<a id="__codelineno-8-111" name="__codelineno-8-111" href="#__codelineno-8-111"></a><span class="n">model</span><span class="o">.</span><span class="n">constraint</span><span class="o">.</span><span class="n">sp</span><span class="o">.</span><span class="n">fix_x</span><span class="p">(</span>
+<a id="__codelineno-8-112" name="__codelineno-8-112" href="#__codelineno-8-112"></a>    <span class="n">xCoordinate</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+<a id="__codelineno-8-113" name="__codelineno-8-113" href="#__codelineno-8-113"></a>    <span class="n">dofs</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+<a id="__codelineno-8-114" name="__codelineno-8-114" href="#__codelineno-8-114"></a>    <span class="n">tol</span><span class="o">=</span><span class="mf">1.0e-9</span><span class="p">,</span>
+<a id="__codelineno-8-115" name="__codelineno-8-115" href="#__codelineno-8-115"></a><span class="p">)</span>
+<a id="__codelineno-8-116" name="__codelineno-8-116" href="#__codelineno-8-116"></a>
+<a id="__codelineno-8-117" name="__codelineno-8-117" href="#__codelineno-8-117"></a><span class="n">tip_nodes</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">mask</span><span class="o">.</span><span class="n">nodes</span><span class="o">.</span><span class="n">near_point</span><span class="p">(</span>
+<a id="__codelineno-8-118" name="__codelineno-8-118" href="#__codelineno-8-118"></a>    <span class="n">point</span><span class="o">=</span><span class="p">(</span><span class="n">LENGTH</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">),</span>
+<a id="__codelineno-8-119" name="__codelineno-8-119" href="#__codelineno-8-119"></a>    <span class="n">radius</span><span class="o">=</span><span class="mf">1.0e-9</span><span class="p">,</span>
+<a id="__codelineno-8-120" name="__codelineno-8-120" href="#__codelineno-8-120"></a><span class="p">)</span>
+<a id="__codelineno-8-121" name="__codelineno-8-121" href="#__codelineno-8-121"></a><span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">tip_nodes</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+<a id="__codelineno-8-122" name="__codelineno-8-122" href="#__codelineno-8-122"></a>    <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Expected one cantilever tip node, found </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">tip_nodes</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<a id="__codelineno-8-123" name="__codelineno-8-123" href="#__codelineno-8-123"></a>
+<a id="__codelineno-8-124" name="__codelineno-8-124" href="#__codelineno-8-124"></a>
+<a id="__codelineno-8-125" name="__codelineno-8-125" href="#__codelineno-8-125"></a><span class="c1"># %% [markdown]</span>
+<a id="__codelineno-8-126" name="__codelineno-8-126" href="#__codelineno-8-126"></a><span class="c1"># ## Apply the load and record the response</span>
+<a id="__codelineno-8-127" name="__codelineno-8-127" href="#__codelineno-8-127"></a><span class="c1">#</span>
+<a id="__codelineno-8-128" name="__codelineno-8-128" href="#__codelineno-8-128"></a><span class="c1"># The load pattern and recorder both act on the selected tip node.</span>
+<a id="__codelineno-8-129" name="__codelineno-8-129" href="#__codelineno-8-129"></a>
+<a id="__codelineno-8-130" name="__codelineno-8-130" href="#__codelineno-8-130"></a><span class="c1"># %%</span>
+<a id="__codelineno-8-131" name="__codelineno-8-131" href="#__codelineno-8-131"></a><span class="n">load_history</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">time_series</span><span class="o">.</span><span class="n">linear</span><span class="p">(</span><span class="n">factor</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+<a id="__codelineno-8-132" name="__codelineno-8-132" href="#__codelineno-8-132"></a><span class="n">lateral_load</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">pattern</span><span class="o">.</span><span class="n">plain</span><span class="p">(</span><span class="n">time_series</span><span class="o">=</span><span class="n">load_history</span><span class="p">)</span>
+<a id="__codelineno-8-133" name="__codelineno-8-133" href="#__codelineno-8-133"></a><span class="n">lateral_load</span><span class="o">.</span><span class="n">add_load</span><span class="o">.</span><span class="n">node</span><span class="p">(</span>
+<a id="__codelineno-8-134" name="__codelineno-8-134" href="#__codelineno-8-134"></a>    <span class="n">node_mask</span><span class="o">=</span><span class="n">tip_nodes</span><span class="p">,</span>
+<a id="__codelineno-8-135" name="__codelineno-8-135" href="#__codelineno-8-135"></a>    <span class="n">values</span><span class="o">=</span><span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">TIP_LOAD</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span>
+<a id="__codelineno-8-136" name="__codelineno-8-136" href="#__codelineno-8-136"></a><span class="p">)</span>
+<a id="__codelineno-8-137" name="__codelineno-8-137" href="#__codelineno-8-137"></a>
+<a id="__codelineno-8-138" name="__codelineno-8-138" href="#__codelineno-8-138"></a><span class="n">displacement_file</span> <span class="o">=</span> <span class="n">OUTPUT_DIR</span> <span class="o">/</span> <span class="s2">"tip_displacement.out"</span>
+<a id="__codelineno-8-139" name="__codelineno-8-139" href="#__codelineno-8-139"></a><span class="n">tip_recorder</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">recorder</span><span class="o">.</span><span class="n">node</span><span class="p">(</span>
+<a id="__codelineno-8-140" name="__codelineno-8-140" href="#__codelineno-8-140"></a>    <span class="n">file_name</span><span class="o">=</span><span class="n">displacement_file</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span><span class="o">.</span><span class="n">as_posix</span><span class="p">(),</span>
+<a id="__codelineno-8-141" name="__codelineno-8-141" href="#__codelineno-8-141"></a>    <span class="n">nodes</span><span class="o">=</span><span class="n">tip_nodes</span><span class="o">.</span><span class="n">to_tags</span><span class="p">(),</span>
+<a id="__codelineno-8-142" name="__codelineno-8-142" href="#__codelineno-8-142"></a>    <span class="n">dofs</span><span class="o">=</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span>
+<a id="__codelineno-8-143" name="__codelineno-8-143" href="#__codelineno-8-143"></a>    <span class="n">resp_type</span><span class="o">=</span><span class="s2">"disp"</span><span class="p">,</span>
+<a id="__codelineno-8-144" name="__codelineno-8-144" href="#__codelineno-8-144"></a>    <span class="n">time</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<a id="__codelineno-8-145" name="__codelineno-8-145" href="#__codelineno-8-145"></a>    <span class="n">precision</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span>
+<a id="__codelineno-8-146" name="__codelineno-8-146" href="#__codelineno-8-146"></a><span class="p">)</span>
+<a id="__codelineno-8-147" name="__codelineno-8-147" href="#__codelineno-8-147"></a>
+<a id="__codelineno-8-148" name="__codelineno-8-148" href="#__codelineno-8-148"></a>
+<a id="__codelineno-8-149" name="__codelineno-8-149" href="#__codelineno-8-149"></a><span class="c1"># %% [markdown]</span>
+<a id="__codelineno-8-150" name="__codelineno-8-150" href="#__codelineno-8-150"></a><span class="c1"># ## Define the analysis and process</span>
+<a id="__codelineno-8-151" name="__codelineno-8-151" href="#__codelineno-8-151"></a><span class="c1">#</span>
+<a id="__codelineno-8-152" name="__codelineno-8-152" href="#__codelineno-8-152"></a><span class="c1"># The analysis stores the solution settings. The process places the pattern,</span>
+<a id="__codelineno-8-153" name="__codelineno-8-153" href="#__codelineno-8-153"></a><span class="c1"># recorder, and analysis into the exported execution sequence.</span>
+<a id="__codelineno-8-154" name="__codelineno-8-154" href="#__codelineno-8-154"></a>
+<a id="__codelineno-8-155" name="__codelineno-8-155" href="#__codelineno-8-155"></a><span class="c1"># %%</span>
+<a id="__codelineno-8-156" name="__codelineno-8-156" href="#__codelineno-8-156"></a><span class="n">static_analysis</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">static</span><span class="p">(</span>
+<a id="__codelineno-8-157" name="__codelineno-8-157" href="#__codelineno-8-157"></a>    <span class="n">name</span><span class="o">=</span><span class="s2">"tip_load"</span><span class="p">,</span>
+<a id="__codelineno-8-158" name="__codelineno-8-158" href="#__codelineno-8-158"></a>    <span class="n">constraint_handler</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">constraint</span><span class="o">.</span><span class="n">transformation</span><span class="p">(),</span>
+<a id="__codelineno-8-159" name="__codelineno-8-159" href="#__codelineno-8-159"></a>    <span class="n">numberer</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">numberer</span><span class="o">.</span><span class="n">rcm</span><span class="p">(),</span>
+<a id="__codelineno-8-160" name="__codelineno-8-160" href="#__codelineno-8-160"></a>    <span class="n">system</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">system</span><span class="o">.</span><span class="n">bandgeneral</span><span class="p">(),</span>
+<a id="__codelineno-8-161" name="__codelineno-8-161" href="#__codelineno-8-161"></a>    <span class="n">algorithm</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">algorithm</span><span class="o">.</span><span class="n">linear</span><span class="p">(),</span>
+<a id="__codelineno-8-162" name="__codelineno-8-162" href="#__codelineno-8-162"></a>    <span class="n">test</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">test</span><span class="o">.</span><span class="n">normunbalance</span><span class="p">(</span><span class="n">tol</span><span class="o">=</span><span class="mf">1.0e-10</span><span class="p">,</span> <span class="n">max_iter</span><span class="o">=</span><span class="mi">10</span><span class="p">),</span>
+<a id="__codelineno-8-163" name="__codelineno-8-163" href="#__codelineno-8-163"></a>    <span class="n">integrator</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">integrator</span><span class="o">.</span><span class="n">loadcontrol</span><span class="p">(</span><span class="n">incr</span><span class="o">=</span><span class="mf">0.1</span><span class="p">),</span>
+<a id="__codelineno-8-164" name="__codelineno-8-164" href="#__codelineno-8-164"></a>    <span class="n">num_steps</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+<a id="__codelineno-8-165" name="__codelineno-8-165" href="#__codelineno-8-165"></a><span class="p">)</span>
+<a id="__codelineno-8-166" name="__codelineno-8-166" href="#__codelineno-8-166"></a>
+<a id="__codelineno-8-167" name="__codelineno-8-167" href="#__codelineno-8-167"></a><span class="n">model</span><span class="o">.</span><span class="n">process</span><span class="o">.</span><span class="n">add_step</span><span class="p">(</span><span class="n">lateral_load</span><span class="p">,</span> <span class="s2">"Apply the cantilever tip load"</span><span class="p">)</span>
+<a id="__codelineno-8-168" name="__codelineno-8-168" href="#__codelineno-8-168"></a><span class="n">model</span><span class="o">.</span><span class="n">process</span><span class="o">.</span><span class="n">add_step</span><span class="p">(</span><span class="n">tip_recorder</span><span class="p">,</span> <span class="s2">"Record the tip displacement"</span><span class="p">)</span>
+<a id="__codelineno-8-169" name="__codelineno-8-169" href="#__codelineno-8-169"></a><span class="n">model</span><span class="o">.</span><span class="n">process</span><span class="o">.</span><span class="n">add_step</span><span class="p">(</span><span class="n">static_analysis</span><span class="p">,</span> <span class="s2">"Run the linear static analysis"</span><span class="p">)</span>
+<a id="__codelineno-8-170" name="__codelineno-8-170" href="#__codelineno-8-170"></a>
+<a id="__codelineno-8-171" name="__codelineno-8-171" href="#__codelineno-8-171"></a>
+<a id="__codelineno-8-172" name="__codelineno-8-172" href="#__codelineno-8-172"></a><span class="c1"># %% [markdown]</span>
+<a id="__codelineno-8-173" name="__codelineno-8-173" href="#__codelineno-8-173"></a><span class="c1"># ## Export the model</span>
+<a id="__codelineno-8-174" name="__codelineno-8-174" href="#__codelineno-8-174"></a>
+<a id="__codelineno-8-175" name="__codelineno-8-175" href="#__codelineno-8-175"></a><span class="c1"># %%</span>
+<a id="__codelineno-8-176" name="__codelineno-8-176" href="#__codelineno-8-176"></a><span class="n">tcl_file</span> <span class="o">=</span> <span class="n">OUTPUT_DIR</span> <span class="o">/</span> <span class="s2">"elastic_cantilever.tcl"</span>
+<a id="__codelineno-8-177" name="__codelineno-8-177" href="#__codelineno-8-177"></a><span class="n">vtk_file</span> <span class="o">=</span> <span class="n">OUTPUT_DIR</span> <span class="o">/</span> <span class="s2">"elastic_cantilever.vtk"</span>
+<a id="__codelineno-8-178" name="__codelineno-8-178" href="#__codelineno-8-178"></a><span class="n">model</span><span class="o">.</span><span class="n">export_to_tcl</span><span class="p">(</span>
+<a id="__codelineno-8-179" name="__codelineno-8-179" href="#__codelineno-8-179"></a>    <span class="n">filename</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">tcl_file</span><span class="o">.</span><span class="n">resolve</span><span class="p">()),</span>
+<a id="__codelineno-8-180" name="__codelineno-8-180" href="#__codelineno-8-180"></a>    <span class="n">progress_callback</span><span class="o">=</span><span class="k">lambda</span> <span class="o">*</span><span class="n">_</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-8-181" name="__codelineno-8-181" href="#__codelineno-8-181"></a><span class="p">)</span>
+<a id="__codelineno-8-182" name="__codelineno-8-182" href="#__codelineno-8-182"></a><span class="n">model</span><span class="o">.</span><span class="n">export_to_vtk</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">vtk_file</span><span class="o">.</span><span class="n">resolve</span><span class="p">()),</span> <span class="n">write_info_json</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <a id="__codelineno-8-183" name="__codelineno-8-183" href="#__codelineno-8-183"></a>
-<a id="__codelineno-8-184" name="__codelineno-8-184" href="#__codelineno-8-184"></a><span class="c1"># %%</span>
-<a id="__codelineno-8-185" name="__codelineno-8-185" href="#__codelineno-8-185"></a><span class="k">def</span><span class="w"> </span><span class="nf">run_opensees</span><span class="p">(</span><span class="n">executable</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">tcl_file</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<a id="__codelineno-8-186" name="__codelineno-8-186" href="#__codelineno-8-186"></a><span class="w">    </span><span class="sd">"""Run the exported Tcl model and surface solver output on failure."""</span>
-<a id="__codelineno-8-187" name="__codelineno-8-187" href="#__codelineno-8-187"></a>    <span class="n">completed</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
-<a id="__codelineno-8-188" name="__codelineno-8-188" href="#__codelineno-8-188"></a>        <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">executable</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">tcl_file</span><span class="p">)],</span>
-<a id="__codelineno-8-189" name="__codelineno-8-189" href="#__codelineno-8-189"></a>        <span class="n">cwd</span><span class="o">=</span><span class="n">tcl_file</span><span class="o">.</span><span class="n">parent</span><span class="p">,</span>
-<a id="__codelineno-8-190" name="__codelineno-8-190" href="#__codelineno-8-190"></a>        <span class="n">text</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-<a id="__codelineno-8-191" name="__codelineno-8-191" href="#__codelineno-8-191"></a>        <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-<a id="__codelineno-8-192" name="__codelineno-8-192" href="#__codelineno-8-192"></a>        <span class="n">check</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-<a id="__codelineno-8-193" name="__codelineno-8-193" href="#__codelineno-8-193"></a>    <span class="p">)</span>
-<a id="__codelineno-8-194" name="__codelineno-8-194" href="#__codelineno-8-194"></a>    <span class="k">if</span> <span class="n">completed</span><span class="o">.</span><span class="n">returncode</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-<a id="__codelineno-8-195" name="__codelineno-8-195" href="#__codelineno-8-195"></a>        <span class="k">return</span>
-<a id="__codelineno-8-196" name="__codelineno-8-196" href="#__codelineno-8-196"></a>
-<a id="__codelineno-8-197" name="__codelineno-8-197" href="#__codelineno-8-197"></a>    <span class="k">if</span> <span class="n">completed</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">strip</span><span class="p">():</span>
-<a id="__codelineno-8-198" name="__codelineno-8-198" href="#__codelineno-8-198"></a>        <span class="nb">print</span><span class="p">(</span><span class="n">completed</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">rstrip</span><span class="p">())</span>
-<a id="__codelineno-8-199" name="__codelineno-8-199" href="#__codelineno-8-199"></a>    <span class="k">if</span> <span class="n">completed</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">strip</span><span class="p">():</span>
-<a id="__codelineno-8-200" name="__codelineno-8-200" href="#__codelineno-8-200"></a>        <span class="nb">print</span><span class="p">(</span><span class="n">completed</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">rstrip</span><span class="p">())</span>
-<a id="__codelineno-8-201" name="__codelineno-8-201" href="#__codelineno-8-201"></a>    <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"OpenSees failed with exit code </span><span class="si">{</span><span class="n">completed</span><span class="o">.</span><span class="n">returncode</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-<a id="__codelineno-8-202" name="__codelineno-8-202" href="#__codelineno-8-202"></a>
-<a id="__codelineno-8-203" name="__codelineno-8-203" href="#__codelineno-8-203"></a>
-<a id="__codelineno-8-204" name="__codelineno-8-204" href="#__codelineno-8-204"></a><span class="k">def</span><span class="w"> </span><span class="nf">read_tip_displacement</span><span class="p">(</span><span class="n">displacement_file</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<a id="__codelineno-8-205" name="__codelineno-8-205" href="#__codelineno-8-205"></a><span class="w">    </span><span class="sd">"""Read the final displacement value from the OpenSees node recorder."""</span>
-<a id="__codelineno-8-206" name="__codelineno-8-206" href="#__codelineno-8-206"></a>    <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_2d</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">displacement_file</span><span class="p">))</span>
-<a id="__codelineno-8-207" name="__codelineno-8-207" href="#__codelineno-8-207"></a>    <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">])</span>
-<a id="__codelineno-8-208" name="__codelineno-8-208" href="#__codelineno-8-208"></a>
-<a id="__codelineno-8-209" name="__codelineno-8-209" href="#__codelineno-8-209"></a>
-<a id="__codelineno-8-210" name="__codelineno-8-210" href="#__codelineno-8-210"></a><span class="k">def</span><span class="w"> </span><span class="nf">analytical_tip_displacement</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<a id="__codelineno-8-211" name="__codelineno-8-211" href="#__codelineno-8-211"></a><span class="w">    </span><span class="sd">"""Return the Euler-Bernoulli cantilever solution for comparison."""</span>
-<a id="__codelineno-8-212" name="__codelineno-8-212" href="#__codelineno-8-212"></a>    <span class="k">return</span> <span class="n">TIP_LOAD</span> <span class="o">*</span> <span class="n">LENGTH</span><span class="o">**</span><span class="mi">3</span> <span class="o">/</span> <span class="p">(</span><span class="mf">3.0</span> <span class="o">*</span> <span class="n">ELASTIC_MODULUS</span> <span class="o">*</span> <span class="n">SECOND_MOMENT</span><span class="p">)</span>
+<a id="__codelineno-8-184" name="__codelineno-8-184" href="#__codelineno-8-184"></a><span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Elastic cantilever model"</span><span class="p">)</span>
+<a id="__codelineno-8-185" name="__codelineno-8-185" href="#__codelineno-8-185"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  Nodes:       </span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">assembled_mesh</span><span class="o">.</span><span class="n">n_points</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<a id="__codelineno-8-186" name="__codelineno-8-186" href="#__codelineno-8-186"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  Elements:    </span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">assembled_mesh</span><span class="o">.</span><span class="n">n_cells</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<a id="__codelineno-8-187" name="__codelineno-8-187" href="#__codelineno-8-187"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  Tcl model:   </span><span class="si">{</span><span class="n">tcl_file</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<a id="__codelineno-8-188" name="__codelineno-8-188" href="#__codelineno-8-188"></a>
+<a id="__codelineno-8-189" name="__codelineno-8-189" href="#__codelineno-8-189"></a>
+<a id="__codelineno-8-190" name="__codelineno-8-190" href="#__codelineno-8-190"></a><span class="c1"># %% [markdown]</span>
+<a id="__codelineno-8-191" name="__codelineno-8-191" href="#__codelineno-8-191"></a><span class="c1"># ## Run OpenSees and verify the response</span>
+<a id="__codelineno-8-192" name="__codelineno-8-192" href="#__codelineno-8-192"></a><span class="c1">#</span>
+<a id="__codelineno-8-193" name="__codelineno-8-193" href="#__codelineno-8-193"></a><span class="c1"># The Colab setup cell configures `FEMORA_OPENSEES` automatically. For a local</span>
+<a id="__codelineno-8-194" name="__codelineno-8-194" href="#__codelineno-8-194"></a><span class="c1"># run, set the same environment variable before executing this script.</span>
+<a id="__codelineno-8-195" name="__codelineno-8-195" href="#__codelineno-8-195"></a>
+<a id="__codelineno-8-196" name="__codelineno-8-196" href="#__codelineno-8-196"></a><span class="c1"># %%</span>
+<a id="__codelineno-8-197" name="__codelineno-8-197" href="#__codelineno-8-197"></a><span class="k">if</span> <span class="n">OPENSEES</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-8-198" name="__codelineno-8-198" href="#__codelineno-8-198"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"  Solver:      not run (set FEMORA_OPENSEES to run OpenSees)"</span><span class="p">)</span>
+<a id="__codelineno-8-199" name="__codelineno-8-199" href="#__codelineno-8-199"></a><span class="k">else</span><span class="p">:</span>
+<a id="__codelineno-8-200" name="__codelineno-8-200" href="#__codelineno-8-200"></a>    <span class="n">completed</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
+<a id="__codelineno-8-201" name="__codelineno-8-201" href="#__codelineno-8-201"></a>        <span class="p">[</span><span class="n">OPENSEES</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">tcl_file</span><span class="o">.</span><span class="n">resolve</span><span class="p">())],</span>
+<a id="__codelineno-8-202" name="__codelineno-8-202" href="#__codelineno-8-202"></a>        <span class="n">cwd</span><span class="o">=</span><span class="n">OUTPUT_DIR</span><span class="o">.</span><span class="n">resolve</span><span class="p">(),</span>
+<a id="__codelineno-8-203" name="__codelineno-8-203" href="#__codelineno-8-203"></a>        <span class="n">text</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<a id="__codelineno-8-204" name="__codelineno-8-204" href="#__codelineno-8-204"></a>        <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<a id="__codelineno-8-205" name="__codelineno-8-205" href="#__codelineno-8-205"></a>        <span class="n">check</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<a id="__codelineno-8-206" name="__codelineno-8-206" href="#__codelineno-8-206"></a>    <span class="p">)</span>
+<a id="__codelineno-8-207" name="__codelineno-8-207" href="#__codelineno-8-207"></a>    <span class="k">if</span> <span class="n">completed</span><span class="o">.</span><span class="n">returncode</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+<a id="__codelineno-8-208" name="__codelineno-8-208" href="#__codelineno-8-208"></a>        <span class="k">if</span> <span class="n">completed</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">strip</span><span class="p">():</span>
+<a id="__codelineno-8-209" name="__codelineno-8-209" href="#__codelineno-8-209"></a>            <span class="nb">print</span><span class="p">(</span><span class="n">completed</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">rstrip</span><span class="p">())</span>
+<a id="__codelineno-8-210" name="__codelineno-8-210" href="#__codelineno-8-210"></a>        <span class="k">if</span> <span class="n">completed</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">strip</span><span class="p">():</span>
+<a id="__codelineno-8-211" name="__codelineno-8-211" href="#__codelineno-8-211"></a>            <span class="nb">print</span><span class="p">(</span><span class="n">completed</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">rstrip</span><span class="p">())</span>
+<a id="__codelineno-8-212" name="__codelineno-8-212" href="#__codelineno-8-212"></a>        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"OpenSees failed with exit code </span><span class="si">{</span><span class="n">completed</span><span class="o">.</span><span class="n">returncode</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 <a id="__codelineno-8-213" name="__codelineno-8-213" href="#__codelineno-8-213"></a>
-<a id="__codelineno-8-214" name="__codelineno-8-214" href="#__codelineno-8-214"></a>
-<a id="__codelineno-8-215" name="__codelineno-8-215" href="#__codelineno-8-215"></a><span class="c1"># %% [markdown]</span>
-<a id="__codelineno-8-216" name="__codelineno-8-216" href="#__codelineno-8-216"></a><span class="c1"># ## Execute the tutorial</span>
-<a id="__codelineno-8-217" name="__codelineno-8-217" href="#__codelineno-8-217"></a><span class="c1">#</span>
-<a id="__codelineno-8-218" name="__codelineno-8-218" href="#__codelineno-8-218"></a><span class="c1"># Local users may pass `--opensees` or set `FEMORA_OPENSEES`. In Colab, the</span>
-<a id="__codelineno-8-219" name="__codelineno-8-219" href="#__codelineno-8-219"></a><span class="c1"># runtime setup above configures the solver automatically.</span>
+<a id="__codelineno-8-214" name="__codelineno-8-214" href="#__codelineno-8-214"></a>    <span class="n">recorder_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_2d</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">displacement_file</span><span class="p">))</span>
+<a id="__codelineno-8-215" name="__codelineno-8-215" href="#__codelineno-8-215"></a>    <span class="n">numerical</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">recorder_data</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+<a id="__codelineno-8-216" name="__codelineno-8-216" href="#__codelineno-8-216"></a>    <span class="n">analytical</span> <span class="o">=</span> <span class="n">TIP_LOAD</span> <span class="o">*</span> <span class="n">LENGTH</span><span class="o">**</span><span class="mi">3</span> <span class="o">/</span> <span class="p">(</span>
+<a id="__codelineno-8-217" name="__codelineno-8-217" href="#__codelineno-8-217"></a>        <span class="mf">3.0</span> <span class="o">*</span> <span class="n">ELASTIC_MODULUS</span> <span class="o">*</span> <span class="n">SECOND_MOMENT</span>
+<a id="__codelineno-8-218" name="__codelineno-8-218" href="#__codelineno-8-218"></a>    <span class="p">)</span>
+<a id="__codelineno-8-219" name="__codelineno-8-219" href="#__codelineno-8-219"></a>    <span class="n">relative_error</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">((</span><span class="n">numerical</span> <span class="o">-</span> <span class="n">analytical</span><span class="p">)</span> <span class="o">/</span> <span class="n">analytical</span><span class="p">)</span>
 <a id="__codelineno-8-220" name="__codelineno-8-220" href="#__codelineno-8-220"></a>
-<a id="__codelineno-8-221" name="__codelineno-8-221" href="#__codelineno-8-221"></a><span class="c1"># %%</span>
-<a id="__codelineno-8-222" name="__codelineno-8-222" href="#__codelineno-8-222"></a><span class="k">def</span><span class="w"> </span><span class="nf">parse_args</span><span class="p">(</span><span class="n">argv</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">argparse</span><span class="o">.</span><span class="n">Namespace</span><span class="p">:</span>
-<a id="__codelineno-8-223" name="__codelineno-8-223" href="#__codelineno-8-223"></a>    <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="vm">__doc__</span><span class="p">)</span>
-<a id="__codelineno-8-224" name="__codelineno-8-224" href="#__codelineno-8-224"></a>    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
-<a id="__codelineno-8-225" name="__codelineno-8-225" href="#__codelineno-8-225"></a>        <span class="s2">"--output-dir"</span><span class="p">,</span>
-<a id="__codelineno-8-226" name="__codelineno-8-226" href="#__codelineno-8-226"></a>        <span class="nb">type</span><span class="o">=</span><span class="n">Path</span><span class="p">,</span>
-<a id="__codelineno-8-227" name="__codelineno-8-227" href="#__codelineno-8-227"></a>        <span class="n">default</span><span class="o">=</span><span class="p">(</span>
-<a id="__codelineno-8-228" name="__codelineno-8-228" href="#__codelineno-8-228"></a>            <span class="n">Path</span><span class="p">(</span><span class="s2">"/content/elastic_cantilever"</span><span class="p">)</span>
-<a id="__codelineno-8-229" name="__codelineno-8-229" href="#__codelineno-8-229"></a>            <span class="k">if</span> <span class="n">IN_COLAB</span>
-<a id="__codelineno-8-230" name="__codelineno-8-230" href="#__codelineno-8-230"></a>            <span class="k">else</span> <span class="n">Path</span><span class="p">(</span><span class="s2">"example_outputs"</span><span class="p">)</span> <span class="o">/</span> <span class="s2">"elastic_cantilever"</span>
-<a id="__codelineno-8-231" name="__codelineno-8-231" href="#__codelineno-8-231"></a>        <span class="p">),</span>
-<a id="__codelineno-8-232" name="__codelineno-8-232" href="#__codelineno-8-232"></a>        <span class="n">help</span><span class="o">=</span><span class="s2">"Directory for the Tcl, VTK, JSON, and recorder output files."</span><span class="p">,</span>
-<a id="__codelineno-8-233" name="__codelineno-8-233" href="#__codelineno-8-233"></a>    <span class="p">)</span>
-<a id="__codelineno-8-234" name="__codelineno-8-234" href="#__codelineno-8-234"></a>    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
-<a id="__codelineno-8-235" name="__codelineno-8-235" href="#__codelineno-8-235"></a>        <span class="s2">"--opensees"</span><span class="p">,</span>
-<a id="__codelineno-8-236" name="__codelineno-8-236" href="#__codelineno-8-236"></a>        <span class="nb">type</span><span class="o">=</span><span class="n">Path</span><span class="p">,</span>
-<a id="__codelineno-8-237" name="__codelineno-8-237" href="#__codelineno-8-237"></a>        <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-8-238" name="__codelineno-8-238" href="#__codelineno-8-238"></a>        <span class="n">help</span><span class="o">=</span><span class="s2">"OpenSees executable. Defaults to the FEMORA_OPENSEES environment variable."</span><span class="p">,</span>
-<a id="__codelineno-8-239" name="__codelineno-8-239" href="#__codelineno-8-239"></a>    <span class="p">)</span>
-<a id="__codelineno-8-240" name="__codelineno-8-240" href="#__codelineno-8-240"></a>    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
-<a id="__codelineno-8-241" name="__codelineno-8-241" href="#__codelineno-8-241"></a>        <span class="s2">"--plot"</span><span class="p">,</span>
-<a id="__codelineno-8-242" name="__codelineno-8-242" href="#__codelineno-8-242"></a>        <span class="n">action</span><span class="o">=</span><span class="s2">"store_true"</span><span class="p">,</span>
-<a id="__codelineno-8-243" name="__codelineno-8-243" href="#__codelineno-8-243"></a>        <span class="n">help</span><span class="o">=</span><span class="s2">"Open an interactive PyVista view of the assembled mesh."</span><span class="p">,</span>
-<a id="__codelineno-8-244" name="__codelineno-8-244" href="#__codelineno-8-244"></a>    <span class="p">)</span>
-<a id="__codelineno-8-245" name="__codelineno-8-245" href="#__codelineno-8-245"></a>    <span class="k">return</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">(</span><span class="n">argv</span><span class="p">)</span>
-<a id="__codelineno-8-246" name="__codelineno-8-246" href="#__codelineno-8-246"></a>
-<a id="__codelineno-8-247" name="__codelineno-8-247" href="#__codelineno-8-247"></a>
-<a id="__codelineno-8-248" name="__codelineno-8-248" href="#__codelineno-8-248"></a><span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="n">argv</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<a id="__codelineno-8-249" name="__codelineno-8-249" href="#__codelineno-8-249"></a>    <span class="n">args</span> <span class="o">=</span> <span class="n">parse_args</span><span class="p">(</span><span class="n">argv</span><span class="p">)</span>
-<a id="__codelineno-8-250" name="__codelineno-8-250" href="#__codelineno-8-250"></a>    <span class="n">model</span><span class="p">,</span> <span class="n">tcl_file</span><span class="p">,</span> <span class="n">displacement_file</span> <span class="o">=</span> <span class="n">build_model</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">output_dir</span><span class="p">)</span>
-<a id="__codelineno-8-251" name="__codelineno-8-251" href="#__codelineno-8-251"></a>
-<a id="__codelineno-8-252" name="__codelineno-8-252" href="#__codelineno-8-252"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Elastic cantilever model"</span><span class="p">)</span>
-<a id="__codelineno-8-253" name="__codelineno-8-253" href="#__codelineno-8-253"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  Nodes:       </span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">assembled_mesh</span><span class="o">.</span><span class="n">n_points</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-<a id="__codelineno-8-254" name="__codelineno-8-254" href="#__codelineno-8-254"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  Elements:    </span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">assembled_mesh</span><span class="o">.</span><span class="n">n_cells</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-<a id="__codelineno-8-255" name="__codelineno-8-255" href="#__codelineno-8-255"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  Tcl model:   </span><span class="si">{</span><span class="n">tcl_file</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-<a id="__codelineno-8-256" name="__codelineno-8-256" href="#__codelineno-8-256"></a>
-<a id="__codelineno-8-257" name="__codelineno-8-257" href="#__codelineno-8-257"></a>    <span class="n">configured_executable</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">opensees</span> <span class="ow">or</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"FEMORA_OPENSEES"</span><span class="p">)</span>
-<a id="__codelineno-8-258" name="__codelineno-8-258" href="#__codelineno-8-258"></a>    <span class="k">if</span> <span class="n">configured_executable</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-<a id="__codelineno-8-259" name="__codelineno-8-259" href="#__codelineno-8-259"></a>        <span class="nb">print</span><span class="p">(</span><span class="s2">"  Solver:      not run (pass --opensees or set FEMORA_OPENSEES)"</span><span class="p">)</span>
-<a id="__codelineno-8-260" name="__codelineno-8-260" href="#__codelineno-8-260"></a>    <span class="k">else</span><span class="p">:</span>
-<a id="__codelineno-8-261" name="__codelineno-8-261" href="#__codelineno-8-261"></a>        <span class="n">run_opensees</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">configured_executable</span><span class="p">),</span> <span class="n">tcl_file</span><span class="p">)</span>
-<a id="__codelineno-8-262" name="__codelineno-8-262" href="#__codelineno-8-262"></a>        <span class="n">numerical</span> <span class="o">=</span> <span class="n">read_tip_displacement</span><span class="p">(</span><span class="n">displacement_file</span><span class="p">)</span>
-<a id="__codelineno-8-263" name="__codelineno-8-263" href="#__codelineno-8-263"></a>        <span class="n">analytical</span> <span class="o">=</span> <span class="n">analytical_tip_displacement</span><span class="p">()</span>
-<a id="__codelineno-8-264" name="__codelineno-8-264" href="#__codelineno-8-264"></a>        <span class="n">relative_error</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">((</span><span class="n">numerical</span> <span class="o">-</span> <span class="n">analytical</span><span class="p">)</span> <span class="o">/</span> <span class="n">analytical</span><span class="p">)</span>
-<a id="__codelineno-8-265" name="__codelineno-8-265" href="#__codelineno-8-265"></a>        <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">numerical</span><span class="p">,</span> <span class="n">analytical</span><span class="p">,</span> <span class="n">rtol</span><span class="o">=</span><span class="mf">1.0e-9</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1.0e-12</span><span class="p">):</span>
-<a id="__codelineno-8-266" name="__codelineno-8-266" href="#__codelineno-8-266"></a>            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
-<a id="__codelineno-8-267" name="__codelineno-8-267" href="#__codelineno-8-267"></a>                <span class="s2">"Cantilever verification failed: "</span>
-<a id="__codelineno-8-268" name="__codelineno-8-268" href="#__codelineno-8-268"></a>                <span class="sa">f</span><span class="s2">"numerical=</span><span class="si">{</span><span class="n">numerical</span><span class="si">:</span><span class="s2">.12e</span><span class="si">}</span><span class="s2">, analytical=</span><span class="si">{</span><span class="n">analytical</span><span class="si">:</span><span class="s2">.12e</span><span class="si">}</span><span class="s2">"</span>
-<a id="__codelineno-8-269" name="__codelineno-8-269" href="#__codelineno-8-269"></a>            <span class="p">)</span>
-<a id="__codelineno-8-270" name="__codelineno-8-270" href="#__codelineno-8-270"></a>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  Tip disp.:   </span><span class="si">{</span><span class="n">numerical</span><span class="si">:</span><span class="s2">.6e</span><span class="si">}</span><span class="s2"> m"</span><span class="p">)</span>
-<a id="__codelineno-8-271" name="__codelineno-8-271" href="#__codelineno-8-271"></a>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  Analytical:  </span><span class="si">{</span><span class="n">analytical</span><span class="si">:</span><span class="s2">.6e</span><span class="si">}</span><span class="s2"> m"</span><span class="p">)</span>
-<a id="__codelineno-8-272" name="__codelineno-8-272" href="#__codelineno-8-272"></a>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  Rel. error:  </span><span class="si">{</span><span class="n">relative_error</span><span class="si">:</span><span class="s2">.3e</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-<a id="__codelineno-8-273" name="__codelineno-8-273" href="#__codelineno-8-273"></a>        <span class="nb">print</span><span class="p">(</span><span class="s2">"  Verification: passed"</span><span class="p">)</span>
-<a id="__codelineno-8-274" name="__codelineno-8-274" href="#__codelineno-8-274"></a>
-<a id="__codelineno-8-275" name="__codelineno-8-275" href="#__codelineno-8-275"></a>    <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">plot</span><span class="p">:</span>
-<a id="__codelineno-8-276" name="__codelineno-8-276" href="#__codelineno-8-276"></a>        <span class="n">model</span><span class="o">.</span><span class="n">assembled_mesh</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
-<a id="__codelineno-8-277" name="__codelineno-8-277" href="#__codelineno-8-277"></a>            <span class="n">show_edges</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-<a id="__codelineno-8-278" name="__codelineno-8-278" href="#__codelineno-8-278"></a>            <span class="n">line_width</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
-<a id="__codelineno-8-279" name="__codelineno-8-279" href="#__codelineno-8-279"></a>            <span class="n">color</span><span class="o">=</span><span class="s2">"#d67a2f"</span><span class="p">,</span>
-<a id="__codelineno-8-280" name="__codelineno-8-280" href="#__codelineno-8-280"></a>            <span class="n">background</span><span class="o">=</span><span class="s2">"#f4f0e8"</span><span class="p">,</span>
-<a id="__codelineno-8-281" name="__codelineno-8-281" href="#__codelineno-8-281"></a>        <span class="p">)</span>
-<a id="__codelineno-8-282" name="__codelineno-8-282" href="#__codelineno-8-282"></a>
-<a id="__codelineno-8-283" name="__codelineno-8-283" href="#__codelineno-8-283"></a>
-<a id="__codelineno-8-284" name="__codelineno-8-284" href="#__codelineno-8-284"></a><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
-<a id="__codelineno-8-285" name="__codelineno-8-285" href="#__codelineno-8-285"></a>    <span class="n">main</span><span class="p">([]</span> <span class="k">if</span> <span class="s2">"ipykernel"</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">modules</span> <span class="k">else</span> <span class="kc">None</span><span class="p">)</span>
+<a id="__codelineno-8-221" name="__codelineno-8-221" href="#__codelineno-8-221"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">numerical</span><span class="p">,</span> <span class="n">analytical</span><span class="p">,</span> <span class="n">rtol</span><span class="o">=</span><span class="mf">1.0e-9</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1.0e-12</span><span class="p">):</span>
+<a id="__codelineno-8-222" name="__codelineno-8-222" href="#__codelineno-8-222"></a>        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+<a id="__codelineno-8-223" name="__codelineno-8-223" href="#__codelineno-8-223"></a>            <span class="s2">"Cantilever verification failed: "</span>
+<a id="__codelineno-8-224" name="__codelineno-8-224" href="#__codelineno-8-224"></a>            <span class="sa">f</span><span class="s2">"numerical=</span><span class="si">{</span><span class="n">numerical</span><span class="si">:</span><span class="s2">.12e</span><span class="si">}</span><span class="s2">, analytical=</span><span class="si">{</span><span class="n">analytical</span><span class="si">:</span><span class="s2">.12e</span><span class="si">}</span><span class="s2">"</span>
+<a id="__codelineno-8-225" name="__codelineno-8-225" href="#__codelineno-8-225"></a>        <span class="p">)</span>
+<a id="__codelineno-8-226" name="__codelineno-8-226" href="#__codelineno-8-226"></a>
+<a id="__codelineno-8-227" name="__codelineno-8-227" href="#__codelineno-8-227"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  Tip disp.:   </span><span class="si">{</span><span class="n">numerical</span><span class="si">:</span><span class="s2">.6e</span><span class="si">}</span><span class="s2"> m"</span><span class="p">)</span>
+<a id="__codelineno-8-228" name="__codelineno-8-228" href="#__codelineno-8-228"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  Analytical:  </span><span class="si">{</span><span class="n">analytical</span><span class="si">:</span><span class="s2">.6e</span><span class="si">}</span><span class="s2"> m"</span><span class="p">)</span>
+<a id="__codelineno-8-229" name="__codelineno-8-229" href="#__codelineno-8-229"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  Rel. error:  </span><span class="si">{</span><span class="n">relative_error</span><span class="si">:</span><span class="s2">.3e</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<a id="__codelineno-8-230" name="__codelineno-8-230" href="#__codelineno-8-230"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"  Verification: passed"</span><span class="p">)</span>
+<a id="__codelineno-8-231" name="__codelineno-8-231" href="#__codelineno-8-231"></a>
+<a id="__codelineno-8-232" name="__codelineno-8-232" href="#__codelineno-8-232"></a>
+<a id="__codelineno-8-233" name="__codelineno-8-233" href="#__codelineno-8-233"></a><span class="c1"># %% [markdown]</span>
+<a id="__codelineno-8-234" name="__codelineno-8-234" href="#__codelineno-8-234"></a><span class="c1"># ## Optional visualization</span>
+<a id="__codelineno-8-235" name="__codelineno-8-235" href="#__codelineno-8-235"></a>
+<a id="__codelineno-8-236" name="__codelineno-8-236" href="#__codelineno-8-236"></a><span class="c1"># %%</span>
+<a id="__codelineno-8-237" name="__codelineno-8-237" href="#__codelineno-8-237"></a><span class="k">if</span> <span class="n">PLOT_MODEL</span><span class="p">:</span>
+<a id="__codelineno-8-238" name="__codelineno-8-238" href="#__codelineno-8-238"></a>    <span class="n">model</span><span class="o">.</span><span class="n">assembled_mesh</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+<a id="__codelineno-8-239" name="__codelineno-8-239" href="#__codelineno-8-239"></a>        <span class="n">show_edges</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<a id="__codelineno-8-240" name="__codelineno-8-240" href="#__codelineno-8-240"></a>        <span class="n">line_width</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+<a id="__codelineno-8-241" name="__codelineno-8-241" href="#__codelineno-8-241"></a>        <span class="n">color</span><span class="o">=</span><span class="s2">"#d67a2f"</span><span class="p">,</span>
+<a id="__codelineno-8-242" name="__codelineno-8-242" href="#__codelineno-8-242"></a>        <span class="n">background</span><span class="o">=</span><span class="s2">"#f4f0e8"</span><span class="p">,</span>
+<a id="__codelineno-8-243" name="__codelineno-8-243" href="#__codelineno-8-243"></a>    <span class="p">)</span>
 </code></pre></div>
 </details>
 <h2 id="try-a-controlled-change">Try A Controlled Change</h2>
@@ -13011,7 +13015,7 @@ u_{tip} = \frac{P L^3}{3 E I}
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="August 25, 2026 03:11:18 UTC">August 25, 2026</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="August 25, 2026 07:13:27 UTC">August 25, 2026</span>
   </span>
 
     
@@ -13021,7 +13025,7 @@ u_{tip} = \frac{P L^3}{3 E I}
     <span class="md-icon" title="Created">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M14.47 15.08 11 13V7h1.5v5.25l3.08 1.83c-.41.28-.79.62-1.11 1m-1.39 4.84c-.36.05-.71.08-1.08.08-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8c0 .37-.03.72-.08 1.08.69.1 1.33.32 1.92.64.1-.56.16-1.13.16-1.72 0-5.5-4.5-10-10-10S2 6.5 2 12s4.47 10 10 10c.59 0 1.16-.06 1.72-.16-.32-.59-.54-1.23-.64-1.92M18 15v3h-3v2h3v3h2v-3h3v-2h-3v-3z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="August 25, 2026 03:11:18 UTC">August 25, 2026</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="August 25, 2026 07:13:27 UTC">August 25, 2026</span>
   </span>
 
     
