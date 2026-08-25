@@ -129,3 +129,27 @@ Use normal links in prose. Use button styling only for important next actions:
 ```
 
 Avoid making every link a button.
+
+Tutorial pages use a shared action pair for executable notebooks and canonical source files:
+
+```markdown
+<div class="tutorial-actions" markdown>
+[:simple-googlecolab: Open in Colab](COLAB_URL){ .tutorial-action .tutorial-action--colab target="_blank" rel="noopener" }
+[:material-code-braces: View source](SOURCE_URL){ .tutorial-action .tutorial-action--source target="_blank" rel="noopener" }
+</div>
+```
+
+Keep this pair near the tutorial introduction. Do not repeat it at the end of the page.
+
+The percent-format Python script is the canonical tutorial source. Regenerate
+its output-free Colab notebook after changing the script:
+
+```bash
+python scripts/sync_tutorial_notebooks.py
+```
+
+Check synchronization without modifying files:
+
+```bash
+python scripts/sync_tutorial_notebooks.py --check
+```

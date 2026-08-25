@@ -37,6 +37,11 @@ dependencies = [
 [project.optional-dependencies]
 jupyter = ["pyvista[all]"]
 
+docs = [
+    "jupytext>=1.17",
+    "nbformat>=5.10",
+]
+
 metis = [
     "pymetis",
 ]

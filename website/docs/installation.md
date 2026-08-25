@@ -52,6 +52,15 @@ pip install "femora[all]"
 
 Use this only when you actually want the larger optional stack.
 
+### Documentation Development
+
+Contributors who regenerate tutorial notebooks should install the documentation
+tooling:
+
+```bash
+pip install -e ".[docs]"
+```
+
 ## Install From Source
 
 If you are developing Femora itself, testing local changes, or working from the repository:
@@ -95,6 +104,40 @@ pip install -e .
 ```
 
 If you rename the environment in `environment.yml`, activate that name instead of `myenv`.
+
+## Configure OpenSees
+
+Femora exports models for OpenSees and can register the executable used by
+tutorials and solver helpers. For a local installation, pass the executable
+directly:
+
+```python
+import femora as fm
+
+runtime = fm.runtime.setup(
+    "local",
+    executable=r"D:\path\to\OpenSees.exe",
+)
+print(runtime.version)
+```
+
+You can instead set `FEMORA_OPENSEES` or place OpenSees on `PATH` and call
+`fm.runtime.setup("local")` without `executable`.
+
+In Google Colab, install Femora before importing it and then configure the
+portable runtime:
+
+```python
+%pip install -q "https://github.com/GeotechUW/Femora/archive/refs/heads/main.zip"
+
+import femora as fm
+
+runtime = fm.runtime.setup("colab")
+```
+
+Colab setup downloads the packaged OpenSees launcher and matching Tcl library,
+verifies the published checksum, validates startup, and sets
+`FEMORA_OPENSEES`. Repeated calls in the same session reuse the installation.
 
 ## Verify the Installation
 
@@ -163,5 +206,5 @@ If your local environment is missing visualization-related dependencies, install
 After installation:
 
 1. read the [Getting Started](getting_started.md) guide
-2. open the [Examples & Tutorials](advanced.md) page
+2. open the [Tutorial Gallery](tutorials/index.md)
 3. use the [API Reference](reference/) when you need exact manager, class, or method behavior
