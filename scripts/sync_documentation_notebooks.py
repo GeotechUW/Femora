@@ -5,7 +5,7 @@
 # SPDX-License-Identifier: Apache-2.0
 # =============================================================================
 
-"""Generate committed tutorial notebooks from canonical percent-format scripts."""
+"""Generate documentation notebooks from canonical percent-format scripts."""
 
 from __future__ import annotations
 
@@ -19,9 +19,11 @@ import nbformat
 
 
 ROOT = Path(__file__).resolve().parents[1]
-TUTORIALS = (
-    ROOT / "examples" / "tutorials" / "elastic_cantilever.py",
+SOURCE_DIRS = (
+    ROOT / "examples" / "tutorials",
+    ROOT / "examples" / "site_response",
 )
+COLAB_INPUT_PREFIX = "# femora-colab-input:"
 
 COLAB_SETUP_MARKDOWN = """## Configure the Colab runtime
 
@@ -30,8 +32,11 @@ It is intentionally not part of the canonical local Python example.
 """
 
 COLAB_SETUP_CODE = """import importlib.util
+import os
+from pathlib import Path
 import subprocess
 import sys
+from urllib.request import urlretrieve
 
 if importlib.util.find_spec("femora") is None:
     subprocess.check_call(
@@ -52,6 +57,53 @@ print(f"OpenSees {runtime.version or 'runtime'} configured at {runtime.executabl
 """
 
 
+def _discover_sources() -> tuple[Path, ...]:
+    """Return canonical documentation scripts in deterministic order."""
+    sources = []
+    for directory in SOURCE_DIRS:
+        sources.extend(
+            path
+            for path in sorted(directory.glob("*.py"))
+            if not path.name.startswith("_")
+        )
+    return tuple(sources)
+
+
+def _colab_inputs(source: Path) -> tuple[str, ...]:
+    """Read repository-relative Colab input declarations from a source file."""
+    inputs = []
+    for line in source.read_text(encoding="utf-8").splitlines():
+        if line.startswith(COLAB_INPUT_PREFIX):
+            inputs.append(line.removeprefix(COLAB_INPUT_PREFIX).strip())
+    return tuple(inputs)
+
+
+def _colab_setup_code(source: Path) -> str:
+    inputs = _colab_inputs(source)
+    if not inputs:
+        return COLAB_SETUP_CODE
+
+    return (
+        COLAB_SETUP_CODE
+        + f"""
+
+colab_inputs = {list(inputs)!r}
+input_root = Path("/content/femora_inputs")
+for repository_path in colab_inputs:
+    relative_path = Path(repository_path).relative_to("examples/inputs")
+    destination = input_root / relative_path
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    url = f"https://raw.githubusercontent.com/GeotechUW/Femora/main/{{repository_path}}"
+    urlretrieve(url, destination)
+
+motion_directory = input_root / "motions"
+if motion_directory.exists():
+    os.environ["FEMORA_MOTIONS_DIR"] = str(motion_directory)
+print(f"Downloaded {{len(colab_inputs)}} example input files")
+"""
+    )
+
+
 def _render_notebook(source: Path) -> str:
     notebook = jupytext.read(source, fmt="py:percent")
     if (
@@ -67,7 +119,7 @@ def _render_notebook(source: Path) -> str:
             metadata={"tags": ["colab-bootstrap"]},
         ),
         nbformat.v4.new_code_cell(
-            COLAB_SETUP_CODE,
+            _colab_setup_code(source),
             metadata={"tags": ["colab-bootstrap"]},
         ),
     ]
@@ -94,7 +146,12 @@ def _render_notebook(source: Path) -> str:
 
 def sync(check: bool) -> int:
     stale: list[Path] = []
-    for source in TUTORIALS:
+    sources = _discover_sources()
+    if not sources:
+        print("No documentation notebook sources found", file=sys.stderr)
+        return 1
+
+    for source in sources:
         destination = source.with_suffix(".ipynb")
         rendered = _render_notebook(source)
         current = destination.read_text(encoding="utf-8") if destination.exists() else None
@@ -108,11 +165,11 @@ def sync(check: bool) -> int:
             print(f"Generated {destination.relative_to(ROOT)}")
 
     if stale:
-        print("Tutorial notebooks are out of date:", file=sys.stderr)
+        print("Documentation notebooks are out of date:", file=sys.stderr)
         for path in stale:
             print(f"  {path.relative_to(ROOT)}", file=sys.stderr)
         print(
-            "Run: python scripts/sync_tutorial_notebooks.py",
+            "Run: python scripts/sync_documentation_notebooks.py",
             file=sys.stderr,
         )
         return 1

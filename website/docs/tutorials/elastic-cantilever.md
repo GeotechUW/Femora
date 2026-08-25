@@ -1,6 +1,6 @@
 ---
 title: Elastic Cantilever
-icon: material/bridge
+icon: material/file-document-outline
 ---
 
 # Elastic Cantilever
@@ -142,8 +142,6 @@ The default `example_outputs/elastic_cantilever/` directory contains:
 | File | Purpose |
 |---|---|
 | `elastic_cantilever.tcl` | Complete OpenSees input model |
-| `elastic_cantilever.vtk` | Assembled mesh for external visualization |
-| `elastic_cantilever_info.json` | Femora part metadata associated with the VTK export |
 | `tip_displacement.out` | OpenSees time and tip-displacement history |
 
 ??? example "Complete source"

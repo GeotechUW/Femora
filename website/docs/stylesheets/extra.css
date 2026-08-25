@@ -252,6 +252,18 @@
     border: 0;
 }
 
+.femora-video {
+    margin: 1rem auto 1.4rem;
+    max-width: 760px;
+}
+
+.femora-video video {
+    display: block;
+    width: 100%;
+    border-radius: 0.65rem;
+    background: #101719;
+}
+
 .femora-embed--cantilever iframe {
     height: auto;
     aspect-ratio: 1000 / 410;

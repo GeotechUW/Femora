@@ -187,12 +187,10 @@ model.process.add_step(static_analysis, "Run the linear static analysis")
 # %%
 # --8<-- [start:export-model]
 tcl_file = OUTPUT_DIR / "elastic_cantilever.tcl"
-vtk_file = OUTPUT_DIR / "elastic_cantilever.vtk"
 model.export_to_tcl(
     filename=str(tcl_file.resolve()),
     progress_callback=lambda *_: None,
 )
-model.export_to_vtk(filename=str(vtk_file.resolve()), write_info_json=True)
 
 print("\nElastic cantilever model")
 print(f"  Nodes:       {model.assembled_mesh.n_points}")

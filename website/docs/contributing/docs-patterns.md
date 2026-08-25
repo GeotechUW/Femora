@@ -145,11 +145,11 @@ The percent-format Python script is the canonical tutorial source. Regenerate
 its output-free Colab notebook after changing the script:
 
 ```bash
-python scripts/sync_tutorial_notebooks.py
+python scripts/sync_documentation_notebooks.py
 ```
 
 Check synchronization without modifying files:
 
 ```bash
-python scripts/sync_tutorial_notebooks.py --check
+python scripts/sync_documentation_notebooks.py --check
 ```

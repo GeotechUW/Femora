@@ -61,6 +61,10 @@ The short version:
 - Use current `Model` manager-based examples.
 - Do not use stale singleton/default-model examples.
 
+Executable documentation has an additional single-source workflow. Follow
+`website/docs/contributing/tutorials.md` for guided tutorials and
+`website/docs/contributing/examples.md` for application examples.
+
 ## Pull Requests
 
 Pull requests should be focused and easy to review.

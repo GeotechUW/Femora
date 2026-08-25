@@ -36,5 +36,7 @@ nav:
           - 'Elastic Cantilever': tutorials/elastic-cantilever.md
       - Examples:
           - Gallery: examples/index.md
+          - 'Layered Elastic Soil Column': examples/layered-elastic-soil-column.md
+          - 'Partitioned Layered Soil Domain': examples/partitioned-layered-soil-domain.md
   - 'Technical Reference':
       - 'Mesh Data Schema': technical-reference/mesh-data-schema.md
