@@ -39,11 +39,11 @@ With Femora you can:
 
     [Open guide](getting_started.md)
 
--   :material-school-outline: **Tutorials and Examples**
+-   :material-school-outline: **Tutorials**
 
-    Explore practical modeling workflows and advanced meshing examples.
+    Follow complete, guided modeling workflows in a deliberate learning sequence.
 
-    [Open tutorials](advanced.md)
+    [Open tutorial gallery](tutorials/index.md)
 
 -   :material-api: **API Reference**
 
@@ -62,6 +62,6 @@ With Femora you can:
 ## Suggested Workflow
 
 1. Read the getting started guide.
-2. Explore an example close to your use case.
+2. Complete a tutorial, then explore a model close to your use case in the example gallery.
 3. Use the API reference when you need exact class and method behavior.
-4. Return to the website for the broader product overview and examples gallery.
+4. Return to the website for the broader product overview and modeling tools.

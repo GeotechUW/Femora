@@ -18,3 +18,7 @@ src/femora/tools/motions
 _local_test
 website/site
 .vscode
+example_outputs/
+.cache/
+.tmp/
+*.log

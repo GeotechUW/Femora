@@ -136,11 +136,11 @@ If you are new to Femora, the best order is:
 
     [Open installation](installation.md)
 
--   :material-school-outline: **Tutorials and Examples**
+-   :material-school-outline: **Tutorials**
 
-    Explore practical 3D workflows for site response, SSI, DRM, and assembled models.
+    Follow complete models that explain each decision in sequence.
 
-    [Open tutorials](advanced.md)
+    [Open tutorial gallery](tutorials/index.md)
 
 -   :material-api: **API Reference**
 

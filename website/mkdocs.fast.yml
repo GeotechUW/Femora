@@ -1,0 +1,40 @@
+INHERIT: mkdocs.yml
+
+# Local Concepts-only configuration. It intentionally skips generated API pages
+# and their expensive mkdocstrings parsing while preserving the documentation UI.
+plugins:
+  - search
+  - autorefs
+  - section-index
+
+nav:
+  - Home: index.md
+  - Installation: installation.md
+  - 'Getting Started': getting_started.md
+  - Concepts:
+      - Overview: concepts/index.md
+      - Model: concepts/model.md
+      - Managers: concepts/managers.md
+      - 'Building Blocks': concepts/building-blocks.md
+      - 'Mesh Parts': concepts/mesh-parts.md
+      - Interfaces: concepts/interfaces.md
+      - Assembly: concepts/assembly.md
+      - Partitioning: concepts/partitioning-and-parallel-execution.md
+      - 'The Assembled Model': concepts/assembled-model.md
+      - 'Tags and IDs': concepts/tags-and-ids.md
+      - 'Regions and Groups': concepts/regions-and-groups.md
+      - Damping: concepts/damping.md
+      - Constraints: concepts/constraints.md
+      - Loading: concepts/loading.md
+      - 'Recorders and Actions': concepts/recorders-and-actions.md
+      - Analysis: concepts/analysis.md
+      - Process: concepts/process.md
+  - 'Tutorials & Examples':
+      - Overview: tutorials-and-examples/index.md
+      - Tutorials:
+          - Gallery: tutorials/index.md
+          - 'Elastic Cantilever': tutorials/elastic-cantilever.md
+      - Examples:
+          - Gallery: examples/index.md
+  - 'Technical Reference':
+      - 'Mesh Data Schema': technical-reference/mesh-data-schema.md

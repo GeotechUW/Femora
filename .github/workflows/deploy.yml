@@ -49,6 +49,8 @@ jobs:
           pip install \
             mkdocs \
             mkdocs-material \
+            mkdocs-git-revision-date-localized-plugin \
+            mkdocs-git-committers-plugin-2 \
             mkdocstrings[python] \
             mkdocs-autorefs \
             mkdocs-gen-files \
@@ -57,6 +59,8 @@ jobs:
 
       - name: Build API documentation
         working-directory: website
+        env:
+          MKDOCS_GIT_COMMITTERS_APIKEY: ${{ secrets.GITHUB_TOKEN }}
         run: |
           mkdocs build --site-dir ../public/docs
 

@@ -45,7 +45,11 @@ markdown_extensions:
       anchor_linenums: true
   - pymdownx.details
   - pymdownx.inlinehilite
-  - pymdownx.snippets
+  - pymdownx.snippets:
+      base_path:
+        - .
+        - ..
+      check_paths: true
   - pymdownx.tabbed:
       alternate_style: true
   - pymdownx.superfences:
@@ -73,6 +77,12 @@ extra_css:
 plugins:
   - search
   - autorefs
+  - git-revision-date-localized:
+      enable_creation_date: true
+  - git-committers:
+      repository: GeotechUW/Femora
+      branch: main
+      docs_path: website/docs/
   - gen-files:
       scripts:
         - gen_ref_pages.py
@@ -113,10 +123,23 @@ nav:
       - 'Mesh Parts': concepts/mesh-parts.md
       - Interfaces: concepts/interfaces.md
       - Assembly: concepts/assembly.md
-      - 'Tags, Sources, Regions, and Groups': concepts/tags-sources-regions-and-groups.md
-      - 'Loads, Time Series, and Patterns': concepts/loads-time-series-and-patterns.md
-      - 'Damping, Recorders, and Outputs': concepts/damping-recorders-and-outputs.md
-      - 'Process and Analysis': concepts/process-and-analysis.md
-      - 'Partitioning and Parallel Execution': concepts/partitioning-and-parallel-execution.md
-  - 'Tutorials and Examples': advanced.md
+      - Partitioning: concepts/partitioning-and-parallel-execution.md
+      - 'The Assembled Model': concepts/assembled-model.md
+      - 'Tags and IDs': concepts/tags-and-ids.md
+      - 'Regions and Groups': concepts/regions-and-groups.md
+      - Damping: concepts/damping.md
+      - Constraints: concepts/constraints.md
+      - Loading: concepts/loading.md
+      - 'Recorders and Actions': concepts/recorders-and-actions.md
+      - Analysis: concepts/analysis.md
+      - Process: concepts/process.md
+  - 'Tutorials & Examples':
+      - Overview: tutorials-and-examples/index.md
+      - Tutorials:
+          - Gallery: tutorials/index.md
+          - 'Elastic Cantilever': tutorials/elastic-cantilever.md
+      - Examples:
+          - Gallery: examples/index.md
+  - 'Technical Reference':
+      - 'Mesh Data Schema': technical-reference/mesh-data-schema.md
   - 'API Reference': reference/
