@@ -335,7 +335,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../technical-reference/mesh-data-schema.md" class="md-tabs__link">
+        <a href="../../technical-reference/mesh-data-schema/" class="md-tabs__link">
           
   
   
@@ -801,10 +801,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#the-main-workflow" class="md-nav__link">
+  <a href="#before-vs-after-assembly" class="md-nav__link">
     <span class="md-ellipsis">
       
-        The Main Workflow
+        Before vs After Assembly
       
     </span>
   </a>
@@ -823,13 +823,41 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#inspecting-interfaces-after-assembly" class="md-nav__link">
+  <a href="#visualizing-generated-interfaces" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Inspecting Interfaces After Assembly
+        Visualizing Generated Interfaces
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Visualizing Generated Interfaces">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#embedded-beam-solid-plot" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Embedded Beam-Solid Plot
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#embedded-node-plot" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Embedded Node Plot
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -838,17 +866,6 @@
     <span class="md-ellipsis">
       
         What Femora Stores
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#what-happens-under-the-hood" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        What Happens Under The Hood
       
     </span>
   </a>
@@ -949,7 +966,7 @@
         
   
   
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9 3v2H7a2 2 0 0 0-2 2v2H3v2h2v2H3v2h2v2a2 2 0 0 0 2 2h2v2h2v-2h2v2h2v-2h2a2 2 0 0 0 2-2v-2h2v-2h-2v-2h2V9h-2V7a2 2 0 0 0-2-2h-2V3h-2v2h-2V3M8 9h3.5v1.5h-3v.75h2a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1v-4a1 1 0 0 1 1-1m4.5 0H14v2h1.5V9H17v6h-1.5v-2.5h-3m-4 .25v.75H10v-.75"/></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19.5 17c-.14 0-.26 0-.39.04L17.5 13.8c.45-.45.75-1.09.75-1.8a2.5 2.5 0 0 0-2.5-2.5c-.14 0-.25 0-.4.04L13.74 6.3c.47-.46.76-1.09.76-1.8a2.5 2.5 0 0 0-5 0c0 .7.29 1.34.76 1.79L8.65 9.54c-.15-.04-.26-.04-.4-.04a2.5 2.5 0 0 0-2.5 2.5c0 .71.29 1.34.75 1.79l-1.61 3.25C4.76 17 4.64 17 4.5 17a2.5 2.5 0 0 0 0 5A2.5 2.5 0 0 0 7 19.5c0-.7-.29-1.34-.76-1.79l1.62-3.25c.14.04.26.04.39.04s.25 0 .38-.04l1.63 3.25c-.47.45-.76 1.09-.76 1.79a2.5 2.5 0 0 0 5 0A2.5 2.5 0 0 0 12 17c-.13 0-.26 0-.39.04L10 13.8c.45-.45.75-1.09.75-1.8 0-.7-.29-1.33-.75-1.79l1.61-3.25c.13.04.26.04.39.04s.26 0 .39-.04L14 10.21a2.5 2.5 0 0 0 1.75 4.29c.13 0 .25 0 .38-.04l1.63 3.25c-.47.45-.76 1.09-.76 1.79a2.5 2.5 0 0 0 5 0 2.5 2.5 0 0 0-2.5-2.5m-15 3.5c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1m8.5-1c0 .55-.45 1-1 1s-1-.45-1-1 .45-1 1-1 1 .45 1 1M7.25 12c0-.55.45-1 1-1s1 .45 1 1-.45 1-1 1-1-.45-1-1M11 4.5c0-.55.45-1 1-1s1 .45 1 1-.45 1-1 1-1-.45-1-1m3.75 7.5c0-.55.45-1 1-1s1 .45 1 1-.45 1-1 1-1-.45-1-1m4.75 8.5c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1"/></svg>
   
   <span class="md-ellipsis">
     
@@ -975,9 +992,11 @@
   
   
     <li class="md-nav__item">
-      <a href="../assembled-model.md" class="md-nav__link">
+      <a href="../assembled-model/" class="md-nav__link">
         
   
+  
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 22v-2h3v-3h2v3.5c0 .39-.16.74-.46 1.04s-.65.46-1.04.46zM7 22H3.5c-.39 0-.74-.16-1.04-.46S2 20.89 2 20.5V17h2v3h3zM17 2h3.5c.39 0 .74.16 1.04.46s.46.65.46 1.04V7h-2V4h-3zM7 2v2H4v3H2V3.5c0-.39.16-.74.46-1.04S3.11 2 3.5 2zm6 15.25 4-2.3v-4.59l-4 2.3zm-1-6.33 4-2.29-4-2.35-4 2.35zm-5 4.03 4 2.3v-4.59l-4-2.3zm11.23-7.36c.5.32.77.75.77 1.32v6.32c0 .57-.27 1-.77 1.32l-5.48 3.18q-.75.48-1.5 0l-5.48-3.18c-.5-.32-.77-.75-.77-1.32V8.91c0-.57.27-1 .77-1.32l5.48-3.18c.25-.13.5-.19.75-.19s.5.06.75.19z"/></svg>
   
   <span class="md-ellipsis">
     
@@ -1003,9 +1022,11 @@
   
   
     <li class="md-nav__item">
-      <a href="../tags-and-ids.md" class="md-nav__link">
+      <a href="../tags-and-ids/" class="md-nav__link">
         
   
+  
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m5.41 21 .71-4h-4l.35-2h4l1.06-6h-4l.35-2h4l.71-4h2l-.71 4h6l.71-4h2l-.71 4h4l-.35 2h-4l-1.06 6h4l-.35 2h-4l-.71 4h-2l.71-4h-6l-.71 4zM9.53 9l-1.06 6h6l1.06-6z"/></svg>
   
   <span class="md-ellipsis">
     
@@ -1035,7 +1056,7 @@
         
   
   
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M6.5 10C7.3 10 8 9.3 8 8.5S7.3 7 6.5 7 5 7.7 5 8.5 5.7 10 6.5 10M9 6l7 7-5 5-7-7V6zm0-2H4c-1.1 0-2 .9-2 2v5c0 .6.2 1.1.6 1.4l7 7c.3.4.8.6 1.4.6s1.1-.2 1.4-.6l5-5c.4-.4.6-.9.6-1.4 0-.6-.2-1.1-.6-1.4l-7-7C10.1 4.2 9.6 4 9 4m4.5 1.7 1-1 6.9 6.9c.4.4.6.9.6 1.4s-.2 1.1-.6 1.4L16 19.8l-1-1 5.7-5.8z"/></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 1h2v2H3v2H1V3a2 2 0 0 1 2-2m11 0a2 2 0 0 1 2 2v2h-2V3h-2V1zm6 6a2 2 0 0 1 2 2v2h-2V9h-2V7zm2 13a2 2 0 0 1-2 2h-2v-2h2v-2h2zm-2-7h2v3h-2zm-7-4V7h3v3h-2V9zm0 13v-2h3v2zm-4 0a2 2 0 0 1-2-2v-2h2v2h2v2zm-2-6v-3h2v1h1v2zM7 3V1h3v2zM3 16a2 2 0 0 1-2-2v-2h2v2h2v2zM1 7h2v3H1zm8 0h2v2H9v2H7V9a2 2 0 0 1 2-2m7 7a2 2 0 0 1-2 2h-2v-2h2v-2h2z"/></svg>
   
   <span class="md-ellipsis">
     
@@ -1061,9 +1082,11 @@
   
   
     <li class="md-nav__item">
-      <a href="../damping.md" class="md-nav__link">
+      <a href="../damping/" class="md-nav__link">
         
   
+  
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 12h2v2h-2c-1.38 0-2.74-.35-4-1-2.5 1.3-5.5 1.3-8 0-1.26.65-2.63 1-4 1H2v-2h2c1.39 0 2.78-.47 4-1.33 2.44 1.71 5.56 1.71 8 0 1.22.86 2.61 1.33 4 1.33m0-6h2v2h-2c-1.38 0-2.74-.35-4-1-2.5 1.3-5.5 1.3-8 0-1.26.65-2.63 1-4 1H2V6h2c1.39 0 2.78-.47 4-1.33 2.44 1.71 5.56 1.71 8 0C17.22 5.53 18.61 6 20 6m0 12h2v2h-2c-1.38 0-2.74-.35-4-1-2.5 1.3-5.5 1.3-8 0-1.26.65-2.63 1-4 1H2v-2h2c1.39 0 2.78-.47 4-1.33 2.44 1.71 5.56 1.71 8 0 1.22.86 2.61 1.33 4 1.33"/></svg>
   
   <span class="md-ellipsis">
     
@@ -1089,9 +1112,11 @@
   
   
     <li class="md-nav__item">
-      <a href="../constraints.md" class="md-nav__link">
+      <a href="../constraints/" class="md-nav__link">
         
   
+  
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 17a2 2 0 0 1-2-2c0-1.11.89-2 2-2a2 2 0 0 1 2 2 2 2 0 0 1-2 2m6 3V10H6v10zm0-12a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V10c0-1.11.89-2 2-2h1V6a5 5 0 0 1 5-5 5 5 0 0 1 5 5v2zm-6-5a3 3 0 0 0-3 3v2h6V6a3 3 0 0 0-3-3"/></svg>
   
   <span class="md-ellipsis">
     
@@ -1121,7 +1146,7 @@
         
   
   
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m22 12-2 1-1 1-1-1-1 3-1-3-1 8-1-8-1 2-1-2-1 4-1-4-1 9-1-9-1 6-1-6-1 1-1-1-2-1 2-1 1-1 1 1 1-6 1 6 1-9 1 9 1-4 1 4 1-2 1 2 1-8 1 8 1-3 1 3 1-1 1 1z"/></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 3a4 4 0 0 1 4 4c0 .73-.19 1.41-.54 2H18c.95 0 1.75.67 1.95 1.56C21.96 18.57 22 18.78 22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2c0-.22.04-.43 2.05-8.44C4.25 9.67 5.05 9 6 9h2.54A3.9 3.9 0 0 1 8 7a4 4 0 0 1 4-4m0 2a2 2 0 0 0-2 2 2 2 0 0 0 2 2 2 2 0 0 0 2-2 2 2 0 0 0-2-2"/></svg>
   
   <span class="md-ellipsis">
     
@@ -1147,9 +1172,11 @@
   
   
     <li class="md-nav__item">
-      <a href="../recorders-and-actions.md" class="md-nav__link">
+      <a href="../recorders-and-actions/" class="md-nav__link">
         
   
+  
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12.5 5A7.5 7.5 0 0 0 5 12.5a7.5 7.5 0 0 0 7.5 7.5 7.5 7.5 0 0 0 7.5-7.5A7.5 7.5 0 0 0 12.5 5M7 10h2a1 1 0 0 1 1 1v1c0 .5-.38.9-.86.97L10.31 15H9.15L8 13v2H7m5-5h2v1h-2v1h2v1h-2v1h2v1h-2a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1m4 0h2v1h-2v3h2v1h-2a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1m-8 1v1h1v-1"/></svg>
   
   <span class="md-ellipsis">
     
@@ -1175,9 +1202,11 @@
   
   
     <li class="md-nav__item">
-      <a href="../analysis.md" class="md-nav__link">
+      <a href="../analysis/" class="md-nav__link">
         
   
+  
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13.54 22H10c-.25 0-.46-.18-.5-.42l-.37-2.65c-.63-.25-1.17-.59-1.69-.99l-2.49 1.01c-.22.08-.49 0-.61-.22l-2-3.46a.493.493 0 0 1 .12-.64l2.11-1.66L4.5 12l.07-1-2.11-1.63a.493.493 0 0 1-.12-.64l2-3.46c.12-.22.39-.31.61-.22l2.49 1c.52-.39 1.06-.73 1.69-.98l.37-2.65c.04-.24.25-.42.5-.42h4c.25 0 .46.18.5.42l.37 2.65c.63.25 1.17.59 1.69.98l2.49-1c.22-.09.49 0 .61.22l2 3.46c.13.22.07.49-.12.64L19.43 11l.07 1v.19c-.5-.12-1-.19-1.5-.19-.17 0-.34 0-.5.03 0-.62-.1-1.24-.3-1.83l2.11-1.55-.75-1.3-2.41 1.04a5.42 5.42 0 0 0-3.03-1.77L12.75 4h-1.5l-.37 2.61c-1.2.25-2.26.89-3.03 1.78L5.44 7.35l-.75 1.3L6.8 10.2a5.55 5.55 0 0 0 0 3.6l-2.12 1.56.75 1.3 2.43-1.04c.77.88 1.82 1.52 3.01 1.76l.37 2.62h1.11c.26.75.65 1.42 1.19 2m2.42-9.64c.04-.12.04-.24.04-.36 0-2.21-1.79-4-4-4s-4 1.79-4 4 1.79 4 4 4c.12 0 .24 0 .36-.04a6.05 6.05 0 0 1 3.6-3.6M12 14c-1.1 0-2-.89-2-2s.9-2 2-2 2 .9 2 2-.89 2-2 2m4 1v6l5-3z"/></svg>
   
   <span class="md-ellipsis">
     
@@ -1203,9 +1232,11 @@
   
   
     <li class="md-nav__item">
-      <a href="../process.md" class="md-nav__link">
+      <a href="../process/" class="md-nav__link">
         
   
+  
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M7 13v-2h14v2zm0 6v-2h14v2zM7 7V5h14v2zM3 8V5H2V4h2v4zm-1 9v-1h3v4H2v-1h2v-.5H3v-1h1V17zm2.25-7a.75.75 0 0 1 .75.75c0 .2-.08.39-.21.52L3.12 13H5v1H2v-.92L4 11H2v-1z"/></svg>
   
   <span class="md-ellipsis">
     
@@ -1581,9 +1612,11 @@
   
   
     <li class="md-nav__item">
-      <a href="../../technical-reference/mesh-data-schema.md" class="md-nav__link">
+      <a href="../../technical-reference/mesh-data-schema/" class="md-nav__link">
         
   
+  
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 3h16a2 2 0 0 1 2 2v15a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2m0 4v3h4V7zm6 0v3h4V7zm10 3V7h-4v3zM4 12v3h4v-3zm0 8h4v-3H4zm6-8v3h4v-3zm0 8h4v-3h-4zm10 0v-3h-4v3zm0-8h-4v3h4z"/></svg>
   
   <span class="md-ellipsis">
     
@@ -12366,10 +12399,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#the-main-workflow" class="md-nav__link">
+  <a href="#before-vs-after-assembly" class="md-nav__link">
     <span class="md-ellipsis">
       
-        The Main Workflow
+        Before vs After Assembly
       
     </span>
   </a>
@@ -12388,13 +12421,41 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#inspecting-interfaces-after-assembly" class="md-nav__link">
+  <a href="#visualizing-generated-interfaces" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Inspecting Interfaces After Assembly
+        Visualizing Generated Interfaces
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Visualizing Generated Interfaces">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#embedded-beam-solid-plot" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Embedded Beam-Solid Plot
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#embedded-node-plot" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Embedded Node Plot
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -12403,17 +12464,6 @@
     <span class="md-ellipsis">
       
         What Femora Stores
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#what-happens-under-the-hood" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        What Happens Under The Hood
       
     </span>
   </a>
@@ -12485,25 +12535,25 @@
 
 
 <h1 id="interfaces">Interfaces</h1>
-<p>Interfaces describe relationships between mesh parts that should be resolved during assembly instead of being hard-coded into one conforming mesh up front.</p>
+<p>Interfaces describe relationships between mesh parts that should be executed through the assembly pipeline instead of being hard-coded into one conforming mesh up front.</p>
 <p>In other words, mesh parts define geometry separately, and interfaces tell Femora how those separate pieces should interact when the global model is compiled.</p>
 <hr />
 <h2 id="mental-model">Mental Model</h2>
 <p>Think of interfaces as <strong>declared relationships</strong> rather than finished connectivity.</p>
 <pre class="mermaid"><code>flowchart LR
-    parts["Mesh parts&lt;br/&gt;independent geometry"]
+    meshparts["Mesh parts&lt;br/&gt;independent geometry"]
     interface["Interface declaration&lt;br/&gt;relationship rule"]
-    assembly{{"Assembly&lt;br/&gt;search + resolve"}}
-    model["Assembled model&lt;br/&gt;new constraints / metadata / updates"]
+    assembly{{"Assembly pipeline&lt;br/&gt;event-driven execution"}}
+    result["Resolved interface result&lt;br/&gt;assembled-model updates"]
 
-    parts --&gt; interface
+    meshparts --&gt; interface
     interface --&gt; assembly
-    assembly --&gt; model
+    assembly --&gt; result
 
     classDef stage stroke-width:1px;
     classDef compile stroke-width:2px;
 
-    class parts,interface,model stage;
+    class meshparts,interface,result stage;
     class assembly compile;</code></pre>
 <p>An interface usually means one of these ideas:</p>
 <ul>
@@ -12511,7 +12561,7 @@
 <li>one set of cells should search for nearby host cells</li>
 <li>one boundary treatment should be generated from the assembled model</li>
 </ul>
-<p>The important point is that the interface is <strong>declared before assembly</strong>, but most of its real work happens <strong>during assembly events</strong>.</p>
+<p>The important point is that the interface is <strong>declared before assembly</strong>, but its real work is <strong>event-driven inside the assembly pipeline</strong>.</p>
 <details class="note" open="open">
 <summary>Interfaces are not just geometry</summary>
 <p>A mesh part answers: "what geometry do I have?" An interface answers: "how should two already-defined parts relate once Femora sees the full assembled model?"</p>
@@ -12519,22 +12569,15 @@
 <hr />
 <h2 id="where-it-fits">Where It Fits</h2>
 <p>Interfaces belong after mesh parts and before assembly.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>Building blocks
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>  -&gt; mesh parts
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>  -&gt; interfaces
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>  -&gt; assembly
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>  -&gt; constraints, loads, damping, recorders, analysis
-</code></pre></div>
 <p>That ordering matters because an interface usually needs:</p>
 <ol>
 <li>mesh parts to already exist</li>
-<li>the assembled mesh to perform search, filtering, or conflict resolution</li>
+<li>one or more assembly stages to perform search, filtering, boundary processing, or conflict resolution</li>
 </ol>
 <p>So interfaces sit at the boundary between <strong>local modeling</strong> and <strong>global compilation</strong>.</p>
 <hr />
 <h2 id="what-interfaces-mean-in-femora">What Interfaces Mean In Femora</h2>
-<p>Femora interfaces are model objects managed under <code>model.interface</code>.</p>
-<p>They are useful when you do <strong>not</strong> want to force everything into one perfectly matching mesh by hand. Instead, you let Femora inspect the assembled model and generate the needed relationships.</p>
+<p>Femora interfaces are model objects managed under <code>model.interface</code>. They are useful when you do <strong>not</strong> want to force everything into one perfectly matching mesh by hand. Instead, you let Femora inspect the assembled model and generate the needed relationships.</p>
 <p>Current interface ideas in Femora include:</p>
 <table>
 <thead>
@@ -12562,91 +12605,102 @@
 </tr>
 </tbody>
 </table>
-<p>This page focuses on the concept. The exact API surface comes from the interface manager and interface components.</p>
 <hr />
-<h2 id="the-main-workflow">The Main Workflow</h2>
-<p>For most users, the interface workflow is:</p>
-<ol>
-<li>Create the mesh parts independently.</li>
-<li>Declare the interface by naming the participating parts.</li>
-<li>Run assembly.</li>
-<li>Let Femora resolve the relationship during event-driven assembly steps.</li>
-</ol>
-<p>This is different from manually writing node-by-node constraints after export. The interface stays as a higher-level modeling object inside Femora.</p>
+<h2 id="before-vs-after-assembly">Before vs After Assembly</h2>
+<p>Explicitly contrast how the model sees the pieces before assembly versus how it sees the generated interface result after assembly.</p>
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 2rem 0;">
+  <div style="border: 1px solid var(--md-default-fg-color--lightest); border-radius: 8px; padding: 1.5rem; background: rgba(169, 116, 97, 0.08);">
+    <h3 style="margin-top: 0; color: var(--md-typeset-color);">Before Assembly</h3>
+    <ul style="margin-bottom: 0;">
+      <li><b>Independent Parts:</b> A pile mesh part and a soil mesh part exist separately.</li>
+      <li><b>No Connections:</b> They share space but do not interact.</li>
+      <li><b>Interface Rule:</b> A lightweight object holding radius, penalty params, and mesh references.</li>
+    </ul>
+  </div>
+  <div style="border: 1px solid var(--md-default-fg-color--lightest); border-radius: 8px; padding: 1.5rem; background: rgba(59, 130, 246, 0.08);">
+    <h3 style="margin-top: 0; color: var(--md-typeset-color);">After Assembly</h3>
+    <ul style="margin-bottom: 0;">
+      <li><b>Unified Global Grid:</b> One assembled <code>pyvista.UnstructuredGrid</code>.</li>
+      <li><b>Host Discovery:</b> Surrounding soil cells are tagged as hosts.</li>
+      <li><b>Generated Interface Result:</b> Interface-driven cells, metadata, or coupling updates are added depending on the interface type.</li>
+    </ul>
+  </div>
+</div>
+
 <hr />
 <h2 id="minimal-examples">Minimal Examples</h2>
 <div class="tabbed-set tabbed-alternate" data-tabs="1:3"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Embedded beam in solids</label><label for="__tabbed_1_2">Boundary absorber</label><label for="__tabbed_1_3">Embedded nodes in a host mesh</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>This is the most important interface pattern in the current workflow.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">femora.core.model</span><span class="w"> </span><span class="kn">import</span> <span class="n">Model</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="n">model</span> <span class="o">=</span> <span class="n">Model</span><span class="p">()</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="c1"># Assume "pile" is a line mesh part and "soil_box" is a solid mesh part.</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="n">interface</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">interface</span><span class="o">.</span><span class="n">beam_solid_interface</span><span class="p">(</span>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>    <span class="n">name</span><span class="o">=</span><span class="s2">"pile_soil_interface"</span><span class="p">,</span>
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>    <span class="n">beam_part</span><span class="o">=</span><span class="s2">"pile"</span><span class="p">,</span>
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>    <span class="n">solid_parts</span><span class="o">=</span><span class="p">[</span><span class="s2">"soil_box"</span><span class="p">],</span>
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>    <span class="n">radius</span><span class="o">=</span><span class="mf">0.50</span><span class="p">,</span>
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>    <span class="n">n_peri</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span>
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>    <span class="n">n_long</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>    <span class="n">penalty_param</span><span class="o">=</span><span class="mf">1.0e12</span><span class="p">,</span>
+<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>    <span class="n">g_penalty</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="p">)</span>
+<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>
+<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a><span class="n">model</span><span class="o">.</span><span class="n">assembler</span><span class="o">.</span><span class="n">create_section</span><span class="p">(</span>
+<a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a>    <span class="n">meshparts</span><span class="o">=</span><span class="p">[</span><span class="s2">"pile"</span><span class="p">,</span> <span class="s2">"soil_box"</span><span class="p">],</span>
+<a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a>    <span class="n">merge_points</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a><span class="p">)</span>
+<a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a><span class="n">model</span><span class="o">.</span><span class="n">assembler</span><span class="o">.</span><span class="n">assemble</span><span class="p">()</span>
+</code></pre></div>
+<p>Here the interface is declared before assembly, but the surrounding-solid search and embedded relationship generation happen only when the required assembly stage is reached.</p>
+</div>
+<div class="tabbed-block">
+<p>Some interfaces are not part-to-part embedding relationships. They are assembly-time boundary treatments.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">femora.core.model</span><span class="w"> </span><span class="kn">import</span> <span class="n">Model</span>
 <a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
 <a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="n">model</span> <span class="o">=</span> <span class="n">Model</span><span class="p">()</span>
 <a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>
-<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="c1"># Assume "pile" is a line mesh part and "soil_box" is a solid mesh part.</span>
-<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="n">interface</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">interface</span><span class="o">.</span><span class="n">beam_solid_interface</span><span class="p">(</span>
-<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>    <span class="n">name</span><span class="o">=</span><span class="s2">"pile_soil_interface"</span><span class="p">,</span>
-<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>    <span class="n">beam_part</span><span class="o">=</span><span class="s2">"pile"</span><span class="p">,</span>
-<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>    <span class="n">solid_parts</span><span class="o">=</span><span class="p">[</span><span class="s2">"soil_box"</span><span class="p">],</span>
-<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>    <span class="n">radius</span><span class="o">=</span><span class="mf">0.50</span><span class="p">,</span>
-<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>    <span class="n">n_peri</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span>
-<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>    <span class="n">n_long</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
-<a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>    <span class="n">penalty_param</span><span class="o">=</span><span class="mf">1.0e12</span><span class="p">,</span>
-<a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>    <span class="n">g_penalty</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-<a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a><span class="p">)</span>
-<a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a>
-<a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a><span class="n">model</span><span class="o">.</span><span class="n">assembler</span><span class="o">.</span><span class="n">create_section</span><span class="p">(</span>
-<a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a>    <span class="n">meshparts</span><span class="o">=</span><span class="p">[</span><span class="s2">"pile"</span><span class="p">,</span> <span class="s2">"soil_box"</span><span class="p">],</span>
-<a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a>    <span class="n">merge_points</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-<a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a><span class="p">)</span>
-<a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a><span class="n">model</span><span class="o">.</span><span class="n">assembler</span><span class="o">.</span><span class="n">assemble</span><span class="p">()</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="n">model</span><span class="o">.</span><span class="n">interface</span><span class="o">.</span><span class="n">boundary</span><span class="o">.</span><span class="n">absorber</span><span class="p">(</span>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>    <span class="n">num_layers</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>    <span class="n">geometry</span><span class="o">=</span><span class="s2">"rectangular"</span><span class="p">,</span>
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>    <span class="n">boundary_type</span><span class="o">=</span><span class="s2">"dashpot"</span><span class="p">,</span>
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>    <span class="n">rayleigh_damping</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span>
+<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="p">)</span>
+<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>
+<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="n">model</span><span class="o">.</span><span class="n">assembler</span><span class="o">.</span><span class="n">assemble</span><span class="p">()</span>
 </code></pre></div>
-<p>Here the interface is declared before assembly, but the surrounding-solid search and embedded relationship generation happen only when the assembled model exists.</p>
+<p>In this pattern, the interface logic inspects the assembled boundary and then creates the absorbing treatment during the relevant assembly-time stage.</p>
 </div>
 <div class="tabbed-block">
-<p>Some interfaces are not part-to-part embedding relationships. They are assembly-time boundary treatments.</p>
+<p>Embedded node interfaces are useful when the constrained part should be tied to surrounding retained cells through node-based embedding logic instead of the beam-solid workflow.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">femora.core.model</span><span class="w"> </span><span class="kn">import</span> <span class="n">Model</span>
 <a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>
 <a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="n">model</span> <span class="o">=</span> <span class="n">Model</span><span class="p">()</span>
 <a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>
-<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="n">model</span><span class="o">.</span><span class="n">interface</span><span class="o">.</span><span class="n">boundary</span><span class="o">.</span><span class="n">absorber</span><span class="p">(</span>
-<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>    <span class="n">num_layers</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
-<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>    <span class="n">geometry</span><span class="o">=</span><span class="s2">"rectangular"</span><span class="p">,</span>
-<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>    <span class="n">boundary_type</span><span class="o">=</span><span class="s2">"dashpot"</span><span class="p">,</span>
-<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>    <span class="n">rayleigh_damping</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span>
-<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="p">)</span>
-<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>
-<a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a><span class="n">model</span><span class="o">.</span><span class="n">assembler</span><span class="o">.</span><span class="n">assemble</span><span class="p">()</span>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="n">interface</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">interface</span><span class="o">.</span><span class="n">node_interface</span><span class="p">(</span>
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>    <span class="n">name</span><span class="o">=</span><span class="s2">"building_foundation_interface"</span><span class="p">,</span>
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>    <span class="n">constrained_node</span><span class="o">=</span><span class="s2">"building"</span><span class="p">,</span>
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>    <span class="n">retained_nodes</span><span class="o">=</span><span class="p">[</span><span class="s2">"foundation"</span><span class="p">],</span>
+<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>    <span class="n">rot</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>    <span class="n">p</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>    <span class="n">offset</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+<a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a><span class="p">)</span>
+<a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a>
+<a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a><span class="n">model</span><span class="o">.</span><span class="n">assembler</span><span class="o">.</span><span class="n">assemble</span><span class="p">()</span>
 </code></pre></div>
-<p>In this pattern, the interface logic inspects the assembled boundary and then creates the absorbing treatment after assembly begins.</p>
 </div>
-<div class="tabbed-block">
-<p>Embedded node interfaces are useful when the constrained part should be tied to surrounding retained cells through node-based embedding logic instead of the beam-solid workflow.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">femora.core.model</span><span class="w"> </span><span class="kn">import</span> <span class="n">Model</span>
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>
-<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="n">model</span> <span class="o">=</span> <span class="n">Model</span><span class="p">()</span>
-<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>
-<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="n">interface</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">interface</span><span class="o">.</span><span class="n">node_interface</span><span class="p">(</span>
-<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>    <span class="n">name</span><span class="o">=</span><span class="s2">"building_foundation_interface"</span><span class="p">,</span>
-<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>    <span class="n">constrained_node</span><span class="o">=</span><span class="s2">"building"</span><span class="p">,</span>
-<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>    <span class="n">retained_nodes</span><span class="o">=</span><span class="p">[</span><span class="s2">"foundation"</span><span class="p">],</span>
-<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>    <span class="n">rot</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-<a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a>    <span class="n">p</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-<a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a>    <span class="n">offset</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
-<a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a><span class="p">)</span>
-<a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a>
-<a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a><span class="n">model</span><span class="o">.</span><span class="n">assembler</span><span class="o">.</span><span class="n">assemble</span><span class="p">()</span>
+</div>
+</div>
+<h2 id="visualizing-generated-interfaces">Visualizing Generated Interfaces</h2>
+<p>After <code>model.assembler.assemble()</code>, you can often call <code>plot()</code> on an interface object to inspect what Femora actually selected and added. These plot helpers are useful for debugging because they show the <strong>resolved interface result</strong>, not just the declaration.</p>
+<p>The exact plotting options depend on the interface type, but the basic usage pattern is:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="n">model</span><span class="o">.</span><span class="n">assembler</span><span class="o">.</span><span class="n">assemble</span><span class="p">()</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="n">interface</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
 </code></pre></div>
-<p>The constrained part is sampled after assembly, host cells are searched, and Femora generates the embedded interface contribution from those discovered relationships.</p>
-</div>
-</div>
-</div>
-<hr />
-<h2 id="inspecting-interfaces-after-assembly">Inspecting Interfaces After Assembly</h2>
-<p>After <code>model.assembler.assemble()</code>, the embedded interfaces can be plotted directly to inspect what Femora actually selected.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="2:2"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">Beam-solid plot</label><label for="__tabbed_2_2">Embedded-node plot</label></div>
-<div class="tabbed-content">
-<div class="tabbed-block">
+<h3 id="embedded-beam-solid-plot">Embedded Beam-Solid Plot</h3>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="n">interface</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">interface</span><span class="o">.</span><span class="n">beam_solid_interface</span><span class="p">(</span>
 <a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>    <span class="n">name</span><span class="o">=</span><span class="s2">"pile_soil_interface"</span><span class="p">,</span>
 <a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>    <span class="n">beam_part</span><span class="o">=</span><span class="s2">"pile"</span><span class="p">,</span>
@@ -12657,8 +12711,20 @@
 <a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="n">model</span><span class="o">.</span><span class="n">assembler</span><span class="o">.</span><span class="n">assemble</span><span class="p">()</span>
 <a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a><span class="n">interface</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
 </code></pre></div>
+<div style="margin: 1.25rem 0; border: 1px solid var(--md-default-fg-color--lightest); border-radius: 12px; overflow: hidden; background: var(--md-default-bg-color);">
+  <div style="position: relative; width: 100%; aspect-ratio: 16/9; background: #fafafa;">
+    <iframe src="../../assets/interfaces/embedded_beam_solid_plot.html" style="width: 100%; height: 100%; border: none;" title="Embedded Beam-Solid Interactive Visual"></iframe>
+  </div>
 </div>
-<div class="tabbed-block">
+
+<p>This view is useful because it shows:</p>
+<ul>
+<li>the beam path owned by the interface</li>
+<li>the surrounding host solid cells selected by the search</li>
+<li>the geometric search envelope used by the interface</li>
+</ul>
+<p>If those highlights do not match the intended physical relationship, the interface definition should be adjusted before export or analysis.</p>
+<h3 id="embedded-node-plot">Embedded Node Plot</h3>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="n">interface</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">interface</span><span class="o">.</span><span class="n">node_interface</span><span class="p">(</span>
 <a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>    <span class="n">name</span><span class="o">=</span><span class="s2">"building_foundation_interface"</span><span class="p">,</span>
 <a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>    <span class="n">constrained_node</span><span class="o">=</span><span class="s2">"building"</span><span class="p">,</span>
@@ -12668,27 +12734,20 @@
 <a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="n">model</span><span class="o">.</span><span class="n">assembler</span><span class="o">.</span><span class="n">assemble</span><span class="p">()</span>
 <a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a><span class="n">interface</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
 </code></pre></div>
+<div style="margin: 1.25rem 0; border: 1px solid var(--md-default-fg-color--lightest); border-radius: 12px; overflow: hidden; background: var(--md-default-bg-color);">
+  <div style="position: relative; width: 100%; aspect-ratio: 16/9; background: #fafafa;">
+    <iframe src="../../assets/interfaces/embedded_node_plot.html" style="width: 100%; height: 100%; border: none;" title="Embedded Node Interactive Visual"></iframe>
+  </div>
 </div>
-</div>
-</div>
-<p>The plot helpers are useful because they show the <strong>resolved interface result</strong>, not just the declaration. That makes it much easier to confirm that the right cells, points, and search region were actually used.</p>
-<details class="tip" open="open">
-<summary>Read the plot like a debugging view</summary>
-<p>For a beam-solid interface, the usual reading is:</p>
+
+<p>This view is useful because it shows:</p>
 <ul>
-<li>black line cells: the beam path owned by the interface</li>
-<li>orange solid cells: the surrounding host cells selected by the search</li>
-<li>blue envelope: the geometric radius/envelope used for discovery</li>
+<li>the constrained mesh part</li>
+<li>the retained host cells used by the interface</li>
+<li>the constrained points selected for embedding</li>
+<li>the generated interface cells added to the assembled model</li>
 </ul>
-<p>For an embedded-node interface, the usual reading is:</p>
-<ul>
-<li>black geometry: the constrained mesh part</li>
-<li>orange cells: the retained host cells that received the embedded search hits</li>
-<li>blue points: constrained points used by the interface</li>
-<li>red markers: generated interface cells added to the assembled model</li>
-</ul>
-<p>If those highlights do not match what you intended physically, the interface definition should be adjusted before export or analysis.</p>
-</details>
+<p>Each interface may expose different plotting options, but the main idea is the same: inspect the resolved relationship before continuing to export or analysis.</p>
 <hr />
 <h2 id="what-femora-stores">What Femora Stores</h2>
 <p>When you create an interface, Femora stores the <strong>relationship definition</strong>, not just a final Tcl line.</p>
@@ -12707,26 +12766,10 @@
 <p>Because the interface exists as a Femora object before export, you can inspect names, owners, participating parts, and often plot or trace the relationship before committing to the final solver script.</p>
 </details>
 <hr />
-<h2 id="what-happens-under-the-hood">What Happens Under The Hood</h2>
-<p>The interface system is event-driven.</p>
-<p>The manager and component code show that interfaces subscribe to model events such as:</p>
-<ul>
-<li><code>POST_ASSEMBLE</code></li>
-<li><code>RESOLVE_CORE_CONFLICTS</code></li>
-</ul>
-<p>That means Femora can:</p>
-<ul>
-<li>wait until the full assembled mesh exists</li>
-<li>search only the relevant cells or parts</li>
-<li>generate embedded/contact information</li>
-<li>resolve conflicts when parallel cores or overlapping interface results need cleanup</li>
-</ul>
-<p>This is the main reason interfaces belong conceptually before assembly but computationally act during assembly.</p>
-<hr />
 <h2 id="what-interfaces-are-not">What Interfaces Are Not</h2>
 <p>Interfaces are not the same thing as ordinary constraints.</p>
 <ul>
-<li>Interfaces start from mesh-part relationships and assembly-time search.</li>
+<li>Interfaces start from mesh-part relationships and assembly-pipeline events.</li>
 <li>Constraints usually start from already-known nodes, DOFs, or assembled selections.</li>
 </ul>
 <p>So even though both can eventually affect the solver domain, they solve different modeling problems.</p>
@@ -12739,7 +12782,7 @@
 </details>
 <details class="warning" open="open">
 <summary>Do not think of interfaces as immediate solver commands</summary>
-<p>Creating an interface object does not finish the connection. The heavy work usually happens when <code>model.assembler.assemble()</code> triggers the relevant model events.</p>
+<p>Creating an interface object does not finish the connection. The heavy work happens when <code>model.assembler.assemble()</code> triggers the relevant model events for that interface type.</p>
 </details>
 <details class="warning" open="open">
 <summary>Make the participating parts explicit when needed</summary>
@@ -12787,7 +12830,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="August 25, 2026 02:05:35 UTC">August 25, 2026</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="August 25, 2026 03:11:18 UTC">August 25, 2026</span>
   </span>
 
     
@@ -12797,7 +12840,7 @@
     <span class="md-icon" title="Created">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M14.47 15.08 11 13V7h1.5v5.25l3.08 1.83c-.41.28-.79.62-1.11 1m-1.39 4.84c-.36.05-.71.08-1.08.08-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8c0 .37-.03.72-.08 1.08.69.1 1.33.32 1.92.64.1-.56.16-1.13.16-1.72 0-5.5-4.5-10-10-10S2 6.5 2 12s4.47 10 10 10c.59 0 1.16-.06 1.72-.16-.32-.59-.54-1.23-.64-1.92M18 15v3h-3v2h3v3h2v-3h3v-2h-3v-3z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="August 25, 2026 02:05:35 UTC">August 25, 2026</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="August 25, 2026 03:11:18 UTC">August 25, 2026</span>
   </span>
 
     

@@ -8,9 +8,13 @@
       
       
       
-        <link rel="canonical" href="https://femora.io/docs/concepts/damping-recorders-and-outputs/">
+        <link rel="canonical" href="https://femora.io/docs/technical-reference/mesh-data-schema/">
       
       
+        <link rel="prev" href="../../examples/">
+      
+      
+        <link rel="next" href="../../reference/">
       
       
         
@@ -21,7 +25,7 @@
     
     
       
-        <title>Damping, Recorders, and Outputs - Femora</title>
+        <title>Mesh Data Schema - Femora</title>
       
     
     
@@ -76,7 +80,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#damping-recorders-and-outputs" class="md-skip">
+        <a href="#mesh-data-schema" class="md-skip">
           Skip to content
         </a>
       
@@ -109,7 +113,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Damping, Recorders, and Outputs
+              Mesh Data Schema
             
           </span>
         </div>
@@ -289,7 +293,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../" class="md-tabs__link">
+        <a href="../../concepts/" class="md-tabs__link">
           
   
   
@@ -325,11 +329,13 @@
   
   
   
+    
+  
   
     
     
-      <li class="md-tabs__item">
-        <a href="../../technical-reference/mesh-data-schema.md" class="md-tabs__link">
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="./" class="md-tabs__link">
           
   
   
@@ -543,7 +549,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../" class="md-nav__link">
+      <a href="../../concepts/" class="md-nav__link">
         
   
   
@@ -573,7 +579,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../model/" class="md-nav__link">
+      <a href="../../concepts/model/" class="md-nav__link">
         
   
   
@@ -603,7 +609,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../managers/" class="md-nav__link">
+      <a href="../../concepts/managers/" class="md-nav__link">
         
   
   
@@ -633,7 +639,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../building-blocks/" class="md-nav__link">
+      <a href="../../concepts/building-blocks/" class="md-nav__link">
         
   
   
@@ -663,7 +669,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../mesh-parts/" class="md-nav__link">
+      <a href="../../concepts/mesh-parts/" class="md-nav__link">
         
   
   
@@ -693,7 +699,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../interfaces/" class="md-nav__link">
+      <a href="../../concepts/interfaces/" class="md-nav__link">
         
   
   
@@ -723,7 +729,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../assembly/" class="md-nav__link">
+      <a href="../../concepts/assembly/" class="md-nav__link">
         
   
   
@@ -753,11 +759,11 @@
   
   
     <li class="md-nav__item">
-      <a href="../partitioning-and-parallel-execution/" class="md-nav__link">
+      <a href="../../concepts/partitioning-and-parallel-execution/" class="md-nav__link">
         
   
   
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9 3v2H7a2 2 0 0 0-2 2v2H3v2h2v2H3v2h2v2a2 2 0 0 0 2 2h2v2h2v-2h2v2h2v-2h2a2 2 0 0 0 2-2v-2h2v-2h-2v-2h2V9h-2V7a2 2 0 0 0-2-2h-2V3h-2v2h-2V3M8 9h3.5v1.5h-3v.75h2a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1v-4a1 1 0 0 1 1-1m4.5 0H14v2h1.5V9H17v6h-1.5v-2.5h-3m-4 .25v.75H10v-.75"/></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19.5 17c-.14 0-.26 0-.39.04L17.5 13.8c.45-.45.75-1.09.75-1.8a2.5 2.5 0 0 0-2.5-2.5c-.14 0-.25 0-.4.04L13.74 6.3c.47-.46.76-1.09.76-1.8a2.5 2.5 0 0 0-5 0c0 .7.29 1.34.76 1.79L8.65 9.54c-.15-.04-.26-.04-.4-.04a2.5 2.5 0 0 0-2.5 2.5c0 .71.29 1.34.75 1.79l-1.61 3.25C4.76 17 4.64 17 4.5 17a2.5 2.5 0 0 0 0 5A2.5 2.5 0 0 0 7 19.5c0-.7-.29-1.34-.76-1.79l1.62-3.25c.14.04.26.04.39.04s.25 0 .38-.04l1.63 3.25c-.47.45-.76 1.09-.76 1.79a2.5 2.5 0 0 0 5 0A2.5 2.5 0 0 0 12 17c-.13 0-.26 0-.39.04L10 13.8c.45-.45.75-1.09.75-1.8 0-.7-.29-1.33-.75-1.79l1.61-3.25c.13.04.26.04.39.04s.26 0 .39-.04L14 10.21a2.5 2.5 0 0 0 1.75 4.29c.13 0 .25 0 .38-.04l1.63 3.25c-.47.45-.76 1.09-.76 1.79a2.5 2.5 0 0 0 5 0 2.5 2.5 0 0 0-2.5-2.5m-15 3.5c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1m8.5-1c0 .55-.45 1-1 1s-1-.45-1-1 .45-1 1-1 1 .45 1 1M7.25 12c0-.55.45-1 1-1s1 .45 1 1-.45 1-1 1-1-.45-1-1M11 4.5c0-.55.45-1 1-1s1 .45 1 1-.45 1-1 1-1-.45-1-1m3.75 7.5c0-.55.45-1 1-1s1 .45 1 1-.45 1-1 1-1-.45-1-1m4.75 8.5c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1"/></svg>
   
   <span class="md-ellipsis">
     
@@ -783,9 +789,11 @@
   
   
     <li class="md-nav__item">
-      <a href="../assembled-model.md" class="md-nav__link">
+      <a href="../../concepts/assembled-model/" class="md-nav__link">
         
   
+  
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 22v-2h3v-3h2v3.5c0 .39-.16.74-.46 1.04s-.65.46-1.04.46zM7 22H3.5c-.39 0-.74-.16-1.04-.46S2 20.89 2 20.5V17h2v3h3zM17 2h3.5c.39 0 .74.16 1.04.46s.46.65.46 1.04V7h-2V4h-3zM7 2v2H4v3H2V3.5c0-.39.16-.74.46-1.04S3.11 2 3.5 2zm6 15.25 4-2.3v-4.59l-4 2.3zm-1-6.33 4-2.29-4-2.35-4 2.35zm-5 4.03 4 2.3v-4.59l-4-2.3zm11.23-7.36c.5.32.77.75.77 1.32v6.32c0 .57-.27 1-.77 1.32l-5.48 3.18q-.75.48-1.5 0l-5.48-3.18c-.5-.32-.77-.75-.77-1.32V8.91c0-.57.27-1 .77-1.32l5.48-3.18c.25-.13.5-.19.75-.19s.5.06.75.19z"/></svg>
   
   <span class="md-ellipsis">
     
@@ -811,9 +819,11 @@
   
   
     <li class="md-nav__item">
-      <a href="../tags-and-ids.md" class="md-nav__link">
+      <a href="../../concepts/tags-and-ids/" class="md-nav__link">
         
   
+  
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m5.41 21 .71-4h-4l.35-2h4l1.06-6h-4l.35-2h4l.71-4h2l-.71 4h6l.71-4h2l-.71 4h4l-.35 2h-4l-1.06 6h4l-.35 2h-4l-.71 4h-2l.71-4h-6l-.71 4zM9.53 9l-1.06 6h6l1.06-6z"/></svg>
   
   <span class="md-ellipsis">
     
@@ -839,11 +849,11 @@
   
   
     <li class="md-nav__item">
-      <a href="../regions-and-groups/" class="md-nav__link">
+      <a href="../../concepts/regions-and-groups/" class="md-nav__link">
         
   
   
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M6.5 10C7.3 10 8 9.3 8 8.5S7.3 7 6.5 7 5 7.7 5 8.5 5.7 10 6.5 10M9 6l7 7-5 5-7-7V6zm0-2H4c-1.1 0-2 .9-2 2v5c0 .6.2 1.1.6 1.4l7 7c.3.4.8.6 1.4.6s1.1-.2 1.4-.6l5-5c.4-.4.6-.9.6-1.4 0-.6-.2-1.1-.6-1.4l-7-7C10.1 4.2 9.6 4 9 4m4.5 1.7 1-1 6.9 6.9c.4.4.6.9.6 1.4s-.2 1.1-.6 1.4L16 19.8l-1-1 5.7-5.8z"/></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 1h2v2H3v2H1V3a2 2 0 0 1 2-2m11 0a2 2 0 0 1 2 2v2h-2V3h-2V1zm6 6a2 2 0 0 1 2 2v2h-2V9h-2V7zm2 13a2 2 0 0 1-2 2h-2v-2h2v-2h2zm-2-7h2v3h-2zm-7-4V7h3v3h-2V9zm0 13v-2h3v2zm-4 0a2 2 0 0 1-2-2v-2h2v2h2v2zm-2-6v-3h2v1h1v2zM7 3V1h3v2zM3 16a2 2 0 0 1-2-2v-2h2v2h2v2zM1 7h2v3H1zm8 0h2v2H9v2H7V9a2 2 0 0 1 2-2m7 7a2 2 0 0 1-2 2h-2v-2h2v-2h2z"/></svg>
   
   <span class="md-ellipsis">
     
@@ -869,9 +879,11 @@
   
   
     <li class="md-nav__item">
-      <a href="../damping.md" class="md-nav__link">
+      <a href="../../concepts/damping/" class="md-nav__link">
         
   
+  
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 12h2v2h-2c-1.38 0-2.74-.35-4-1-2.5 1.3-5.5 1.3-8 0-1.26.65-2.63 1-4 1H2v-2h2c1.39 0 2.78-.47 4-1.33 2.44 1.71 5.56 1.71 8 0 1.22.86 2.61 1.33 4 1.33m0-6h2v2h-2c-1.38 0-2.74-.35-4-1-2.5 1.3-5.5 1.3-8 0-1.26.65-2.63 1-4 1H2V6h2c1.39 0 2.78-.47 4-1.33 2.44 1.71 5.56 1.71 8 0C17.22 5.53 18.61 6 20 6m0 12h2v2h-2c-1.38 0-2.74-.35-4-1-2.5 1.3-5.5 1.3-8 0-1.26.65-2.63 1-4 1H2v-2h2c1.39 0 2.78-.47 4-1.33 2.44 1.71 5.56 1.71 8 0 1.22.86 2.61 1.33 4 1.33"/></svg>
   
   <span class="md-ellipsis">
     
@@ -897,9 +909,11 @@
   
   
     <li class="md-nav__item">
-      <a href="../constraints.md" class="md-nav__link">
+      <a href="../../concepts/constraints/" class="md-nav__link">
         
   
+  
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 17a2 2 0 0 1-2-2c0-1.11.89-2 2-2a2 2 0 0 1 2 2 2 2 0 0 1-2 2m6 3V10H6v10zm0-12a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V10c0-1.11.89-2 2-2h1V6a5 5 0 0 1 5-5 5 5 0 0 1 5 5v2zm-6-5a3 3 0 0 0-3 3v2h6V6a3 3 0 0 0-3-3"/></svg>
   
   <span class="md-ellipsis">
     
@@ -925,11 +939,11 @@
   
   
     <li class="md-nav__item">
-      <a href="../loading/" class="md-nav__link">
+      <a href="../../concepts/loading/" class="md-nav__link">
         
   
   
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m22 12-2 1-1 1-1-1-1 3-1-3-1 8-1-8-1 2-1-2-1 4-1-4-1 9-1-9-1 6-1-6-1 1-1-1-2-1 2-1 1-1 1 1 1-6 1 6 1-9 1 9 1-4 1 4 1-2 1 2 1-8 1 8 1-3 1 3 1-1 1 1z"/></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 3a4 4 0 0 1 4 4c0 .73-.19 1.41-.54 2H18c.95 0 1.75.67 1.95 1.56C21.96 18.57 22 18.78 22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2c0-.22.04-.43 2.05-8.44C4.25 9.67 5.05 9 6 9h2.54A3.9 3.9 0 0 1 8 7a4 4 0 0 1 4-4m0 2a2 2 0 0 0-2 2 2 2 0 0 0 2 2 2 2 0 0 0 2-2 2 2 0 0 0-2-2"/></svg>
   
   <span class="md-ellipsis">
     
@@ -955,9 +969,11 @@
   
   
     <li class="md-nav__item">
-      <a href="../recorders-and-actions.md" class="md-nav__link">
+      <a href="../../concepts/recorders-and-actions/" class="md-nav__link">
         
   
+  
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12.5 5A7.5 7.5 0 0 0 5 12.5a7.5 7.5 0 0 0 7.5 7.5 7.5 7.5 0 0 0 7.5-7.5A7.5 7.5 0 0 0 12.5 5M7 10h2a1 1 0 0 1 1 1v1c0 .5-.38.9-.86.97L10.31 15H9.15L8 13v2H7m5-5h2v1h-2v1h2v1h-2v1h2v1h-2a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1m4 0h2v1h-2v3h2v1h-2a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1m-8 1v1h1v-1"/></svg>
   
   <span class="md-ellipsis">
     
@@ -983,9 +999,11 @@
   
   
     <li class="md-nav__item">
-      <a href="../analysis.md" class="md-nav__link">
+      <a href="../../concepts/analysis/" class="md-nav__link">
         
   
+  
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13.54 22H10c-.25 0-.46-.18-.5-.42l-.37-2.65c-.63-.25-1.17-.59-1.69-.99l-2.49 1.01c-.22.08-.49 0-.61-.22l-2-3.46a.493.493 0 0 1 .12-.64l2.11-1.66L4.5 12l.07-1-2.11-1.63a.493.493 0 0 1-.12-.64l2-3.46c.12-.22.39-.31.61-.22l2.49 1c.52-.39 1.06-.73 1.69-.98l.37-2.65c.04-.24.25-.42.5-.42h4c.25 0 .46.18.5.42l.37 2.65c.63.25 1.17.59 1.69.98l2.49-1c.22-.09.49 0 .61.22l2 3.46c.13.22.07.49-.12.64L19.43 11l.07 1v.19c-.5-.12-1-.19-1.5-.19-.17 0-.34 0-.5.03 0-.62-.1-1.24-.3-1.83l2.11-1.55-.75-1.3-2.41 1.04a5.42 5.42 0 0 0-3.03-1.77L12.75 4h-1.5l-.37 2.61c-1.2.25-2.26.89-3.03 1.78L5.44 7.35l-.75 1.3L6.8 10.2a5.55 5.55 0 0 0 0 3.6l-2.12 1.56.75 1.3 2.43-1.04c.77.88 1.82 1.52 3.01 1.76l.37 2.62h1.11c.26.75.65 1.42 1.19 2m2.42-9.64c.04-.12.04-.24.04-.36 0-2.21-1.79-4-4-4s-4 1.79-4 4 1.79 4 4 4c.12 0 .24 0 .36-.04a6.05 6.05 0 0 1 3.6-3.6M12 14c-1.1 0-2-.89-2-2s.9-2 2-2 2 .9 2 2-.89 2-2 2m4 1v6l5-3z"/></svg>
   
   <span class="md-ellipsis">
     
@@ -1011,9 +1029,11 @@
   
   
     <li class="md-nav__item">
-      <a href="../process.md" class="md-nav__link">
+      <a href="../../concepts/process/" class="md-nav__link">
         
   
+  
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M7 13v-2h14v2zm0 6v-2h14v2zM7 7V5h14v2zM3 8V5H2V4h2v4zm-1 9v-1h3v4H2v-1h2v-.5H3v-1h1V17zm2.25-7a.75.75 0 0 1 .75.75c0 .2-.08.39-.21.52L3.12 13H5v1H2v-.92L4 11H2v-1z"/></svg>
   
   <span class="md-ellipsis">
     
@@ -1336,24 +1356,29 @@
       
   
   
+    
   
   
+  
     
     
     
     
-      
-      
-    
-    
-    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" checked>
         
           
-          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
             
   
   
@@ -1371,7 +1396,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_6">
             <span class="md-nav__icon md-icon"></span>
             
@@ -1386,12 +1411,43 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../../technical-reference/mesh-data-schema.md" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 3h16a2 2 0 0 1 2 2v15a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2m0 4v3h4V7zm6 0v3h4V7zm10 3V7h-4v3zM4 12v3h4v-3zm0 8h4v-3H4zm6-8v3h4v-3zm0 8h4v-3h-4zm10 0v-3h-4v3zm0-8h-4v3h4z"/></svg>
+  
+  <span class="md-ellipsis">
+    
+  
+    Mesh Data Schema
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
+  
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 3h16a2 2 0 0 1 2 2v15a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2m0 4v3h4V7zm6 0v3h4V7zm10 3V7h-4v3zM4 12v3h4v-3zm0 8h4v-3H4zm6-8v3h4v-3zm0 8h4v-3h-4zm10 0v-3h-4v3zm0-8h-4v3h4z"/></svg>
   
   <span class="md-ellipsis">
     
@@ -1405,6 +1461,103 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#status-labels" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Status Labels
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#assembly-section-point-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Assembly-Section Point Data
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#assembly-section-cell-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Assembly-Section Cell Data
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#final-assembly-point-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Final-Assembly Point Data
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#final-assembly-cell-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Final-Assembly Cell Data
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#vtk-export-field-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        VTK Export Field Data
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#related-documentation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Related Documentation
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -12141,10 +12294,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#mental-model" class="md-nav__link">
+  <a href="#status-labels" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Mental Model
+        Status Labels
       
     </span>
   </a>
@@ -12152,10 +12305,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#where-it-fits" class="md-nav__link">
+  <a href="#assembly-section-point-data" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Where It Fits
+        Assembly-Section Point Data
       
     </span>
   </a>
@@ -12163,10 +12316,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#minimal-example" class="md-nav__link">
+  <a href="#assembly-section-cell-data" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Minimal Example
+        Assembly-Section Cell Data
       
     </span>
   </a>
@@ -12174,10 +12327,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#what-femora-stores" class="md-nav__link">
+  <a href="#final-assembly-point-data" class="md-nav__link">
     <span class="md-ellipsis">
       
-        What Femora Stores
+        Final-Assembly Point Data
       
     </span>
   </a>
@@ -12185,10 +12338,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#common-mistakes" class="md-nav__link">
+  <a href="#final-assembly-cell-data" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Common Mistakes
+        Final-Assembly Cell Data
       
     </span>
   </a>
@@ -12196,10 +12349,21 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#related-concepts" class="md-nav__link">
+  <a href="#vtk-export-field-data" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Related Concepts
+        VTK Export Field Data
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#related-documentation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Related Documentation
       
     </span>
   </a>
@@ -12226,74 +12390,288 @@
   
 
 
-<h1 id="damping-recorders-and-outputs">Damping, Recorders, and Outputs</h1>
-<p>Running a simulation is only useful if you can model physical energy dissipation (Damping), instrument the model to record responses (Recorders), and write files for visualization (Outputs).</p>
-<hr />
-<h2 id="mental-model">Mental Model</h2>
+<h1 id="mesh-data-schema">Mesh Data Schema</h1>
+<p>This reference defines the arrays Femora stores on meshes, including their names, associations, dtypes, and intended use. See <a href="../../concepts/assembled-model/">The Assembled Model</a> for the lifecycle that creates these arrays.</p>
+<p>Femora uses PyVista <code>UnstructuredGrid</code> objects. An array belongs to one of three scopes:</p>
+<table>
+<thead>
+<tr>
+<th>Scope</th>
+<th>Association</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Point data</td>
+<td>One value or vector per mesh point</td>
+<td>Node-level information.</td>
+</tr>
+<tr>
+<td>Cell data</td>
+<td>One value per mesh cell</td>
+<td>Element-level information.</td>
+</tr>
+<tr>
+<td>Field data</td>
+<td>Global arrays for the whole mesh</td>
+<td>Export lookup metadata.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="status-labels">Status Labels</h2>
+<table>
+<thead>
+<tr>
+<th>Status</th>
+<th>Contract</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Public metadata</td>
+<td>Supported model data for inspection, plotting, selection, and export.</td>
+</tr>
+<tr>
+<td>Provenance</td>
+<td>Identifies the Femora source that produced a point or cell.</td>
+</tr>
+<tr>
+<td>Internal assembly data</td>
+<td>Used to implement assembly. Do not make model logic depend on it.</td>
+</tr>
+<tr>
+<td>Export-only field data</td>
+<td>Added to the VTK export mesh copy; not guaranteed on the in-memory assembled mesh.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="assembly-section-point-data">Assembly-Section Point Data</h2>
+<p>These arrays are created or normalized on <code>section.mesh</code>. They remain available on the assembled mesh unless a later operation changes their values through point merging.</p>
+<table>
+<thead>
+<tr>
+<th>Array</th>
+<th>Dtype created by Femora</th>
+<th>Shape</th>
+<th>Status</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ndf</code></td>
+<td><code>uint16</code></td>
+<td><code>(n_points,)</code></td>
+<td>Public metadata</td>
+<td>Degrees of freedom at each point. Used for merge compatibility and node export.</td>
+</tr>
+<tr>
+<td><code>Mass</code></td>
+<td><code>float32</code></td>
+<td><code>(n_points, 6)</code></td>
+<td>Public metadata</td>
+<td>Six-component nodal mass vector. Missing mass is initialized to zero.</td>
+</tr>
+<tr>
+<td><code>MeshPartTag_pointdata</code></td>
+<td><code>uint16</code></td>
+<td><code>(n_points,)</code></td>
+<td>Provenance</td>
+<td>Source mesh-part tag before later merging.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="assembly-section-cell-data">Assembly-Section Cell Data</h2>
+<p>These arrays are created or normalized on <code>section.mesh</code>. A composite mesh can provide its own <code>ElementTag</code>, <code>MaterialTag</code>, or <code>SectionTag</code>; Femora preserves an existing array and therefore its source dtype.</p>
+<table>
+<thead>
+<tr>
+<th>Array</th>
+<th>Dtype created by Femora</th>
+<th>Shape</th>
+<th>Status</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ElementTag</code></td>
+<td><code>uint16</code></td>
+<td><code>(n_cells,)</code></td>
+<td>Public metadata</td>
+<td>Element template or composite element tag.</td>
+</tr>
+<tr>
+<td><code>MaterialTag</code></td>
+<td><code>uint16</code></td>
+<td><code>(n_cells,)</code></td>
+<td>Public metadata</td>
+<td>Material tag for the cell.</td>
+</tr>
+<tr>
+<td><code>SectionTag</code></td>
+<td><code>uint16</code></td>
+<td><code>(n_cells,)</code></td>
+<td>Public metadata</td>
+<td>Section tag for the cell when its formulation uses one.</td>
+</tr>
+<tr>
+<td><code>Region</code></td>
+<td><code>uint16</code></td>
+<td><code>(n_cells,)</code></td>
+<td>Public metadata</td>
+<td>Region assigned by the mesh part.</td>
+</tr>
+<tr>
+<td><code>MeshPartTag_celldata</code></td>
+<td><code>uint16</code></td>
+<td><code>(n_cells,)</code></td>
+<td>Provenance</td>
+<td>Source mesh-part tag for ordinary mesh-part cells.</td>
+</tr>
+<tr>
+<td><code>FemoraPartTag</code></td>
+<td><code>int32</code></td>
+<td><code>(n_cells,)</code></td>
+<td>Provenance</td>
+<td>Consecutive identifier for visualization and exported provenance.</td>
+</tr>
+<tr>
+<td><code>FemoraPartKind</code></td>
+<td><code>int16</code></td>
+<td><code>(n_cells,)</code></td>
+<td>Provenance</td>
+<td>Numeric source kind: mesh part, interface, absorber, or generated.</td>
+</tr>
+<tr>
+<td><code>Core</code></td>
+<td>platform integer</td>
+<td><code>(n_cells,)</code></td>
+<td>Public metadata</td>
+<td>Local partition label. It is <code>0</code> unless the section is divided.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="final-assembly-point-data">Final-Assembly Point Data</h2>
+<p>The final assembly pass adds or uses the following arrays on <code>model.assembled_mesh</code>.</p>
+<table>
+<thead>
+<tr>
+<th>Array</th>
+<th>Dtype</th>
+<th>Shape</th>
+<th>Status</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>MergeInFinal</code></td>
+<td><code>uint8</code></td>
+<td><code>(n_points,)</code></td>
+<td>Public metadata</td>
+<td><code>1</code> when the point's source section permits final merging; <code>0</code> otherwise.</td>
+</tr>
+<tr>
+<td><code>FinalMergeKey</code></td>
+<td>integer</td>
+<td><code>(n_points,)</code></td>
+<td>Internal assembly data</td>
+<td>Merge key built from <code>ndf</code> and <code>MergeInFinal</code>. It is present only when final point merging runs.</td>
+</tr>
+</tbody>
+</table>
+<p><code>ndf</code>, <code>Mass</code>, and <code>MeshPartTag_pointdata</code> also remain point data after final assembly. Merging can change their values. With <code>mass_merging="sum"</code>, Femora rebuilds <code>Mass</code> by summing all source mass vectors at the retained point.</p>
+<p><code>PointMergeMap</code> is temporary field data created by PyVista while a merge runs. Femora removes it before assembly completes; it is not a supported schema entry.</p>
+<h2 id="final-assembly-cell-data">Final-Assembly Cell Data</h2>
+<p>The assembled mesh retains the section cell-data arrays. Interfaces, absorbers, and other event-driven components may append cells and add workflow-specific arrays.</p>
+<table>
+<thead>
+<tr>
+<th>Array</th>
+<th>Status</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ElementTag</code>, <code>MaterialTag</code>, <code>SectionTag</code>, <code>Region</code></td>
+<td>Public metadata</td>
+<td>Element formulation and region metadata carried from the source section.</td>
+</tr>
+<tr>
+<td><code>MeshPartTag_celldata</code></td>
+<td>Provenance</td>
+<td>Original mesh-part source tag. Generated cells can use <code>0</code> when no mesh part owns them.</td>
+</tr>
+<tr>
+<td><code>Core</code></td>
+<td>Public metadata</td>
+<td>Global partition label after Femora offsets later sections.</td>
+</tr>
+<tr>
+<td><code>FemoraPartTag</code>, <code>FemoraPartKind</code></td>
+<td>Provenance</td>
+<td>Source information for ordinary and generated cells.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="vtk-export-field-data">VTK Export Field Data</h2>
+<p>When Femora exports VTK, it adds these lookup arrays to the mesh copy written to disk. Together they map compact cell provenance IDs to readable source information.</p>
+<table>
+<thead>
+<tr>
+<th>Field-data array</th>
+<th>Dtype</th>
+<th>Shape</th>
+<th>Status</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>FemoraPartTags</code></td>
+<td><code>int32</code></td>
+<td><code>(n_parts,)</code></td>
+<td>Export-only field data</td>
+<td>Consecutive part identifiers.</td>
+</tr>
+<tr>
+<td><code>FemoraPartKindIds</code></td>
+<td><code>int16</code></td>
+<td><code>(n_parts,)</code></td>
+<td>Export-only field data</td>
+<td>Kind identifier for each part.</td>
+</tr>
+<tr>
+<td><code>FemoraPartSourceTags</code></td>
+<td><code>int32</code></td>
+<td><code>(n_parts,)</code></td>
+<td>Export-only field data</td>
+<td>Source mesh-part tag, or <code>0</code> when none exists.</td>
+</tr>
+<tr>
+<td><code>FemoraPartNames</code></td>
+<td>string</td>
+<td><code>(n_parts,)</code></td>
+<td>Export-only field data</td>
+<td>Human-readable source name.</td>
+</tr>
+<tr>
+<td><code>FemoraPartKinds</code></td>
+<td>string</td>
+<td><code>(n_parts,)</code></td>
+<td>Export-only field data</td>
+<td>Source kind: <code>meshpart</code>, <code>interface</code>, <code>absorber</code>, or <code>generated</code>.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="related-documentation">Related Documentation</h2>
 <ul>
-<li><strong>Damping</strong>: Dissipation mechanisms (such as mass- and stiffness-proportional Rayleigh damping) applied to structural or soil elements to represent energy loss during dynamic simulations.</li>
-<li><strong>Recorders</strong>: Virtual sensors placed at nodes or elements. Instead of saving data for the entire model, you specify what to record (e.g. displacement, velocity, acceleration) and where to record it.</li>
-<li><strong>Outputs</strong>: The final artifacts produced by Femora, including solver input files (TCL), post-processing databases, and 3D visualization grids (VTK, JSON).</li>
-</ul>
-<p>Think of recorders as cameras placed around a crash-test site. You do not need a camera on every single part of the vehicle; you place them at key interest points to capture data efficiently.</p>
-<hr />
-<h2 id="where-it-fits">Where It Fits</h2>
-<p>Damping, recorders, and outputs are configured after assembly. Damping properties are assigned to regions, recorders are added as process steps, and outputs are written at the end:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>Run Assembly
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>   ├─ Apply Damping to physical regions (e.g. model.damping.rayleigh)
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>   ├─ Define Recorders on node/element groups
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>   ├─ Add Recorders to Process steps (model.process.add_step)
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>   └─ Export Outputs (export_to_tcl, export_to_vtk)
-</code></pre></div>
-<hr />
-<h2 id="minimal-example">Minimal Example</h2>
-<p>Applying Rayleigh damping, creating a node recorder for a group, and exporting the model:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">femora.core.model</span><span class="w"> </span><span class="kn">import</span> <span class="n">Model</span>
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="n">model</span> <span class="o">=</span> <span class="n">Model</span><span class="p">()</span>
-<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>
-<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="c1"># (Configure and compile assembly here...)</span>
-<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>
-<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="c1"># 1. Apply Rayleigh damping to a physical region</span>
-<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="n">model</span><span class="o">.</span><span class="n">damping</span><span class="o">.</span><span class="n">rayleigh</span><span class="p">(</span>
-<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>    <span class="n">name</span><span class="o">=</span><span class="s2">"soil_viscous_damping"</span><span class="p">,</span>
-<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>    <span class="n">alpha</span><span class="o">=</span><span class="mf">0.20</span><span class="p">,</span>
-<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>    <span class="n">beta</span><span class="o">=</span><span class="mf">0.003</span><span class="p">,</span>
-<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>    <span class="n">region</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">region</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"soil_domain"</span><span class="p">)</span>
-<a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a><span class="p">)</span>
-<a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>
-<a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a><span class="c1"># 2. Record displacements for ground surface nodes</span>
-<a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a><span class="n">surf_disp_rec</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">recorder</span><span class="o">.</span><span class="n">node</span><span class="p">(</span>
-<a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a>    <span class="n">name</span><span class="o">=</span><span class="s2">"surf_disp_rec"</span><span class="p">,</span>
-<a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a>    <span class="n">response</span><span class="o">=</span><span class="s2">"disp"</span><span class="p">,</span>
-<a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a>    <span class="n">dof</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span>
-<a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a>    <span class="n">group</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">group</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"ground_surface"</span><span class="p">)</span>
-<a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a><span class="p">)</span>
-<a id="__codelineno-1-22" name="__codelineno-1-22" href="#__codelineno-1-22"></a>
-<a id="__codelineno-1-23" name="__codelineno-1-23" href="#__codelineno-1-23"></a><span class="c1"># 3. Add the recorder to the process steps</span>
-<a id="__codelineno-1-24" name="__codelineno-1-24" href="#__codelineno-1-24"></a><span class="n">model</span><span class="o">.</span><span class="n">process</span><span class="o">.</span><span class="n">add_step</span><span class="p">(</span><span class="n">surf_disp_rec</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">"Record surface motion"</span><span class="p">)</span>
-<a id="__codelineno-1-25" name="__codelineno-1-25" href="#__codelineno-1-25"></a>
-<a id="__codelineno-1-26" name="__codelineno-1-26" href="#__codelineno-1-26"></a><span class="c1"># 4. Export the assembled model to VTK for PyVista/ParaView</span>
-<a id="__codelineno-1-27" name="__codelineno-1-27" href="#__codelineno-1-27"></a><span class="n">model</span><span class="o">.</span><span class="n">export_to_vtk</span><span class="p">(</span><span class="s2">"mesh_geometry.vtk"</span><span class="p">)</span>
-</code></pre></div>
-<p>For recorder and damping configurations, refer to the <a href="../reference/core/recorder_manager.md">Recorder Manager API Reference</a> and <a href="../reference/core/damping_manager.md">Damping Manager API Reference</a>.</p>
-<hr />
-<h2 id="what-femora-stores">What Femora Stores</h2>
-<p>For damping, recorders, and outputs, Femora tracks:
-- <strong>Damping</strong>: Viscous coefficients, target element lists, and associated frequency-damping bounds.
-- <strong>Recorders</strong>: Target node/element groups, output file names, time step frequencies (<code>dt</code>), and requested response fields.
-- <strong>Outputs</strong>: Path references and output file writers.</p>
-<hr />
-<h2 id="common-mistakes">Common Mistakes</h2>
-<details class="warning" open="open">
-<summary>Recording Too Many Nodes in 3D Models</summary>
-<p>In large-scale 3D models with hundreds of thousands of nodes, creating a recorder for all nodes will create massive files on disk, causing severe I/O bottlenecks and drastically slowing down solver execution. Always restrict recorders to targeted, named node or element <a href="tags-sources-regions-and-groups.md">Groups</a>.</p>
-</details>
-<hr />
-<h2 id="related-concepts">Related Concepts</h2>
-<ul>
-<li><a href="tags-sources-regions-and-groups.md">Tags, Sources, Regions, and Groups</a>: Learn how regions and groups partition the mesh.</li>
-<li><a href="../process-and-analysis/">Process and Analysis</a>: Understand where recorders are active during the solver run.</li>
+<li><a href="../../concepts/assembled-model/">The Assembled Model</a>: Mesh lifecycle and final assembly process.</li>
+<li><a href="../../concepts/assembly/">Assembly</a>: Local and final point merging.</li>
+<li><a href="../../concepts/partitioning-and-parallel-execution/">Partitioning</a>: The <code>Core</code> cell-data array.</li>
 </ul>
 
 
@@ -12317,7 +12695,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="August 25, 2026 02:05:35 UTC">August 25, 2026</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="August 25, 2026 03:11:18 UTC">August 25, 2026</span>
   </span>
 
     
@@ -12327,7 +12705,7 @@
     <span class="md-icon" title="Created">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M14.47 15.08 11 13V7h1.5v5.25l3.08 1.83c-.41.28-.79.62-1.11 1m-1.39 4.84c-.36.05-.71.08-1.08.08-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8c0 .37-.03.72-.08 1.08.69.1 1.33.32 1.92.64.1-.56.16-1.13.16-1.72 0-5.5-4.5-10-10-10S2 6.5 2 12s4.47 10 10 10c.59 0 1.16-.06 1.72-.16-.32-.59-.54-1.23-.64-1.92M18 15v3h-3v2h3v3h2v-3h3v-2h-3v-3z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="August 25, 2026 02:05:35 UTC">August 25, 2026</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="August 25, 2026 03:11:18 UTC">August 25, 2026</span>
   </span>
 
     
@@ -12374,6 +12752,44 @@
       
         <footer class="md-footer">
   
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+          
+          <a href="../../examples/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Gallery">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                Gallery
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../../reference/" class="md-footer__link md-footer__link--next" aria-label="Next: Overview">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                Overview
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
     
   
   <div class="md-footer-meta md-typeset">

@@ -21,6 +21,14 @@
          <lastmod>2026-08-25</lastmod>
     </url>
     <url>
+         <loc>https://femora.io/docs/concepts/analysis/</loc>
+         <lastmod>2026-08-25</lastmod>
+    </url>
+    <url>
+         <loc>https://femora.io/docs/concepts/assembled-model/</loc>
+         <lastmod>2026-08-25</lastmod>
+    </url>
+    <url>
          <loc>https://femora.io/docs/concepts/assembly/</loc>
          <lastmod>2026-08-25</lastmod>
     </url>
@@ -29,7 +37,11 @@
          <lastmod>2026-08-25</lastmod>
     </url>
     <url>
-         <loc>https://femora.io/docs/concepts/damping-recorders-and-outputs/</loc>
+         <loc>https://femora.io/docs/concepts/constraints/</loc>
+         <lastmod>2026-08-25</lastmod>
+    </url>
+    <url>
+         <loc>https://femora.io/docs/concepts/damping/</loc>
          <lastmod>2026-08-25</lastmod>
     </url>
     <url>
@@ -57,11 +69,19 @@
          <lastmod>2026-08-25</lastmod>
     </url>
     <url>
-         <loc>https://femora.io/docs/concepts/process-and-analysis/</loc>
+         <loc>https://femora.io/docs/concepts/process/</loc>
+         <lastmod>2026-08-25</lastmod>
+    </url>
+    <url>
+         <loc>https://femora.io/docs/concepts/recorders-and-actions/</loc>
          <lastmod>2026-08-25</lastmod>
     </url>
     <url>
          <loc>https://femora.io/docs/concepts/regions-and-groups/</loc>
+         <lastmod>2026-08-25</lastmod>
+    </url>
+    <url>
+         <loc>https://femora.io/docs/concepts/tags-and-ids/</loc>
          <lastmod>2026-08-25</lastmod>
     </url>
     <url>
@@ -1278,6 +1298,10 @@
     </url>
     <url>
          <loc>https://femora.io/docs/reference/tools/sections/aisc_data/</loc>
+         <lastmod>2026-08-25</lastmod>
+    </url>
+    <url>
+         <loc>https://femora.io/docs/technical-reference/mesh-data-schema/</loc>
          <lastmod>2026-08-25</lastmod>
     </url>
     <url>
