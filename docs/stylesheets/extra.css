@@ -264,6 +264,24 @@
     background: #101719;
 }
 
+.femora-result-figure {
+    display: flex;
+    justify-content: center;
+    margin: 1rem auto 1.4rem;
+}
+
+.femora-result-figure p {
+    margin: 0;
+    text-align: center;
+}
+
+.femora-result-figure img {
+    display: block;
+    width: auto;
+    max-width: min(100%, 780px);
+    margin: 0 auto;
+}
+
 .femora-embed--cantilever iframe {
     height: auto;
     aspect-ratio: 1000 / 410;
