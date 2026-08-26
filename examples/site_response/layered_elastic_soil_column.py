@@ -7,6 +7,7 @@
 
 # femora-colab-input: examples/inputs/motions/FrequencySweep.acc
 # femora-colab-input: examples/inputs/motions/FrequencySweep.time
+# femora-postprocess: examples/site_response/layered_elastic_soil_column_postprocess.py
 
 # %% [markdown]
 # # Layered Elastic Soil Column

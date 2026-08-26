@@ -13,6 +13,7 @@ import argparse
 import hashlib
 from pathlib import Path
 import sys
+from typing import Optional
 
 import jupytext
 import nbformat
@@ -24,6 +25,7 @@ SOURCE_DIRS = (
     ROOT / "examples" / "site_response",
 )
 COLAB_INPUT_PREFIX = "# femora-colab-input:"
+POSTPROCESS_PREFIX = "# femora-postprocess:"
 
 COLAB_SETUP_MARKDOWN = """## Configure the Colab runtime
 
@@ -65,6 +67,7 @@ def _discover_sources() -> tuple[Path, ...]:
             path
             for path in sorted(directory.glob("*.py"))
             if not path.name.startswith("_")
+            and not path.stem.endswith("_postprocess")
         )
     return tuple(sources)
 
@@ -78,14 +81,40 @@ def _colab_inputs(source: Path) -> tuple[str, ...]:
     return tuple(inputs)
 
 
+def _postprocess_source(source: Path) -> Optional[Path]:
+    """Return the declared companion post-processing source, if present."""
+    declarations = []
+    for line in source.read_text(encoding="utf-8").splitlines():
+        if line.startswith(POSTPROCESS_PREFIX):
+            declarations.append(line.removeprefix(POSTPROCESS_PREFIX).strip())
+    if len(declarations) > 1:
+        raise ValueError(f"{source} declares more than one post-processing file")
+    if not declarations:
+        return None
+
+    companion = (ROOT / declarations[0]).resolve()
+    try:
+        companion.relative_to(ROOT)
+    except ValueError as exc:
+        raise ValueError(
+            f"Post-processing source must remain inside the repository: {companion}"
+        ) from exc
+    if not companion.is_file():
+        raise FileNotFoundError(
+            f"Post-processing source declared by {source} was not found: {companion}"
+        )
+    return companion
+
+
 def _colab_setup_code(source: Path) -> str:
     inputs = _colab_inputs(source)
-    if not inputs:
+    postprocess_source = _postprocess_source(source)
+    if not inputs and postprocess_source is None:
         return COLAB_SETUP_CODE
 
-    return (
-        COLAB_SETUP_CODE
-        + f"""
+    setup = COLAB_SETUP_CODE
+    if inputs:
+        setup += f"""
 
 colab_inputs = {list(inputs)!r}
 input_root = Path("/content/femora_inputs")
@@ -101,7 +130,72 @@ if motion_directory.exists():
     os.environ["FEMORA_MOTIONS_DIR"] = str(motion_directory)
 print(f"Downloaded {{len(colab_inputs)}} example input files")
 """
-    )
+    if postprocess_source is not None:
+        repository_path = postprocess_source.relative_to(ROOT).as_posix()
+        setup += f"""
+
+postprocess_repository_path = {repository_path!r}
+postprocess_destination = Path("/content") / postprocess_repository_path
+postprocess_destination.parent.mkdir(parents=True, exist_ok=True)
+url = (
+    "https://raw.githubusercontent.com/GeotechUW/Femora/main/"
+    + postprocess_repository_path
+)
+urlretrieve(url, postprocess_destination)
+print(f"Downloaded post-processing source to {{postprocess_destination}}")
+"""
+    return setup
+
+
+def _postprocess_cells(source: Path) -> list:
+    """Build final result cells backed by a declared companion module."""
+    companion = _postprocess_source(source)
+    if companion is None:
+        return []
+
+    module = companion.relative_to(ROOT).with_suffix("").as_posix().replace("/", ".")
+    return [
+        nbformat.v4.new_markdown_cell(
+            """## Post-process the results
+
+Open the recorded response through Femora's results API, generate the example's
+standard plots, and display them directly in the notebook.
+""",
+            metadata={"tags": ["post-processing"]},
+        ),
+        nbformat.v4.new_code_cell(
+            f"""from IPython.display import Image, display
+from {module} import generate_results
+
+result_files = generate_results()
+for result_file in result_files:
+    display(Image(filename=str(result_file)))
+""",
+            metadata={"tags": ["post-processing"]},
+        ),
+        nbformat.v4.new_markdown_cell(
+            """## Optional response animation
+
+Movie rendering is intentionally opt-in because it can take substantially
+longer than the analysis and static result plots.
+""",
+            metadata={"tags": ["post-processing", "optional-animation"]},
+        ),
+        nbformat.v4.new_code_cell(
+            f"""from IPython.display import Video, display
+from {module} import generate_animations
+
+GENERATE_RESPONSE_ANIMATION = False
+if GENERATE_RESPONSE_ANIMATION:
+    animation_files = generate_animations()
+    for animation_file in animation_files:
+        display(Video(filename=str(animation_file), embed=True))
+else:
+    print("Set GENERATE_RESPONSE_ANIMATION = True to render the movie.")
+""",
+            metadata={"tags": ["post-processing", "optional-animation"]},
+        ),
+    ]
 
 
 def _render_notebook(source: Path) -> str:
@@ -123,6 +217,7 @@ def _render_notebook(source: Path) -> str:
             metadata={"tags": ["colab-bootstrap"]},
         ),
     ]
+    notebook.cells.extend(_postprocess_cells(source))
     notebook.metadata["kernelspec"] = {
         "display_name": "Python 3",
         "language": "python",

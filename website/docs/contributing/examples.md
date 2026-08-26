@@ -10,14 +10,16 @@ Use one lowercase category directory and one descriptive slug:
 
 ```text
 examples/site_response/layered_elastic_soil_column.py
+examples/site_response/layered_elastic_soil_column_postprocess.py
 examples/site_response/layered_elastic_soil_column.ipynb
 website/docs/examples/layered-elastic-soil-column.md
 website/docs/assets/examples/layered-elastic-soil-column/
 ```
 
-The Python file owns all executable behavior. The notebook is generated, and
-the Markdown page embeds named sections from the Python source. Do not maintain
-separate model implementations for local execution, Colab, and the website.
+The model and optional companion post-processing files own all executable
+behavior. The notebook is generated, and the Markdown page embeds named
+sections from those sources. Do not maintain separate implementations for
+local execution, Colab, and the website.
 
 ## Example Structure
 
@@ -59,6 +61,32 @@ repository input near the top of the Python source:
 The notebook generator downloads only the declared files. Motion files are
 placed below `/content/femora_inputs/motions`, and the setup cell configures
 `FEMORA_MOTIONS_DIR` before the model code executes.
+
+## Post-Processing Companions
+
+When an example includes documented results, declare its companion near the
+top of the canonical model source:
+
+```python
+# femora-postprocess: examples/site_response/layered_elastic_soil_column_postprocess.py
+```
+
+The companion remains independently executable and provides two notebook
+entry points:
+
+```python
+def generate_results() -> tuple[Path, ...]:
+    """Generate normal plots and other inexpensive outputs."""
+
+
+def generate_animations() -> tuple[Path, ...]:
+    """Generate optional, comparatively expensive animations."""
+```
+
+The generator downloads this file in Colab and adds result cells to the end of
+the model notebook. `generate_results()` runs as part of the normal workflow;
+`generate_animations()` is placed in an opt-in cell. Files ending in
+`_postprocess.py` are companions and do not generate separate notebooks.
 
 ## Notebook Generation
 
@@ -102,6 +130,7 @@ When migrating a legacy numbered example:
 - Remove working-directory mutation and machine-specific paths.
 - Review units, material properties, loading, and analysis staging.
 - Declare external Colab inputs.
+- Declare and implement a companion post-processing file when results are shown.
 - Generate and commit the notebook and interactive asset.
 - Add the page to the example gallery and MkDocs navigation.
 - Run the Python source, notebook synchronization check, and documentation
