@@ -58,25 +58,6 @@ and exposes the profile's principal amplification peaks.
 The source uses a consistent kN-m-s unit system. It converts the tabulated SI
 stiffness and mass density before creating each Femora material.
 
-## Response
-
-The animation shows the amplified horizontal deformation of the finite-element
-column during the frequency sweep. Colors identify the three physical soil
-strata; the first three mesh parts in the source form the single 10 m Dense
-Ottawa stratum.
-
-<div class="femora-video">
-  <video controls preload="metadata">
-    <source src="../../assets/examples/layered-elastic-soil-column/response.mp4" type="video/mp4">
-    Your browser does not support embedded MP4 video.
-  </video>
-</div>
-
-The numerical surface-to-base amplification follows the analytical layered-soil
-transfer function, including the principal resonance peaks.
-
-![Numerical and analytical transfer-function comparison](../assets/examples/layered-elastic-soil-column/transfer-function-comparison.png)
-
 ## Key Model Definitions
 
 === "Layers and mesh"
@@ -114,6 +95,54 @@ transfer function, including the principal resonance peaks.
     ```python
     --8<-- "examples/site_response/layered_elastic_soil_column.py:analyses-and-process"
     ```
+
+## Results And Post-Processing
+
+The post-processing script reads the recorded VTKHDF response and generates
+both results shown here.
+
+=== "Post-processing code"
+
+    Run this file after OpenSees completes the analysis:
+
+    ```powershell
+    python examples/site_response/layered_elastic_soil_column_postprocess.py
+    ```
+
+    The workflow below comes directly from the maintained post-processing
+    file. Femora handles result discovery, history extraction, partitioned
+    fields, and animation frames; the example retains its engineering choices.
+
+    ```python
+    --8<-- "examples/site_response/layered_elastic_soil_column_postprocess.py:post-processing-workflow"
+    ```
+
+    ??? example "Complete post-processing source"
+        ```python
+        --8<-- "examples/site_response/layered_elastic_soil_column_postprocess.py"
+        ```
+
+=== "Transfer function"
+
+    The numerical surface-to-base amplification follows the analytical
+    layered-soil transfer function, including the principal resonance peaks.
+
+    <div class="femora-result-figure" markdown>
+    ![Numerical and analytical transfer-function comparison](../assets/examples/layered-elastic-soil-column/transfer-function-comparison.png)
+    </div>
+
+=== "Deformed response"
+
+    The animation shows the amplified horizontal deformation during the
+    frequency sweep. Colors identify the three physical soil strata; the first
+    three mesh parts form the single 10 m Dense Ottawa stratum.
+
+    <div class="femora-video">
+      <video controls preload="metadata">
+        <source src="../../assets/examples/layered-elastic-soil-column/response.mp4" type="video/mp4">
+        Your browser does not support embedded MP4 video.
+      </video>
+    </div>
 
 ## Run The Example
 
