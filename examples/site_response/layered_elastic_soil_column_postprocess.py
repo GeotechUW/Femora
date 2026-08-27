@@ -27,7 +27,7 @@ GRAVITY = 9.81
 SURFACE_COORDINATE = np.array([0.0, 0.0, 0.0])
 MAX_FREQUENCY = 22.0
 DEFORMATION_SCALE = 15.0
-MOVIE_STRIDE = 20
+MOVIE_STRIDE = 2
 MOVIE_FRAME_RATE = 50
 
 
@@ -102,6 +102,7 @@ def save_transfer_function_plot(
     numerical_transfer_function: np.ndarray,
     analytical_frequency: np.ndarray,
     analytical_transfer_function: np.ndarray,
+    output_file: Path,
 ) -> None:
     """Save the numerical and analytical amplification comparison."""
     frequency_mask = (
@@ -127,21 +128,29 @@ def save_transfer_function_plot(
     axis.set_xlim(0.0, MAX_FREQUENCY)
     axis.grid(alpha=0.25)
     axis.legend(frameon=False)
-    figure.savefig(POSTPROCESS_DIR / "transfer-function-comparison.png", dpi=180)
+    figure.savefig(output_file, dpi=180)
     plt.close(figure)
 
 
-def save_response_movie(results: fm.results.ResultSet) -> None:
+def save_response_movie(
+    results: fm.results.ResultSet,
+    output_file: Path,
+    *,
+    deformation_scale: float = DEFORMATION_SCALE,
+    stride: int = MOVIE_STRIDE,
+    frame_rate: int = MOVIE_FRAME_RATE,
+) -> None:
     """Save an amplified deformation animation colored by physical stratum."""
-    mesh = results.mesh()
-    cell_elevation = mesh.cell_centers().points[:, 2]
-    material_layer = np.full(mesh.n_cells, 2, dtype=int)
-    material_layer[cell_elevation < -2.0] = 1
-    material_layer[cell_elevation < -8.0] = 0
-    mesh.cell_data["Physical layer"] = material_layer
+    for partition in range(results.number_of_partitions):
+        mesh = results.mesh(partition)
+        cell_elevation = mesh.cell_centers().points[:, 2]
+        material_layer = np.full(mesh.n_cells, 2, dtype=int)
+        material_layer[cell_elevation < -2.0] = 1
+        material_layer[cell_elevation < -8.0] = 0
+        mesh.cell_data["Physical layer"] = material_layer
 
     renderer = results.deformation_renderer()
-    renderer.deform_by("displacement", scale=DEFORMATION_SCALE)
+    renderer.deform_by("displacement", scale=deformation_scale)
     renderer.color_by(
         "Physical layer",
         location="cell",
@@ -150,15 +159,12 @@ def save_response_movie(results: fm.results.ResultSet) -> None:
         show_scalar_bar=False,
     )
     renderer.set_view(
-        "xz",
-        parallel_projection=True,
-        zoom=1.15,
         background="#f6f4ef",
     )
     renderer.write(
-        POSTPROCESS_DIR / "response.mp4",
-        stride=MOVIE_STRIDE,
-        frame_rate=MOVIE_FRAME_RATE,
+        output_file,
+        stride=stride,
+        frame_rate=frame_rate,
     )
 
 
@@ -188,6 +194,7 @@ def generate_results() -> tuple[Path, ...]:
             numerical_tf,
             analytical_frequency,
             analytical_tf,
+            POSTPROCESS_DIR / "transfer-function-comparison.png",
         )
     return (POSTPROCESS_DIR / "transfer-function-comparison.png",)
 
@@ -197,7 +204,7 @@ def generate_animations() -> tuple[Path, ...]:
     POSTPROCESS_DIR.mkdir(parents=True, exist_ok=True)
     result_pattern = str(RESULTS_DIR / "site_response*.vtkhdf")
     with fm.results.open(result_pattern) as results:
-        save_response_movie(results)
+        save_response_movie(results, POSTPROCESS_DIR / "response.mp4")
     return (POSTPROCESS_DIR / "response.mp4",)
 # --8<-- [end:post-processing-workflow]
 

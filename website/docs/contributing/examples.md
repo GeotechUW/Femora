@@ -88,6 +88,21 @@ the model notebook. `generate_results()` runs as part of the normal workflow;
 `generate_animations()` is placed in an opt-in cell. Files ending in
 `_postprocess.py` are companions and do not generate separate notebooks.
 
+Declare another repository source when a companion imports shared example
+logic that is not part of the installed package:
+
+```python
+# femora-colab-source: examples/site_response/shared_postprocessing.py
+```
+
+For an example that requires a Colab-only runtime override, declare it in the
+model source. This is useful when the documented local model is partitioned but
+the packaged Colab OpenSees runtime is serial:
+
+```python
+# femora-colab-env: FEMORA_EXAMPLE_PARTITIONS=0
+```
+
 ## Notebook Generation
 
 The generator discovers curated sources in the directories listed by

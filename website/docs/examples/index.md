@@ -61,4 +61,46 @@ Browse complete models organized by engineering application.
       <span class="learning-card__link">View example <span aria-hidden="true">&rarr;</span></span>
     </div>
   </a>
+  <a class="learning-card" href="deconvolved-ricker-site-response/">
+    <div class="learning-card__preview">
+      <iframe
+        src="../assets/examples/deconvolved-ricker-site-response/index.html"
+        title="Deconvolved Ricker-wave site-response preview"
+        loading="lazy"
+        tabindex="-1"
+      ></iframe>
+    </div>
+    <div class="learning-card__body">
+      <p class="learning-card__sequence">Site response</p>
+      <h2>Deconvolved Ricker-Wave Site Response</h2>
+      <p>Calculate a base motion from a prescribed surface pulse, then verify it with a layered finite-element model.</p>
+      <div class="learning-card__meta" aria-label="Example metadata">
+        <span>Deconvolution</span>
+        <span>Ricker wave</span>
+        <span>Transient</span>
+      </div>
+      <span class="learning-card__link">View example <span aria-hidden="true">&rarr;</span></span>
+    </div>
+  </a>
+  <a class="learning-card" href="nonlinear-layered-soil-column/">
+    <div class="learning-card__preview">
+      <iframe
+        src="../assets/examples/nonlinear-layered-soil-column/index.html"
+        title="Nonlinear layered soil-column preview"
+        loading="lazy"
+        tabindex="-1"
+      ></iframe>
+    </div>
+    <div class="learning-card__body">
+      <p class="learning-card__sequence">Site response</p>
+      <h2>Nonlinear Layered Soil Column</h2>
+      <p>Stage multi-yield soil materials under gravity, activate plasticity, and inspect amplification and hysteresis.</p>
+      <div class="learning-card__meta" aria-label="Example metadata">
+        <span>Nonlinear</span>
+        <span>Material staging</span>
+        <span>Hysteresis</span>
+      </div>
+      <span class="learning-card__link">View example <span aria-hidden="true">&rarr;</span></span>
+    </div>
+  </a>
 </div>

@@ -25,6 +25,8 @@ SOURCE_DIRS = (
     ROOT / "examples" / "site_response",
 )
 COLAB_INPUT_PREFIX = "# femora-colab-input:"
+COLAB_ENV_PREFIX = "# femora-colab-env:"
+COLAB_SOURCE_PREFIX = "# femora-colab-source:"
 POSTPROCESS_PREFIX = "# femora-postprocess:"
 
 COLAB_SETUP_MARKDOWN = """## Configure the Colab runtime
@@ -81,6 +83,56 @@ def _colab_inputs(source: Path) -> tuple[str, ...]:
     return tuple(inputs)
 
 
+def _colab_environment(source: Path) -> dict[str, str]:
+    """Read Colab-only environment assignments from a canonical source."""
+    environment = {}
+    for line in source.read_text(encoding="utf-8").splitlines():
+        if not line.startswith(COLAB_ENV_PREFIX):
+            continue
+        declaration = line.removeprefix(COLAB_ENV_PREFIX).strip()
+        key, separator, value = declaration.partition("=")
+        if not separator or not key.strip():
+            raise ValueError(
+                f"Invalid Colab environment declaration in {source}: {declaration}"
+            )
+        environment[key.strip()] = value.strip()
+    return environment
+
+
+def _repository_source(owner: Path, declaration: str) -> Path:
+    """Resolve and validate a repository-relative source declaration."""
+    resolved = (ROOT / declaration).resolve()
+    try:
+        resolved.relative_to(ROOT)
+    except ValueError as exc:
+        raise ValueError(
+            f"Source declared by {owner} must remain inside the repository: {resolved}"
+        ) from exc
+    if not resolved.is_file():
+        raise FileNotFoundError(f"Source declared by {owner} was not found: {resolved}")
+    return resolved
+
+
+def _additional_colab_sources(source: Path) -> tuple[Path, ...]:
+    """Resolve transitive source dependencies required by a Colab companion."""
+    discovered = []
+    visited = {source.resolve()}
+    pending = [source]
+    while pending:
+        current = pending.pop(0)
+        for line in current.read_text(encoding="utf-8").splitlines():
+            if not line.startswith(COLAB_SOURCE_PREFIX):
+                continue
+            declaration = line.removeprefix(COLAB_SOURCE_PREFIX).strip()
+            dependency = _repository_source(current, declaration)
+            if dependency in visited:
+                continue
+            visited.add(dependency)
+            discovered.append(dependency)
+            pending.append(dependency)
+    return tuple(discovered)
+
+
 def _postprocess_source(source: Path) -> Optional[Path]:
     """Return the declared companion post-processing source, if present."""
     declarations = []
@@ -92,27 +144,30 @@ def _postprocess_source(source: Path) -> Optional[Path]:
     if not declarations:
         return None
 
-    companion = (ROOT / declarations[0]).resolve()
-    try:
-        companion.relative_to(ROOT)
-    except ValueError as exc:
-        raise ValueError(
-            f"Post-processing source must remain inside the repository: {companion}"
-        ) from exc
-    if not companion.is_file():
-        raise FileNotFoundError(
-            f"Post-processing source declared by {source} was not found: {companion}"
-        )
-    return companion
+    return _repository_source(source, declarations[0])
 
 
 def _colab_setup_code(source: Path) -> str:
     inputs = _colab_inputs(source)
+    environment = _colab_environment(source)
     postprocess_source = _postprocess_source(source)
-    if not inputs and postprocess_source is None:
+    additional_sources = list(_additional_colab_sources(source))
+    if postprocess_source is not None:
+        additional_sources.insert(0, postprocess_source)
+        additional_sources.extend(_additional_colab_sources(postprocess_source))
+    additional_sources = list(dict.fromkeys(additional_sources))
+
+    if not inputs and not environment and not additional_sources:
         return COLAB_SETUP_CODE
 
     setup = COLAB_SETUP_CODE
+    if environment:
+        setup += f"""
+
+colab_environment = {environment!r}
+os.environ.update(colab_environment)
+print(f"Configured Colab environment: {{', '.join(colab_environment)}}")
+"""
     if inputs:
         setup += f"""
 
@@ -130,19 +185,17 @@ if motion_directory.exists():
     os.environ["FEMORA_MOTIONS_DIR"] = str(motion_directory)
 print(f"Downloaded {{len(colab_inputs)}} example input files")
 """
-    if postprocess_source is not None:
-        repository_path = postprocess_source.relative_to(ROOT).as_posix()
+    if additional_sources:
+        repository_paths = [path.relative_to(ROOT).as_posix() for path in additional_sources]
         setup += f"""
 
-postprocess_repository_path = {repository_path!r}
-postprocess_destination = Path("/content") / postprocess_repository_path
-postprocess_destination.parent.mkdir(parents=True, exist_ok=True)
-url = (
-    "https://raw.githubusercontent.com/GeotechUW/Femora/main/"
-    + postprocess_repository_path
-)
-urlretrieve(url, postprocess_destination)
-print(f"Downloaded post-processing source to {{postprocess_destination}}")
+colab_sources = {repository_paths!r}
+for repository_path in colab_sources:
+    destination = Path("/content") / repository_path
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    url = "https://raw.githubusercontent.com/GeotechUW/Femora/main/" + repository_path
+    urlretrieve(url, destination)
+print(f"Downloaded {{len(colab_sources)}} companion source files")
 """
     return setup
 

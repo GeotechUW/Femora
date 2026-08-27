@@ -7,12 +7,16 @@
 
 # femora-colab-input: examples/inputs/motions/FrequencySweep.acc
 # femora-colab-input: examples/inputs/motions/FrequencySweep.time
+# femora-colab-env: FEMORA_EXAMPLE_PARTITIONS=0
+# femora-postprocess: examples/site_response/partitioned_layered_soil_domain_postprocess.py
 
 # %% [markdown]
 # # Partitioned Layered Soil Domain
 #
 # Extend the layered soil column to a 10 m by 10 m domain and partition its
-# finite-element mesh into eight connected subdomains with METIS.
+# finite-element mesh into eight connected subdomains with METIS. The generated
+# Colab notebook uses the same model in forced-serial mode because its packaged
+# OpenSees runtime is not MPI-enabled.
 
 # %%
 """Build a partitioned 3D layered site-response model with the current API."""
@@ -120,9 +124,10 @@ for name, shear_modulus, unit_weight, thickness, element_size in LAYERS:
 # %% [markdown]
 # ## Partition and constrain the domain
 #
-# METIS partitions the cell-connectivity graph into eight connected,
+# By default, METIS partitions the cell-connectivity graph into eight connected,
 # approximately balanced subdomains. Set `FEMORA_EXAMPLE_PARTITIONS=0` to build
-# the same model as a forced-serial domain.
+# the same model as a forced-serial domain; the Colab setup applies this override
+# automatically.
 
 # %%
 # --8<-- [start:partition-and-constraints]

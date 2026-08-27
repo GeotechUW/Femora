@@ -21,6 +21,7 @@ and uses METIS to divide its finite-element cells among eight processor domains.
 | **Partitioning** | Eight connected METIS subdomains |
 | **Analysis** | Gravity followed by frequency-sweep excitation |
 | **Output** | Distributed VTKHDF response |
+| **Execution** | MPI locally; forced serial in Colab |
 
 ## Partitioned Model
 
@@ -36,14 +37,18 @@ Each color is a core assignment stored on the assembled cells. The colors do
 not represent materials: the five vertical mesh parts still describe the same
 three physical soil strata used by the column example.
 
-## From Column To Domain
+## Key Model Definitions
 
 The material profile, damping, vertical element sizes, base motion, and laminar
 constraints remain unchanged. Expanding the horizontal grid from one brick per
 elevation to 100 bricks per elevation creates a model large enough to illustrate
 domain decomposition while preserving one-dimensional free-field behavior.
 
-=== "Domain mesh"
+=== "Layers and domain mesh"
+
+    Each layer creates its own material, element definition, and volumetric
+    mesh part. The horizontal discretization expands each elevation to a
+    10-by-10 grid of brick elements.
 
     ```python
     --8<-- "examples/site_response/partitioned_layered_soil_domain.py:model-and-mesh"
@@ -51,29 +56,71 @@ domain decomposition while preserving one-dimensional free-field behavior.
 
 === "Partitioning and constraints"
 
+    The assembly section assigns the complete layered domain to METIS. Laminar
+    constraints preserve free-field motion after the partitioned mesh is
+    assembled.
+
     ```python
     --8<-- "examples/site_response/partitioned_layered_soil_domain.py:partition-and-constraints"
     ```
 
 === "Loading and analysis"
 
+    The frequency sweep, recorder, and staged analyses match the column
+    example. Parallel runs select a parallel numberer and MUMPS system.
+
     ```python
     --8<-- "examples/site_response/partitioned_layered_soil_domain.py:analysis"
     ```
 
-## Response
+## Results And Post-Processing
 
-The amplified deformation below shows the uniform horizontal response across
-the wider domain and the propagation of motion through the layered profile.
+The companion opens every `partitioned_site_response*.vtkhdf` file as one
+logical result set. Point searches span all partitions, while movie frames are
+read and rendered partition by partition without constructing one global
+transient response array.
 
-<div class="femora-video">
-  <video controls preload="metadata">
-    <source src="../../assets/examples/partitioned-layered-soil-domain/response.mp4" type="video/mp4">
-    Your browser does not support embedded MP4 video.
-  </video>
-</div>
+=== "Post-processing code"
 
-![Numerical and analytical transfer-function comparison](../assets/examples/partitioned-layered-soil-domain/transfer-function-comparison.png)
+    Run the companion after the serial or MPI analysis completes:
+
+    ```powershell
+    python examples/site_response/partitioned_layered_soil_domain_postprocess.py
+    ```
+
+    This workflow comes directly from the maintained companion file.
+
+    ```python
+    --8<-- "examples/site_response/partitioned_layered_soil_domain_postprocess.py:post-processing-workflow"
+    ```
+
+    ??? example "Complete post-processing source"
+        ```python
+        --8<-- "examples/site_response/partitioned_layered_soil_domain_postprocess.py"
+        ```
+
+=== "Transfer function"
+
+    A surface point is located across the distributed files. Its numerical
+    surface-to-base amplification is compared with the same analytical layered
+    profile used for the column example.
+
+    <div class="femora-result-figure" markdown>
+    ![Numerical and analytical transfer-function comparison](../assets/examples/partitioned-layered-soil-domain/transfer-function-comparison.png)
+    </div>
+
+=== "Deformed response"
+
+    The amplified deformation shows uniform horizontal response across the
+    wider domain and propagation through the layered profile. All available
+    partition meshes are rendered in synchronized frames.
+
+    <div class="femora-video">
+      <video controls preload="metadata">
+        <source src="../../assets/examples/partitioned-layered-soil-domain/response.mp4" type="video/mp4">
+        Your browser does not support embedded MP4 video.
+      </video>
+    </div>
 
 ## Run The Example
 
@@ -89,6 +136,13 @@ the same domain in forced-serial mode, set:
 $env:FEMORA_EXAMPLE_PARTITIONS = "0"
 python examples/site_response/partitioned_layered_soil_domain.py
 ```
+
+The Colab notebook sets this forced-serial override automatically because the
+packaged browser runtime is not MPI-enabled. The model geometry, loading, and
+post-processing remain the same; only distributed execution is disabled.
+
+After execution, the result companion discovers either the single serial file
+or all MPI partition files through the same filename pattern.
 
 ??? example "Complete source"
     ```python
