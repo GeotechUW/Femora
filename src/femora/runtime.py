@@ -350,14 +350,19 @@ def run(
             if event == "START":
                 if progress_bar is not None:
                     progress_bar.close()
+                unit = fields[4] if len(fields) > 4 else "step"
+                parse_value = float if unit == "s" else int
+                initial = parse_value(fields[5]) if len(fields) > 5 else 0
                 progress_bar = tqdm(
-                    total=int(fields[3]),
+                    total=parse_value(fields[3]),
+                    initial=initial,
                     desc=name,
-                    unit="step",
+                    unit=unit,
                     dynamic_ncols=True,
                 )
             elif event == "UPDATE" and progress_bar is not None:
-                current = int(fields[3])
+                unit = fields[5] if len(fields) > 5 else "step"
+                current = float(fields[3]) if unit == "s" else int(fields[3])
                 progress_bar.update(max(0, current - progress_bar.n))
             elif event == "ERROR":
                 analysis_error = (

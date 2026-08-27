@@ -81,6 +81,7 @@ class AnalysisManager:
         test: Test,
         integrator: StaticIntegrator,
         num_steps: int,
+        max_retries: int = 10,
     ) -> Analysis:
         """Create and register a static Analysis.
 
@@ -93,6 +94,7 @@ class AnalysisManager:
             test: Convergence test.
             integrator: Static integrator.
             num_steps: Number of static analysis steps.
+            max_retries: Same-step retries before reporting failure.
 
         Returns:
             The registered Analysis instance.
@@ -108,6 +110,7 @@ class AnalysisManager:
                 test=test,
                 integrator=integrator,
                 num_steps=num_steps,
+                max_retries=max_retries,
             )
         )
 
@@ -127,6 +130,7 @@ class AnalysisManager:
         dt_max: float | None = None,
         num_sublevels: int | None = None,
         num_substeps: int | None = None,
+        max_retries: int = 10,
     ) -> Analysis:
         """Create and register a transient Analysis.
 
@@ -147,6 +151,7 @@ class AnalysisManager:
             dt_max: Optional last time step for a linear time-step ramp.
             num_sublevels: Optional transient sublevel count for retry logic.
             num_substeps: Optional transient substep count for retry logic.
+            max_retries: Same-step retries before substepping or failure.
 
         Returns:
             The registered Analysis instance.
@@ -168,6 +173,7 @@ class AnalysisManager:
                 dt_max=dt_max,
                 num_sublevels=num_sublevels,
                 num_substeps=num_substeps,
+                max_retries=max_retries,
             )
         )
 
@@ -188,6 +194,7 @@ class AnalysisManager:
         final_time: float | None = None,
         num_sublevels: int | None = None,
         num_substeps: int | None = None,
+        max_retries: int = 10,
     ) -> Analysis:
         """Create and register a variable-transient Analysis.
 
@@ -208,6 +215,7 @@ class AnalysisManager:
                 must be provided.
             num_sublevels: Optional transient sublevel count for retry logic.
             num_substeps: Optional transient substep count for retry logic.
+            max_retries: Same-step retries before substepping or failure.
 
         Returns:
             The registered Analysis instance.
@@ -230,6 +238,7 @@ class AnalysisManager:
                 jd=jd,
                 num_sublevels=num_sublevels,
                 num_substeps=num_substeps,
+                max_retries=max_retries,
             )
         )
 
@@ -262,6 +271,9 @@ class AnalysisManager:
         constraint_handler = options.get(
             "constraint_handler", self.constraint.transformation()
         )
+        max_retries = options.get("max_retries", 10)
+        num_sublevels = options.get("num_sublevels")
+        num_substeps = options.get("num_substeps")
         return self.add(
             Analysis(
                 analysis_name,
@@ -275,6 +287,9 @@ class AnalysisManager:
                 num_steps=num_steps,
                 final_time=final_time,
                 dt=dt,
+                max_retries=max_retries,
+                num_sublevels=num_sublevels,
+                num_substeps=num_substeps,
             )
         )
 

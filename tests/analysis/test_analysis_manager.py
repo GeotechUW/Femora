@@ -87,6 +87,9 @@ def test_add_analysis_tags_and_tcl(mesh_maker):
     tcl = analysis.to_tcl()
     assert "analysis Transient" in tcl
     assert "constraints Plain" in tcl
+    assert tcl.index("test NormUnbalance") < tcl.index("algorithm Newton")
+    assert "while {$Ok != 0 && $FemoraRetry < 10}" in tcl
+    assert "FemoraAnalyzeTransientStep 0.01 0" in tcl
     assert "FEMORA_PROGRESS|START|TransientRun|$FemoraAnalysisTotal" in tcl
     assert "if {$Ok != 0}" in tcl
     assert "FEMORA_PROGRESS|UPDATE|TransientRun" in tcl
@@ -114,7 +117,54 @@ def test_transient_analysis_supports_linear_dt_ramp(mesh_maker):
     assert "set dt_min 0.001" in tcl
     assert "set dt_max 0.1" in tcl
     assert "double($AnalysisStep)/($numSteps-1)*($dt_max-$dt_min)" in tcl
-    assert "set Ok [analyze 1 $dt]" in tcl
+    assert "set Ok [FemoraAnalyzeTransientStep $dt 0]" in tcl
+
+
+def test_transient_analysis_exports_optional_substep_recovery(mesh_maker):
+    am = mesh_maker.analysis
+    handler, numberer, system, algorithm, test, integrator = _build_transient_stack(am)
+
+    analysis = am.transient(
+        name="RecoveringTransient",
+        constraint_handler=handler,
+        numberer=numberer,
+        system=system,
+        algorithm=algorithm,
+        test=test,
+        integrator=integrator,
+        num_steps=2,
+        dt=0.01,
+        max_retries=3,
+        num_sublevels=2,
+        num_substeps=4,
+    )
+
+    tcl = analysis.to_tcl()
+    assert "while {$Ok != 0 && $FemoraRetry < 3}" in tcl
+    assert "if {$level >= 2}" in tcl
+    assert "$dt / double(4)" in tcl
+    assert "$FemoraSubstep < 4" in tcl
+
+
+def test_final_time_analysis_reports_physical_time(mesh_maker):
+    am = mesh_maker.analysis
+    handler, numberer, system, algorithm, test, integrator = _build_transient_stack(am)
+
+    analysis = am.transient(
+        name="TimeBasedTransient",
+        constraint_handler=handler,
+        numberer=numberer,
+        system=system,
+        algorithm=algorithm,
+        test=test,
+        integrator=integrator,
+        final_time=4.0,
+        dt=0.01,
+    )
+
+    tcl = analysis.to_tcl()
+    assert "FEMORA_PROGRESS|START|TimeBasedTransient|4.0|s|[getTime]" in tcl
+    assert "FEMORA_PROGRESS|UPDATE|TimeBasedTransient|[getTime]|4.0|s" in tcl
 
 
 def test_transient_dt_ramp_requires_complete_range(mesh_maker):

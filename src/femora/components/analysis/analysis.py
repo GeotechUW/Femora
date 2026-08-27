@@ -83,6 +83,7 @@ class Analysis(AnalysisComponent):
         jd: Optional[int] = None,
         num_sublevels: Optional[int] = None,
         num_substeps: Optional[int] = None,
+        max_retries: int = 10,
     ):
         """Initializes the Analysis with all required components.
 
@@ -115,6 +116,8 @@ class Analysis(AnalysisComponent):
             jd: Number of iterations desired at each step. Required for VariableTransient.
             num_sublevels: Number of sublevels for transient analysis failure recovery.
             num_substeps: Number of substeps to try at each sublevel.
+            max_retries: Number of times to retry a failed increment at the same
+                step size before using substepping or reporting failure.
 
         Raises:
             ValueError: If integrator type is incompatible with analysis type,
@@ -197,8 +200,16 @@ class Analysis(AnalysisComponent):
         if (num_sublevels is not None and num_substeps is None) or (num_sublevels is None and num_substeps is not None):
             raise ValueError("Both num_sublevels and num_substeps must be provided if either is specified.")
 
+        if num_sublevels is not None and num_sublevels < 1:
+            raise ValueError("num_sublevels must be at least 1.")
+        if num_substeps is not None and num_substeps < 2:
+            raise ValueError("num_substeps must be at least 2.")
+        if isinstance(max_retries, bool) or not isinstance(max_retries, int) or max_retries < 0:
+            raise ValueError("max_retries must be a non-negative integer.")
+
         self.num_sublevels = num_sublevels
         self.num_substeps = num_substeps
+        self.max_retries = max_retries
 
     def to_tcl(self) -> str:
         """Render this analysis configuration as OpenSees Tcl commands.
@@ -220,12 +231,16 @@ class Analysis(AnalysisComponent):
         commands.append(self.constraint_handler.to_tcl())
         commands.append(self.numberer.to_tcl())
         commands.append(self.system.to_tcl())
-        commands.append(self.algorithm.to_tcl())
         commands.append(self.test.to_tcl())
+        # Iterative algorithms obtain the active convergence test when created.
+        commands.append(self.algorithm.to_tcl())
         commands.append(self.integrator.to_tcl())
 
         # Add analysis command
         commands.append(f"analysis {self.analysis_type}")
+
+        if self.analysis_type in ["Transient", "VariableTransient"]:
+            commands.extend(self._transient_recovery_procedure(progress_name))
 
         if self.final_time is not None:
             total_steps = (
@@ -240,21 +255,32 @@ class Analysis(AnalysisComponent):
                 "set FemoraAnalysisStep 0",
                 f"set FemoraAnalysisTotal {total_steps}",
                 "set FemoraProgressStride [expr {max(1, int(ceil(double($FemoraAnalysisTotal) / 1000.0)))}]",
-                f'if {{$pid == 0}} {{puts "FEMORA_PROGRESS|START|{progress_name}|$FemoraAnalysisTotal"; flush stdout}}',
             ]
         )
+        if self.final_time is not None:
+            commands.append(
+                f'if {{$pid == 0}} {{puts "FEMORA_PROGRESS|START|{progress_name}|{self.final_time}|s|[getTime]"; flush stdout}}'
+            )
+        else:
+            commands.append(
+                f'if {{$pid == 0}} {{puts "FEMORA_PROGRESS|START|{progress_name}|$FemoraAnalysisTotal|step|0"; flush stdout}}'
+            )
 
         # Run one increment at a time so failures and progress remain observable.
         if self.analysis_type == "Static":
             commands.append("while {$FemoraAnalysisStep < $FemoraAnalysisTotal} {")
-            commands.append("\tset Ok [analyze 1]")
+            commands.extend(self._analyze_with_retries("analyze 1", progress_name))
             commands.extend(self._step_status_commands(progress_name))
             commands.append("}")
         elif self.analysis_type in ["Transient", "VariableTransient"]:
             if self.final_time is not None:
                 commands.append("while {[getTime] < %f} {" % self.final_time)
-                commands.append(f"\tset Ok [analyze 1 {self.dt}]")
-                commands.extend(self._step_status_commands(progress_name))
+                commands.append(f"\tset Ok [FemoraAnalyzeTransientStep {self.dt} 0]")
+                commands.extend(
+                    self._step_status_commands(
+                        progress_name, final_time=self.final_time
+                    )
+                )
                 commands.append("}")
             elif self.analysis_type == "Transient" and self.dt_min is not None and self.dt_max is not None:
                 commands.append(f"set numSteps {self.num_steps}")
@@ -266,12 +292,12 @@ class Analysis(AnalysisComponent):
                 commands.append("\t} else {")
                 commands.append("\t\tset dt [expr {$dt_min + double($AnalysisStep)/($numSteps-1)*($dt_max-$dt_min)}]")
                 commands.append("\t}")
-                commands.append("\tset Ok [analyze 1 $dt]")
+                commands.append("\tset Ok [FemoraAnalyzeTransientStep $dt 0]")
                 commands.extend(self._step_status_commands(progress_name))
                 commands.append("}")
             else:
                 commands.append("while {$FemoraAnalysisStep < $FemoraAnalysisTotal} {")
-                commands.append(f"\tset Ok [analyze 1 {self.dt}]")
+                commands.append(f"\tset Ok [FemoraAnalyzeTransientStep {self.dt} 0]")
                 commands.extend(self._step_status_commands(progress_name))
                 commands.append("}")
 
@@ -280,9 +306,60 @@ class Analysis(AnalysisComponent):
 
         return "\n".join(commands)
 
+    def _analyze_with_retries(
+        self, analyze_command: str, progress_name: str
+    ) -> list[str]:
+        """Return an indented Tcl block that retries one analysis increment."""
+        return [
+            f"\tset Ok [{analyze_command}]",
+            "\tset FemoraRetry 0",
+            f"\twhile {{$Ok != 0 && $FemoraRetry < {self.max_retries}}} {{",
+            "\t\tincr FemoraRetry",
+            f'\t\tif {{$pid == 0}} {{puts "FEMORA_PROGRESS|RETRY|{progress_name}|$FemoraRetry|{self.max_retries}"; flush stdout}}',
+            f"\t\tset Ok [{analyze_command}]",
+            "\t}",
+        ]
+
+    def _transient_recovery_procedure(self, progress_name: str) -> list[str]:
+        """Return Tcl support for bounded retries and optional substepping."""
+        max_levels = self.num_sublevels or 0
+        num_substeps = self.num_substeps or 2
+        return [
+            "proc FemoraAnalyzeTransientStep {dt level} {",
+            "\tglobal pid",
+            "\tset Ok [analyze 1 $dt]",
+            "\tset FemoraRetry 0",
+            f"\twhile {{$Ok != 0 && $FemoraRetry < {self.max_retries}}} {{",
+            "\t\tincr FemoraRetry",
+            f'\t\tif {{$pid == 0}} {{puts "FEMORA_PROGRESS|RETRY|{progress_name}|$FemoraRetry|{self.max_retries}|$dt"; flush stdout}}',
+            "\t\tset Ok [analyze 1 $dt]",
+            "\t}",
+            "\tif {$Ok == 0} {return 0}",
+            f"\tif {{$level >= {max_levels}}} {{return $Ok}}",
+            f"\tset FemoraSubstepDt [expr {{$dt / double({num_substeps})}}]",
+            f"\tfor {{set FemoraSubstep 0}} {{$FemoraSubstep < {num_substeps}}} {{incr FemoraSubstep}} {{",
+            "\t\tset Ok [FemoraAnalyzeTransientStep $FemoraSubstepDt [expr {$level + 1}]]",
+            "\t\tif {$Ok != 0} {return $Ok}",
+            "\t}",
+            "\treturn 0",
+            "}",
+        ]
+
     @staticmethod
-    def _step_status_commands(progress_name: str) -> list[str]:
+    def _step_status_commands(
+        progress_name: str, final_time: float | None = None
+    ) -> list[str]:
         """Return Tcl commands that report progress and stop on failed steps."""
+        if final_time is None:
+            update_command = (
+                f'\t\tputs "FEMORA_PROGRESS|UPDATE|{progress_name}|'
+                '$FemoraAnalysisStep|$FemoraAnalysisTotal|step"'
+            )
+        else:
+            update_command = (
+                f'\t\tputs "FEMORA_PROGRESS|UPDATE|{progress_name}|'
+                f'[getTime]|{final_time}|s"'
+            )
         return [
             "\tif {$Ok != 0} {",
             f'\t\tif {{$pid == 0}} {{puts stderr "FEMORA_PROGRESS|ERROR|{progress_name}|[expr {{$FemoraAnalysisStep + 1}}]|$Ok"; flush stderr}}',
@@ -290,7 +367,7 @@ class Analysis(AnalysisComponent):
             "\t}",
             "\tincr FemoraAnalysisStep",
             "\tif {$pid == 0 && (($FemoraAnalysisStep % $FemoraProgressStride) == 0 || $FemoraAnalysisStep == $FemoraAnalysisTotal)} {",
-            f'\t\tputs "FEMORA_PROGRESS|UPDATE|{progress_name}|$FemoraAnalysisStep|$FemoraAnalysisTotal"',
+            update_command,
             "\t\tflush stdout",
             "\t}",
         ]

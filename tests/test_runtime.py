@@ -27,10 +27,11 @@ class _FakeTqdm:
     instances = []
     messages = []
 
-    def __init__(self, *, total, desc, **_kwargs):
+    def __init__(self, *, total, desc, initial=0, unit="step", **_kwargs):
         self.total = total
         self.desc = desc
-        self.n = 0
+        self.n = initial
+        self.unit = unit
         self.closed = False
         self.instances.append(self)
 
@@ -117,6 +118,26 @@ def test_run_tracks_managed_analysis_progress(tmp_path, monkeypatch):
     assert len(_FakeTqdm.instances) == 1
     assert _FakeTqdm.instances[0].n == 10
     assert _FakeTqdm.instances[0].closed
+
+
+def test_run_tracks_final_time_as_seconds(tmp_path, monkeypatch):
+    script = tmp_path / "model.tcl"
+    executable = tmp_path / "OpenSees"
+    script.write_text("wipe\n", encoding="ascii")
+    executable.write_text("", encoding="ascii")
+    _configure_process(
+        monkeypatch,
+        "FEMORA_PROGRESS|START|Dynamic response|40.0|s|2.0\n"
+        "FEMORA_PROGRESS|UPDATE|Dynamic response|2.5|40.0|s\n"
+        "FEMORA_PROGRESS|UPDATE|Dynamic response|40.0|40.0|s\n",
+    )
+
+    completed = runtime.run(script, executable=executable)
+
+    assert completed.returncode == 0
+    assert _FakeTqdm.instances[0].total == 40.0
+    assert _FakeTqdm.instances[0].unit == "s"
+    assert _FakeTqdm.instances[0].n == 40.0
 
 
 def test_run_raises_when_analysis_reports_failure(tmp_path, monkeypatch):
