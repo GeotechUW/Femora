@@ -215,6 +215,8 @@ def export_to_tcl(model, filename=None, progress_callback=None, decimals=5):
             mass      = model.assembled_mesh.point_data["Mass"]
             num_nodes = model.assembled_mesh.n_points
             wroted    = zeros((num_nodes, len(num_cores)), dtype=bool) # to keep track of the nodes that have been written
+            core_to_idx = {int(core): idx for idx, core in enumerate(num_cores)}
+            node_owner = np.full(num_nodes, -1, dtype=int)
             nodeTags  = arange(model._start_nodetag,
                                model._start_nodetag + num_nodes,
                                dtype=int)
@@ -233,19 +235,15 @@ def export_to_tcl(model, filename=None, progress_callback=None, decimals=5):
                 f.write("if {$pid ==" + str(core) + "} {\n")
                 # writing nodes
                 for pid in pids:
-                    if not wroted[pid][core]:
+                    core_idx = core_to_idx[int(core)]
+                    if not wroted[pid][core_idx]:
                         # Resolve potential ghost node sentinels back to real DOFs
                         raw_ndf = ndfs[pid]
                         real_ndf = GhostNodeElement.resolve_ndf(raw_ndf) if raw_ndf >= 1000 else raw_ndf
                         f.write(f"\tnode {nodeTags[pid]} {round(nodes[pid][0], decimals)} {round(nodes[pid][1], decimals)} {round(nodes[pid][2], decimals)} -ndf {real_ndf}\n")
-
-                        mass_vec = mass[pid]
-                        mass_vec = mass_vec[:real_ndf]
-                        # if any of the mass vector is not zero then write it
-                        if abs(mass_vec).sum() > 1e-6:
-                            f.write(f"\tmass {nodeTags[pid]} {' '.join(map(str, mass_vec))}\n")
-                        # write them mass for that node
-                        wroted[pid][core] = True
+                        if node_owner[pid] < 0:
+                            node_owner[pid] = int(core)
+                        wroted[pid][core_idx] = True
 
                 eleclass = model.element.get(elementClassTag[i])
                 nodeTag = [nodeTags[pid] for pid in pids]
@@ -254,6 +252,22 @@ def export_to_tcl(model, filename=None, progress_callback=None, decimals=5):
                 f.write("}\n")
                 if progress_callback:
                     progress_callback((i / model.assembled_mesh.n_cells) * 45 + 5, "writing nodes and elements")
+
+            # Emit each assembled node mass once, on the node's owner PID.
+            # The node itself is still declared on every PID that uses it.
+            f.write("\n# Nodal masses ======================================\n")
+            for core in num_cores:
+                owned_nodes = where(node_owner == int(core))[0]
+                if owned_nodes.size == 0:
+                    continue
+                f.write("if {$pid ==" + str(core) + "} {\n")
+                for node_idx in owned_nodes:
+                    raw_ndf = ndfs[node_idx]
+                    real_ndf = GhostNodeElement.resolve_ndf(raw_ndf) if raw_ndf >= 1000 else raw_ndf
+                    mass_vec = mass[node_idx][:real_ndf]
+                    if abs(mass_vec).sum() > 1e-6:
+                        f.write(f"\tmass {nodeTags[node_idx]} {' '.join(map(str, mass_vec))}\n")
+                f.write("}\n")
 
             # notify EmbbededBeamSolidInterface event
             model.events.emit(FemoraEvent.INTERFACE_ELEMENTS_TCL, file_handle=f)
