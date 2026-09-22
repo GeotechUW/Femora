@@ -40,5 +40,6 @@ nav:
           - 'Partitioned Layered Soil Domain': examples/partitioned-layered-soil-domain.md
           - 'Deconvolved Ricker-Wave Site Response': examples/deconvolved-ricker-site-response.md
           - 'Nonlinear Layered Soil Column': examples/nonlinear-layered-soil-column.md
+          - 'Laterally Loaded Pile': examples/laterally-loaded-pile.md
   - 'Technical Reference':
       - 'Mesh Data Schema': technical-reference/mesh-data-schema.md

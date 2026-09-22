@@ -514,6 +514,63 @@
     margin: 1rem 0 1.25rem;
 }
 
+.example-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+    margin: 1.2rem 0 0.45rem;
+}
+
+.example-filter {
+    padding: 0.42rem 0.72rem;
+    border: 1px solid color-mix(in oklab, currentColor 16%, transparent 84%);
+    border-radius: 999px;
+    color: var(--md-default-fg-color--light);
+    background: color-mix(in oklab, var(--md-default-bg-color) 96%, currentColor 4%);
+    font: inherit;
+    font-size: 0.68rem;
+    font-weight: 650;
+    cursor: pointer;
+    transition: border-color 140ms ease, background-color 140ms ease, color 140ms ease;
+}
+
+.example-filter:hover,
+.example-filter:focus-visible {
+    border-color: color-mix(in oklab, var(--md-accent-fg-color) 60%, currentColor 10%);
+    color: var(--md-default-fg-color);
+}
+
+.example-filter--active {
+    border-color: var(--md-accent-fg-color);
+    color: var(--md-default-bg-color);
+    background: var(--md-accent-fg-color);
+}
+
+.example-filter-status {
+    margin: 0;
+    color: var(--md-default-fg-color--light);
+    font-size: 0.67rem;
+}
+
+.example-filter-panel {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+    margin: 0 0 0.65rem;
+    padding: 0.7rem;
+    border: 1px solid color-mix(in oklab, currentColor 12%, transparent 88%);
+    border-radius: 0.65rem;
+    background: color-mix(in oklab, var(--md-default-bg-color) 94%, currentColor 6%);
+}
+
+.example-filter-panel[hidden] {
+    display: none;
+}
+
+.learning-card[hidden] {
+    display: none;
+}
+
 .gallery-empty {
     display: flex;
     gap: 0.9rem;

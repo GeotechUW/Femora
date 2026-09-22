@@ -5,102 +5,17 @@ icon: material/view-grid-outline
 
 # Example Gallery
 
-Browse complete models organized by engineering application.
+Follow the curated sequence or filter the same examples by engineering topic.
+The order remains unchanged within every filtered view.
 
-<div class="example-scope" aria-label="Example categories">
-  <span>Structures</span>
-  <span>Site response</span>
-  <span>Soil-structure interaction</span>
-  <span>DRM</span>
-  <span>Interfaces</span>
-  <span>Parallel models</span>
-</div>
-
-## Site Response
-
-<div class="learning-gallery">
-  <a class="learning-card" href="layered-elastic-soil-column/">
-    <div class="learning-card__preview">
-      <iframe
-        src="../assets/examples/layered-elastic-soil-column/index.html"
-        title="Layered elastic soil-column preview"
-        loading="lazy"
-        tabindex="-1"
-      ></iframe>
+<div
+  data-example-gallery
+  data-manifest="../assets/data/examples.json"
+>
+  <div class="gallery-empty">
+    <div>
+      <h2>Loading examples</h2>
+      <p>The gallery is being assembled from the example manifest.</p>
     </div>
-    <div class="learning-card__body">
-      <p class="learning-card__sequence">Site response</p>
-      <h2>Layered Elastic Soil Column</h2>
-      <p>Run gravity and frequency-sweep excitation through a three-stratum laminar soil profile.</p>
-      <div class="learning-card__meta" aria-label="Example metadata">
-        <span>Elastic</span>
-        <span>Transient</span>
-        <span>VTKHDF</span>
-      </div>
-      <span class="learning-card__link">View example <span aria-hidden="true">&rarr;</span></span>
-    </div>
-  </a>
-  <a class="learning-card" href="partitioned-layered-soil-domain/">
-    <div class="learning-card__preview">
-      <iframe
-        src="../assets/examples/partitioned-layered-soil-domain/index.html"
-        title="Partitioned layered soil-domain preview"
-        loading="lazy"
-        tabindex="-1"
-      ></iframe>
-    </div>
-    <div class="learning-card__body">
-      <p class="learning-card__sequence">Site response</p>
-      <h2>Partitioned Layered Soil Domain</h2>
-      <p>Expand the layered profile to a 3D domain and divide 2,500 bricks into eight connected METIS partitions.</p>
-      <div class="learning-card__meta" aria-label="Example metadata">
-        <span>3D</span>
-        <span>METIS</span>
-        <span>8 partitions</span>
-      </div>
-      <span class="learning-card__link">View example <span aria-hidden="true">&rarr;</span></span>
-    </div>
-  </a>
-  <a class="learning-card" href="deconvolved-ricker-site-response/">
-    <div class="learning-card__preview">
-      <iframe
-        src="../assets/examples/deconvolved-ricker-site-response/index.html"
-        title="Deconvolved Ricker-wave site-response preview"
-        loading="lazy"
-        tabindex="-1"
-      ></iframe>
-    </div>
-    <div class="learning-card__body">
-      <p class="learning-card__sequence">Site response</p>
-      <h2>Deconvolved Ricker-Wave Site Response</h2>
-      <p>Calculate a base motion from a prescribed surface pulse, then verify it with a layered finite-element model.</p>
-      <div class="learning-card__meta" aria-label="Example metadata">
-        <span>Deconvolution</span>
-        <span>Ricker wave</span>
-        <span>Transient</span>
-      </div>
-      <span class="learning-card__link">View example <span aria-hidden="true">&rarr;</span></span>
-    </div>
-  </a>
-  <a class="learning-card" href="nonlinear-layered-soil-column/">
-    <div class="learning-card__preview">
-      <iframe
-        src="../assets/examples/nonlinear-layered-soil-column/index.html"
-        title="Nonlinear layered soil-column preview"
-        loading="lazy"
-        tabindex="-1"
-      ></iframe>
-    </div>
-    <div class="learning-card__body">
-      <p class="learning-card__sequence">Site response</p>
-      <h2>Nonlinear Layered Soil Column</h2>
-      <p>Stage multi-yield soil materials under gravity, activate plasticity, and inspect amplification and hysteresis.</p>
-      <div class="learning-card__meta" aria-label="Example metadata">
-        <span>Nonlinear</span>
-        <span>Material staging</span>
-        <span>Hysteresis</span>
-      </div>
-      <span class="learning-card__link">View example <span aria-hidden="true">&rarr;</span></span>
-    </div>
-  </a>
+  </div>
 </div>
