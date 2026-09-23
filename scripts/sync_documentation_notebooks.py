@@ -23,6 +23,7 @@ ROOT = Path(__file__).resolve().parents[1]
 SOURCE_DIRS = (
     ROOT / "examples" / "tutorials",
     ROOT / "examples" / "site_response",
+    ROOT / "examples" / "soil_structure_interaction",
 )
 COLAB_INPUT_PREFIX = "# femora-colab-input:"
 COLAB_ENV_PREFIX = "# femora-colab-env:"
@@ -50,7 +51,7 @@ if importlib.util.find_spec("femora") is None:
             "pip",
             "install",
             "--quiet",
-            "https://github.com/GeotechUW/Femora/archive/refs/heads/main.zip",
+            "femora[colab] @ https://github.com/GeotechUW/Femora/archive/refs/heads/main.zip",
         ]
     )
 

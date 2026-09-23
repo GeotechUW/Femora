@@ -37,6 +37,13 @@ dependencies = [
 [project.optional-dependencies]
 jupyter = ["pyvista[all]"]
 
+# Keep Colab's managed IPython/Jupyter stack untouched while using the
+# PyVista/VTK pair verified against the current Colab Python runtime.
+colab = [
+    "pyvista==0.46.3",
+    "vtk==9.5.2",
+]
+
 docs = [
     "jupytext>=1.17",
     "nbformat>=5.10",

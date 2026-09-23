@@ -128,7 +128,8 @@ In Google Colab, install Femora before importing it and then configure the
 portable runtime:
 
 ```python
-%pip install -q "https://github.com/GeotechUW/Femora/archive/refs/heads/main.zip"
+%pip install -q \
+    "femora[colab] @ https://github.com/GeotechUW/Femora/archive/refs/heads/main.zip"
 
 import femora as fm
 
