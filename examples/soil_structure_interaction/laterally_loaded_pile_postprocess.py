@@ -28,6 +28,10 @@ OUTPUT_FILE = POSTPROCESS_DIR / "pile_forces_moments.png"
 MOVIE_FILE = POSTPROCESS_DIR / "lateral-deformation.mp4"
 PILE_BOTTOM_Z = -10.0
 PILE_HEAD_Z = 1.0
+# These are intentionally separate from the physical pile elevations. They
+# reproduce the depth range used by the legacy comparison plot.
+LEGACY_PLOT_BOTTOM = -5.0
+LEGACY_PLOT_TOP = 2.0
 DEFORMATION_SCALE = 100.0
 MOVIE_FRAME_RATE = 24
 
@@ -66,35 +70,29 @@ def generate_force_plot() -> Path:
     """Plot the final pile force and moment distributions."""
     element_count, history = read_beam_force_xml(FORCE_FILE)
     response = end_distributions(element_count, history[-1])
-    elevations = np.linspace(PILE_BOTTOM_Z, PILE_HEAD_Z, element_count + 1)
+    depths = np.linspace(LEGACY_PLOT_BOTTOM, LEGACY_PLOT_TOP, element_count + 1)
 
-    figure, axes = plt.subplots(
-        2,
-        3,
-        figsize=(12.0, 7.2),
-        sharey=True,
-        sharex="row",
-        constrained_layout=True,
+    # Keep the legacy arrangement and Matplotlib defaults for direct comparison
+    # with examples/SoilStructureInteraction/Example0/plot_moment.py.
+    figure, axes = plt.subplots(3, 2, figsize=(6, 8), constrained_layout=True)
+    components = (
+        ("Px", axes[0, 0], "Shear Forces Px"),
+        ("Py", axes[0, 1], "Shear Forces Py"),
+        ("Pz", axes[1, 0], "Axial Forces Pz"),
+        ("Mx", axes[1, 1], "Moments Mx"),
+        ("My", axes[2, 0], "Moments My"),
+        ("Mz", axes[2, 1], "Torsional Moments Mz"),
     )
-    labels = {
-        "Px": "Horizontal force $P_x$ (N)",
-        "Py": "Horizontal force $P_y$ (N)",
-        "Pz": "Axial force $P_z$ (N)",
-        "Mx": "Moment $M_x$ (N m)",
-        "My": "Moment $M_y$ (N m)",
-        "Mz": "Torsion $M_z$ (N m)",
-    }
-    for axis, component in zip(axes.flat, labels):
-        axis.plot(response[component], elevations, color="#b65f3a", linewidth=2.0)
-        axis.axvline(0.0, color="#263238", linewidth=0.8)
-        axis.grid(alpha=0.22)
-        axis.set_xlabel(labels[component])
-        axis.set_ylabel("Elevation (m)")
-        axis.set_ylim(PILE_BOTTOM_Z, PILE_HEAD_Z)
-        axis.spines[["top", "right"]].set_visible(False)
+    for component, axis, title in components:
+        axis.plot(response[component], depths, "-", alpha=1.0)
+        axis.set_title(title)
+        axis.grid(True, which="both", linestyle="--", alpha=0.5)
+        axis.set_xlabel("Force / Moment")
+        axis.set_ylabel("Depth")
+        axis.axvline(0, color="black", linewidth=0.8, linestyle="-", alpha=0.7)
 
     OUTPUT_FILE.parent.mkdir(parents=True, exist_ok=True)
-    figure.savefig(OUTPUT_FILE, dpi=180, bbox_inches="tight")
+    figure.savefig(OUTPUT_FILE, dpi=300, bbox_inches="tight")
     plt.close(figure)
     return OUTPUT_FILE
 
