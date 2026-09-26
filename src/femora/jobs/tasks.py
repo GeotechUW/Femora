@@ -49,16 +49,25 @@ class Python:
 
 @dataclass(frozen=True)
 class Command:
-    """Run an executable without a shell in the task output directory."""
+    """Run an executable without a shell in the task output directory.
+
+    Set ranks and matching cores for an MPI-aware executable, including Python
+    scripts using mpi4py. MPI execution requires an allocation backend.
+    """
 
     name: str
     argv: Sequence[str | Path]
     cores: int = 1
     env: Mapping[str, str] | None = None
+    ranks: int | None = None
 
     def __post_init__(self) -> None:
         _task_name(self.name)
         _positive_cores(self.cores)
+        if self.ranks is not None:
+            _positive_cores(self.ranks)
+            if self.cores != self.ranks:
+                raise ValueError("MPI Command cores must equal ranks")
         if isinstance(self.argv, (str, Path)) or not self.argv:
             raise ValueError("command argv must contain an executable")
         if any(not isinstance(arg, (str, Path)) for arg in self.argv):

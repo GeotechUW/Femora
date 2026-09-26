@@ -16,6 +16,7 @@ from zipfile import ZipFile
 
 from .runner import RunResult, execute
 from .workflow import Workflow
+from .backends import TACC
 
 
 _FORMAT_VERSION = 1
@@ -107,8 +108,9 @@ def replay(
     *,
     workspace: str | Path,
     cores: int | None = None,
+    backend: TACC | None = None,
 ) -> RunResult:
-    """Run a trusted bundle locally in a fresh workspace.
+    """Run a trusted bundle in a fresh workspace using the selected backend.
 
     Bundle source is executable Python. Do not replay bundles from untrusted
     origins. This operation does not install dependencies or configure OpenSees.
@@ -165,7 +167,7 @@ def replay(
                 )
                 if not isinstance(workflow, Workflow):
                     raise TypeError("bundle entrypoint must return an fm.Workflow")
-                return execute(workflow, workspace=root, inputs=inputs, cores=cores)
+                return execute(workflow, workspace=root, inputs=inputs, cores=cores, backend=backend)
             finally:
                 sys.modules.pop(module_name, None)
                 sys.path.remove(temporary)
