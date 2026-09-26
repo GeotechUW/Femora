@@ -52,7 +52,16 @@ Initial limits:
 - Python callbacks run on the coordinator, in sequential stages with `cores=1`.
   Parallel callbacks and mixed callback/MPI parallel stages are rejected.
 - Capacity covers CPU rank slots, not memory. The caller must request enough RAM.
-- Requires MPI-enabled OpenSees for multiple ranks. A serial binary is insufficient.
+- TACC defaults to `OpenSeesMP`, including for one rank; local execution defaults
+  to `OpenSees`. A task's `executable`, then `FEMORA_OPENSEES`, override the default.
+  There is no fallback to a serial binary if `OpenSeesMP` is missing.
+- OpenSees tasks source the original Tcl file through a generated error-catching
+  driver. Tcl errors emit `FEMORA_JOB|ERROR|` and request a nonzero exit; the runner
+  checks that marker even if the launcher returns zero. TACC also checks `getNP`
+  before sourcing the model. Failed stages block later stages once running tasks
+  finish; this is not MPI-wide immediate cancellation or deadlock recovery.
+- An unchecked nonzero return from Tcl `analyze` is not a Tcl exception. Models
+  must check it and raise `error` (Femora's analysis exporter does this).
 - Bundles contain executable Python: run only trusted inputs under the submitting
   user's permissions, never a privileged shared service account.
 
@@ -70,7 +79,7 @@ On the compute node:
 module load python/3.12.11
 module use /work2/08189/amnp95/modules
 module load femora opensees/3.8.0
-export FEMORA_OPENSEES="$(command -v OpenSees)"
+export FEMORA_OPENSEES="$(command -v OpenSeesMP)"
 export OMP_NUM_THREADS=1
 export MKL_NUM_THREADS=1
 export OPENBLAS_NUM_THREADS=1

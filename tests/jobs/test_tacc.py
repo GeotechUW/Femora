@@ -98,6 +98,94 @@ def test_local_mpi_command_rejected(tmp_path):
         fm.execute(workflow, workspace=tmp_path)
 
 
+@pytest.mark.parametrize("remote,override,explicit,expected", [
+    (True, None, None, "OpenSeesMP"),
+    (False, None, None, "OpenSees"),
+    (True, "custom-env", None, "custom-env"),
+    (False, "custom-env", "custom-task", "custom-task"),
+])
+def test_opensees_executable_selection(allocation, monkeypatch, tmp_path, remote, override, explicit, expected):
+    monkeypatch.delenv("FEMORA_OPENSEES", raising=False)
+    if override:
+        monkeypatch.setenv("FEMORA_OPENSEES", override)
+    captured = {}
+
+    def process(argv, context, env=None):
+        captured.update(argv=argv, env=env)
+
+    monkeypatch.setattr(runner, "_run_process", process)
+    (tmp_path / "model.tcl").write_text("wipe")
+    task = fm.tasks.OpenSees("one", "model.tcl", executable=explicit)
+    runner._run_task(task, TaskContext(tmp_path, tmp_path / "output", {}, {}), allocation if remote else None)
+    assert captured["argv"][-2] == expected
+    assert captured["env"]["FEMORA_JOB_SCRIPT"] == (tmp_path / "model.tcl").as_posix()
+    assert ("FEMORA_JOB_RANKS" in captured["env"]) == remote
+
+
+def test_no_serial_fallback(allocation, monkeypatch, tmp_path):
+    monkeypatch.delenv("FEMORA_OPENSEES", raising=False)
+    monkeypatch.setattr(runner.shutil, "which", lambda name: "OpenSees" if name == "OpenSees" else None)
+    (tmp_path / "model.tcl").write_text("wipe")
+    with pytest.raises(FileNotFoundError, match="OpenSeesMP"):
+        runner._run_task(fm.tasks.OpenSees("one", "model.tcl"),
+                         TaskContext(tmp_path, tmp_path / "output", {}, {}), allocation)
+
+
+def test_tcl_failure_with_zero_exit_stops_workflow(allocation, monkeypatch, tmp_path):
+    monkeypatch.setattr(runner, "ProcessPoolExecutor", ThreadPoolExecutor)
+
+    def fail(argv, **kwargs):
+        kwargs["stdout"].write("[rank 1] FEMORA_JOB|ERROR|Unexpected MPI size: 1\n")
+        return SimpleNamespace(returncode=0)
+
+    monkeypatch.setattr(runner.subprocess, "run", fail)
+    (tmp_path / "model.tcl").write_text("error deliberate")
+    workflow = fm.Workflow().add("solve", tasks=[fm.tasks.OpenSees("a", "model.tcl", ranks=2)])
+    workflow.add("compare", tasks=[fm.tasks.Command("b", ["echo", "never"])])
+    with pytest.raises(fm.jobs.WorkflowExecutionError) as error:
+        fm.execute(workflow, workspace=tmp_path, backend=allocation)
+    manifest = json.loads(error.value.run.manifest.read_text())
+    assert "Unexpected MPI size: 1" in manifest["stages"]["solve"]["a"]["error"]
+    assert "compare" not in error.value.run.results
+
+
+@pytest.mark.parametrize("script,actual_ranks,expected_error", [
+    ("set ::modelWasRun 1", 2, None),
+    ("error {deliberate Tcl failure}", 2, "deliberate Tcl failure"),
+    ("set ::modelWasRun 1", 1, "Expected 2 MPI ranks, got 1"),
+    ("set broken {", 2, "missing close-brace"),
+])
+def test_driver_with_real_tcl(allocation, monkeypatch, tmp_path, script, actual_ranks, expected_error):
+    tkinter = pytest.importorskip("tkinter")
+    interpreter = tkinter.Tcl()
+    captured = {}
+
+    def process(argv, context, env=None):
+        captured.update(driver=argv[-1], env=env)
+
+    monkeypatch.setattr(runner, "_run_process", process)
+    source = tmp_path / "model $special [name] with spaces.tcl"
+    source.write_text(script)
+    runner._run_task(fm.tasks.OpenSees("one", source.name, ranks=2),
+                     TaskContext(tmp_path, tmp_path / "output", {}, {}), allocation)
+    # Give the Tcl interpreter a private env array; do not mutate process env.
+    interpreter.eval("unset env; array set env {}; set messages {}; set exitCode 0")
+    interpreter.eval("proc puts {args} {lappend ::messages [lindex $args end]}")
+    interpreter.eval("proc exit {code} {set ::exitCode $code}")
+    interpreter.eval(f"proc getNP {{}} {{return {actual_ranks}}}")
+    for key, value in captured["env"].items():
+        interpreter.setvar(f"env({key})", value)
+    interpreter.eval(Path(captured["driver"]).read_text(encoding="utf-8"))
+    if expected_error:
+        assert int(interpreter.getvar("exitCode")) == 1
+        assert expected_error in str(interpreter.getvar("messages"))
+        if actual_ranks != 2:
+            assert interpreter.eval("info exists ::modelWasRun") == "0"
+    else:
+        assert interpreter.eval("set ::modelWasRun") == "1"
+        assert interpreter.eval("set argv0") == source.as_posix()
+
+
 def test_launcher_failure_preserves_log(allocation, monkeypatch, tmp_path):
     monkeypatch.setattr(runner, "ProcessPoolExecutor", ThreadPoolExecutor)
 
@@ -159,3 +247,14 @@ def test_real_tacc_bundle(tmp_path):
     )
     run = fm.jobs.replay(package, workspace=tmp_path / "results", backend=backends.TACC(), cores=5)
     assert "pair_b: 3 ranks" in (run.workspace / "compare/summary/comparison.txt").read_text()
+
+
+@pytest.mark.skipif(not os.environ.get("FEMORA_OPENSEES"), reason="requires a local OpenSees executable")
+def test_real_opensees_tcl_error(tmp_path):
+    (tmp_path / "bad.tcl").write_text("error {deliberate Tcl failure}")
+    workflow = fm.Workflow().add("solve", tasks=[fm.tasks.OpenSees("bad", "bad.tcl")])
+    workflow.add("later", tasks=[fm.tasks.Command("never", ["unused"])])
+    with pytest.raises(fm.jobs.WorkflowExecutionError, match="deliberate Tcl failure") as error:
+        fm.execute(workflow, workspace=tmp_path)
+    assert "FEMORA_JOB|ERROR|" in (tmp_path / "solve/bad/stdout.log").read_text()
+    assert "later" not in error.value.run.results

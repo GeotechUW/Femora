@@ -65,11 +65,15 @@ def _run_process(argv: list[str], context: TaskContext, env: Mapping[str, str] |
     with log.open(encoding="utf-8", errors="replace") as stream:
         for line in stream:
             tail.append(line.rstrip())
-            analysis_error |= line.startswith("FEMORA_PROGRESS|ERROR|")
+            analysis_error |= (
+                "FEMORA_PROGRESS|ERROR|" in line
+                or "FEMORA_JOB|ERROR|" in line
+            )
     if completed.returncode != 0 or analysis_error:
         detail = "\n".join(tail)
+        reason = "reported a Tcl/analysis error" if analysis_error else "failed"
         raise RuntimeError(
-            f"command failed with exit code {completed.returncode}; log: {log}\n{detail}"
+            f"command {reason} (exit code {completed.returncode}); log: {log}\n{detail}"
         )
     return ProcessResult(context.output_dir, log, completed.returncode)
 
@@ -89,17 +93,41 @@ def _run_task(task: Task, context: TaskContext, backend: TACC | None = None, off
     script = (context.workspace / task.script).resolve()
     if not script.is_relative_to(context.workspace) or not script.is_file():
         raise FileNotFoundError(f"OpenSees script was not found in workspace: {task.script}")
-    configured = task.executable or os.environ.get("FEMORA_OPENSEES") or "OpenSees"
+    default_executable = "OpenSeesMP" if backend is not None else "OpenSees"
+    configured = task.executable or os.environ.get("FEMORA_OPENSEES") or default_executable
     executable = shutil.which(str(configured))
     if executable is None:
         raise FileNotFoundError(
             f"OpenSees executable was not found: {configured}; set FEMORA_OPENSEES"
         )
-    argv = [executable, str(script)]
+    # Source the original at global scope without editing it. Some OpenSees
+    # builds return zero even on Tcl errors, so also emit an explicit marker.
+    driver = context.output_dir / ".femora-driver.tcl"
+    driver.write_text('''set argv0 $::env(FEMORA_JOB_SCRIPT)
+if {[catch {
+    if {[info exists ::env(FEMORA_JOB_RANKS)]} {
+        set ::FemoraJobActualRanks [getNP]
+        if {$::FemoraJobActualRanks != $::env(FEMORA_JOB_RANKS)} {
+            error "Expected $::env(FEMORA_JOB_RANKS) MPI ranks, got $::FemoraJobActualRanks; check the MPI executable"
+        }
+    }
+    source $::env(FEMORA_JOB_SCRIPT)
+} ::FemoraJobMessage ::FemoraJobOptions]} {
+    puts stderr "FEMORA_JOB|ERROR|$::FemoraJobMessage"
+    if {[dict exists $::FemoraJobOptions -errorinfo]} {
+        puts stderr [dict get $::FemoraJobOptions -errorinfo]
+    }
+    flush stderr
+    exit 1
+}
+''', encoding="utf-8")
+    env = {"FEMORA_JOB_SCRIPT": script.as_posix()}
+    argv = [executable, str(driver)]
     if backend is not None:
+        env.update(FEMORA_JOB_RANKS=str(task.ranks), OMP_NUM_THREADS="1",
+                   MKL_NUM_THREADS="1", OPENBLAS_NUM_THREADS="1")
         argv = backend.launch(argv, task, offset)
-        return _run_process(argv, context, {"OMP_NUM_THREADS": "1", "MKL_NUM_THREADS": "1", "OPENBLAS_NUM_THREADS": "1"})
-    return _run_process(argv, context)
+    return _run_process(argv, context, env)
 
 
 def _collect_artifacts(workspace: Path, patterns: tuple[str, ...]) -> tuple[Path, ...]:
@@ -212,8 +240,9 @@ def execute(
         failed = [name for name, record in records[stage.name].items() if record["status"] == "failed"]
         run = snapshot()
         if failed:
+            details = "\n".join(f"{name}: {records[stage.name][name]['error']}" for name in failed)
             raise WorkflowExecutionError(
-                f"stage '{stage.name}' failed: {', '.join(failed)}", run
+                f"stage '{stage.name}' failed: {', '.join(failed)}\n{details}", run
             )
     return snapshot()
 
