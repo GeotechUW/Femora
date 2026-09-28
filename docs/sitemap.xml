@@ -129,6 +129,10 @@
          <lastmod>2026-09-28</lastmod>
     </url>
     <url>
+         <loc>https://femora.io/docs/reference/cli/</loc>
+         <lastmod>2026-09-28</lastmod>
+    </url>
+    <url>
          <loc>https://femora.io/docs/reference/RuntimeExecutionError/</loc>
          <lastmod>2026-09-28</lastmod>
     </url>
@@ -1309,11 +1313,31 @@
          <lastmod>2026-09-28</lastmod>
     </url>
     <url>
+         <loc>https://femora.io/docs/reference/jobs/Details/</loc>
+         <lastmod>2026-09-28</lastmod>
+    </url>
+    <url>
+         <loc>https://femora.io/docs/reference/jobs/JobRecord/</loc>
+         <lastmod>2026-09-28</lastmod>
+    </url>
+    <url>
+         <loc>https://femora.io/docs/reference/jobs/JobRegistry/</loc>
+         <lastmod>2026-09-28</lastmod>
+    </url>
+    <url>
+         <loc>https://femora.io/docs/reference/jobs/JobTracker/</loc>
+         <lastmod>2026-09-28</lastmod>
+    </url>
+    <url>
          <loc>https://femora.io/docs/reference/jobs/OpenSees/</loc>
          <lastmod>2026-09-28</lastmod>
     </url>
     <url>
          <loc>https://femora.io/docs/reference/jobs/ProcessResult/</loc>
+         <lastmod>2026-09-28</lastmod>
+    </url>
+    <url>
+         <loc>https://femora.io/docs/reference/jobs/Prompt/</loc>
          <lastmod>2026-09-28</lastmod>
     </url>
     <url>
@@ -1333,6 +1357,10 @@
          <lastmod>2026-09-28</lastmod>
     </url>
     <url>
+         <loc>https://femora.io/docs/reference/jobs/TrackedJob/</loc>
+         <lastmod>2026-09-28</lastmod>
+    </url>
+    <url>
          <loc>https://femora.io/docs/reference/jobs/Workflow/</loc>
          <lastmod>2026-09-28</lastmod>
     </url>
@@ -1349,11 +1377,19 @@
          <lastmod>2026-09-28</lastmod>
     </url>
     <url>
+         <loc>https://femora.io/docs/reference/jobs/platforms/JobDiscovery/</loc>
+         <lastmod>2026-09-28</lastmod>
+    </url>
+    <url>
          <loc>https://femora.io/docs/reference/jobs/platforms/JobHandle/</loc>
          <lastmod>2026-09-28</lastmod>
     </url>
     <url>
          <loc>https://femora.io/docs/reference/jobs/platforms/JobStatus/</loc>
+         <lastmod>2026-09-28</lastmod>
+    </url>
+    <url>
+         <loc>https://femora.io/docs/reference/jobs/platforms/JobSummary/</loc>
          <lastmod>2026-09-28</lastmod>
     </url>
     <url>
