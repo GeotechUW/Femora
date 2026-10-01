@@ -43,6 +43,9 @@ class NumbererManager:
     def parallelrcm(self) -> Numberer:
         return self._cached("parallelrcm")
 
+    def parallelplain(self) -> Numberer:
+        return self._cached("parallelplain")
+
     def clear(self) -> None:
         self._instances.clear()
 

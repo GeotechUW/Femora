@@ -84,6 +84,7 @@ class Analysis(AnalysisComponent):
         num_sublevels: Optional[int] = None,
         num_substeps: Optional[int] = None,
         max_retries: int = 10,
+        initialize: bool = False,
     ):
         """Initializes the Analysis with all required components.
 
@@ -118,6 +119,7 @@ class Analysis(AnalysisComponent):
             num_substeps: Number of substeps to try at each sublevel.
             max_retries: Number of times to retry a failed increment at the same
                 step size before using substepping or reporting failure.
+            initialize: Run OpenSees ``initialize`` after creating the analysis.
 
         Raises:
             ValueError: If integrator type is incompatible with analysis type,
@@ -210,6 +212,7 @@ class Analysis(AnalysisComponent):
         self.num_sublevels = num_sublevels
         self.num_substeps = num_substeps
         self.max_retries = max_retries
+        self.initialize = initialize
 
     def to_tcl(self) -> str:
         """Render this analysis configuration as OpenSees Tcl commands.
@@ -238,6 +241,8 @@ class Analysis(AnalysisComponent):
 
         # Add analysis command
         commands.append(f"analysis {self.analysis_type}")
+        if self.initialize:
+            commands.append("initialize")
 
         if self.analysis_type in ["Transient", "VariableTransient"]:
             commands.extend(self._transient_recovery_procedure(progress_name))

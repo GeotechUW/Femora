@@ -11,6 +11,7 @@ from femora.components.analysis.systems import (
     BandGeneralSystem,
     BandSPDSystem,
     FullGeneralSystem,
+    MPIDiagonalSystem,
     MumpsSystem,
     ProfileSPDSystem,
     SuperLUSystem,
@@ -107,6 +108,10 @@ class SystemManager(TaggedComponentManager[System]):
             The solver system instance.
         """
         return self.add(MumpsSystem(**kwargs))
+
+    def mpidiagonal(self) -> System:
+        """Add the parallel diagonal solver used by explicit analyses."""
+        return self.add(MPIDiagonalSystem())
 
 
 __all__ = ["SystemManager"]

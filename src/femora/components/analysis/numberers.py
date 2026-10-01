@@ -152,7 +152,18 @@ class ParallelRCMNumberer(Numberer):
         return "numberer ParallelRCM"
 
 
+class ParallelPlainNumberer(Numberer):
+    """Parallel plain numbering (``numberer ParallelPlain``)."""
+
+    def __init__(self) -> None:
+        super().__init__()
+
+    def to_tcl(self) -> str:
+        return "numberer ParallelPlain"
+
+
 Numberer.register_numberer("plain", PlainNumberer)
 Numberer.register_numberer("rcm", RCMNumberer)
 Numberer.register_numberer("amd", AMDNumberer)
 Numberer.register_numberer("parallelrcm", ParallelRCMNumberer)
+Numberer.register_numberer("parallelplain", ParallelPlainNumberer)

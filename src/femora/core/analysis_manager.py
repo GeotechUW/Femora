@@ -131,6 +131,7 @@ class AnalysisManager:
         num_sublevels: int | None = None,
         num_substeps: int | None = None,
         max_retries: int = 10,
+        initialize: bool = False,
     ) -> Analysis:
         """Create and register a transient Analysis.
 
@@ -152,6 +153,7 @@ class AnalysisManager:
             num_sublevels: Optional transient sublevel count for retry logic.
             num_substeps: Optional transient substep count for retry logic.
             max_retries: Same-step retries before substepping or failure.
+            initialize: Run OpenSees ``initialize`` before the first step.
 
         Returns:
             The registered Analysis instance.
@@ -174,6 +176,7 @@ class AnalysisManager:
                 num_sublevels=num_sublevels,
                 num_substeps=num_substeps,
                 max_retries=max_retries,
+                initialize=initialize,
             )
         )
 

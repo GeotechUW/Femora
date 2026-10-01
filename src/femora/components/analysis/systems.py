@@ -289,6 +289,16 @@ class MumpsSystem(System):
         if self.icntl7 is not None:
             cmd += f" -ICNTL7 {self.icntl7}"
         return cmd
+
+
+class MPIDiagonalSystem(System):
+    """Parallel diagonal solver for explicit analyses (``system MPIDiagonal``)."""
+
+    def __init__(self):
+        super().__init__("MPIDiagonal")
+
+    def to_tcl(self) -> str:
+        return "system MPIDiagonal"
     
 
 
@@ -300,3 +310,4 @@ System.register_system('profilespd', ProfileSPDSystem)
 System.register_system('superlu', SuperLUSystem)
 System.register_system('umfpack', UmfpackSystem)
 System.register_system('mumps', MumpsSystem)
+System.register_system('mpidiagonal', MPIDiagonalSystem)
