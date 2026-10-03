@@ -92,7 +92,11 @@ class Command:
 
 @dataclass(frozen=True)
 class OpenSees:
-    """Run one Tcl model. Multi-rank execution needs a remote backend."""
+    """Run one Tcl model. Multi-rank execution needs a remote backend.
+
+    ``executable`` overrides the app or environment default for this task only.
+    On a cluster, use a path visible and executable from every compute node.
+    """
 
     name: str
     script: str | Path
@@ -102,6 +106,13 @@ class OpenSees:
     def __post_init__(self) -> None:
         _task_name(self.name)
         _positive_cores(self.ranks)
+        if self.executable is not None:
+            if not isinstance(self.executable, (str, Path)):
+                raise TypeError("OpenSees executable must be a string or path")
+            executable = str(self.executable)
+            if not executable.strip():
+                raise ValueError("OpenSees executable must not be empty")
+            object.__setattr__(self, "executable", executable)
         script = str(self.script)
         path = PurePath(script)
         if (

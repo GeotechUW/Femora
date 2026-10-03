@@ -59,6 +59,10 @@ Initial limits:
 - TACC defaults to `OpenSeesMP`, including for one rank; local execution defaults
   to `OpenSees`. A task's `executable`, then `FEMORA_OPENSEES`, override the default.
   There is no fallback to a serial binary if `OpenSeesMP` is missing.
+- A workflow may mix the module-loaded default with a custom OpenSees build. Set
+  `executable` only on the tasks that need it. A remote custom path must exist and
+  be executable on every compute node; each task records the resolved path as
+  `FEMORA_JOB|OPENSEES|...` in its `stdout.log`.
 - OpenSees tasks source the original Tcl file through a generated error-catching
   driver. Tcl errors emit `FEMORA_JOB|ERROR|` and request a nonzero exit; the runner
   checks that marker even if the launcher returns zero. TACC also checks `getNP`

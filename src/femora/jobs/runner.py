@@ -97,13 +97,17 @@ def _run_task(task: Task, context: TaskContext, backend: TACC | None = None, off
     configured = task.executable or os.environ.get("FEMORA_OPENSEES") or default_executable
     executable = shutil.which(str(configured))
     if executable is None:
+        source = "task executable" if task.executable else "FEMORA_OPENSEES/default"
         raise FileNotFoundError(
-            f"OpenSees executable was not found: {configured}; set FEMORA_OPENSEES"
+            f"OpenSees executable was not found ({source}): {configured}; "
+            "custom cluster paths must exist and be executable on every compute node"
         )
     # Source the original at global scope without editing it. Some OpenSees
     # builds return zero even on Tcl errors, so also emit an explicit marker.
     driver = context.output_dir / ".femora-driver.tcl"
     driver.write_text('''set argv0 $::env(FEMORA_JOB_SCRIPT)
+puts "FEMORA_JOB|OPENSEES|$::env(FEMORA_JOB_OPENSEES)"
+flush stdout
 if {[catch {
     if {[info exists ::env(FEMORA_JOB_RANKS)]} {
         set ::FemoraJobActualRanks [getNP]
@@ -121,7 +125,10 @@ if {[catch {
     exit 1
 }
 ''', encoding="utf-8")
-    env = {"FEMORA_JOB_SCRIPT": script.as_posix()}
+    env = {
+        "FEMORA_JOB_SCRIPT": script.as_posix(),
+        "FEMORA_JOB_OPENSEES": executable,
+    }
     argv = [executable, str(driver)]
     if backend is not None:
         env.update(FEMORA_JOB_RANKS=str(task.ranks), OMP_NUM_THREADS="1",

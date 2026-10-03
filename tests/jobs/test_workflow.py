@@ -177,6 +177,18 @@ def test_opensees_requires_workspace_relative_script(tmp_path: Path) -> None:
     assert "script was not found" in json.loads(error.value.run.manifest.read_text())["stages"]["solve"]["model"]["error"]
 
 
+@pytest.mark.parametrize("executable", ["", "   "])
+def test_opensees_rejects_empty_executable(executable: str) -> None:
+    with pytest.raises(ValueError, match="must not be empty"):
+        fm.tasks.OpenSees("model", "model.tcl", executable=executable)
+
+
+def test_opensees_normalizes_executable_path(tmp_path: Path) -> None:
+    executable = tmp_path / "custom OpenSeesMP"
+    task = fm.tasks.OpenSees("model", "model.tcl", executable=executable)
+    assert task.executable == str(executable)
+
+
 def test_bundle_replays_source_inputs_and_data(tmp_path: Path) -> None:
     source = tmp_path / "small_workflow.py"
     source.write_text(

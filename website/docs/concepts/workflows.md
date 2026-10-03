@@ -358,6 +358,37 @@ log_file = solve.log
 solver_task_folder = solve.output_dir
 ```
 
+### Use A Custom OpenSees Build For One Task
+
+The Stampede3 app loads its tested OpenSees module as the default. Override it
+only for a model that requires a personalized build:
+
+```python
+workflow.add(
+    "solve",
+    parallel=True,
+    tasks=[
+        fm.tasks.OpenSees(
+            "standard",
+            "build/standard/model.tcl",
+            ranks=16,
+        ),
+        fm.tasks.OpenSees(
+            "custom",
+            "build/custom/model.tcl",
+            ranks=16,
+            executable="/work2/YOUR_PROJECT/YOUR_USER/opensees/bin/OpenSeesMP",
+        ),
+    ],
+)
+```
+
+The task override takes precedence over `FEMORA_OPENSEES` and the module-loaded
+`OpenSeesMP`; other tasks keep using the default. The custom executable must be
+visible and executable on every allocated node and must support the requested
+MPI launch. The resolved path is written to that task's `stdout.log` as
+`FEMORA_JOB|OPENSEES|...`.
+
 Your postprocessor still reads the recorder files at the locations chosen when
 you built the model. Those locations need not be inside the solver task folder.
 

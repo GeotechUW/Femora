@@ -119,6 +119,7 @@ def test_opensees_executable_selection(allocation, monkeypatch, tmp_path, remote
     runner._run_task(task, TaskContext(tmp_path, tmp_path / "output", {}, {}), allocation if remote else None)
     assert captured["argv"][-2] == expected
     assert captured["env"]["FEMORA_JOB_SCRIPT"] == (tmp_path / "model.tcl").as_posix()
+    assert captured["env"]["FEMORA_JOB_OPENSEES"] == expected
     assert ("FEMORA_JOB_RANKS" in captured["env"]) == remote
 
 
@@ -176,6 +177,9 @@ def test_driver_with_real_tcl(allocation, monkeypatch, tmp_path, script, actual_
     for key, value in captured["env"].items():
         interpreter.setvar(f"env({key})", value)
     interpreter.eval(Path(captured["driver"]).read_text(encoding="utf-8"))
+    assert f"FEMORA_JOB|OPENSEES|{captured['env']['FEMORA_JOB_OPENSEES']}" in str(
+        interpreter.getvar("messages")
+    )
     if expected_error:
         assert int(interpreter.getvar("exitCode")) == 1
         assert expected_error in str(interpreter.getvar("messages"))
