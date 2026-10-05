@@ -241,22 +241,26 @@ def build_model(context, angle_degrees=0):
         solid_parts=["soil_grid_1", "soil_grid_2"],
         radius=interface_radius, n_peri=8, n_long=3,
         penalty_param=1.0e9, g_penalty=True,
+        write_connectivity=True, write_interface=True,
     )
     right_soil_interface = model.interface.beam_solid_interface(
         name="pile_soil_interface_right", beam_part=right_soil,
         solid_parts=["soil_grid_1", "soil_grid_2"],
         radius=interface_radius, n_peri=8, n_long=3,
         penalty_param=1.0e9, g_penalty=True,
+        write_connectivity=True, write_interface=True,
     )
     left_cap_interface = model.interface.beam_solid_interface(
         name="pile_cap_interface_left", beam_part=left_cap,
         solid_parts=["cap"], radius=interface_radius, n_peri=8, n_long=3,
         penalty_param=1.0e9, g_penalty=True,
+        write_connectivity=True, write_interface=True,
     )
     right_cap_interface = model.interface.beam_solid_interface(
         name="pile_cap_interface_right", beam_part=right_cap,
         solid_parts=["cap"], radius=interface_radius, n_peri=8, n_long=3,
         penalty_param=1.0e9, g_penalty=True,
+        write_connectivity=True, write_interface=True,
     )
 
     #########################################################################
