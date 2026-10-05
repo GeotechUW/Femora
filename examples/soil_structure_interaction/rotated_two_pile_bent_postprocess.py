@@ -65,6 +65,7 @@ EXPERIMENT_TIME_SHIFT = 11.45
 TIME_WINDOW = (10.0, 40.0)
 GRAVITY = 9.81
 FREE_FIELD_XY = (0.0, 10.0)
+THESIS_MOMENT_ELEVATION_CORRECTION = -1.15
 FREE_FIELD_CHANNELS = {
     "ax_soilTop_global": 0.5,
     "ax_fixSoil_global": 2.6,
@@ -620,7 +621,8 @@ def _plot_pile_moment_comparison(numerical, experiment, output_dir: Path) -> Tup
     for row, (case_name, angle) in enumerate(CASE_ANGLES.items()):
         pile = numerical[f"{case_name}/pile_moments/left"]
         elevation, moments = _average_duplicate_elevations(
-            pile["elevation"][:], pile["moment_local"][:] / 1000.0
+            pile["elevation"][:] + THESIS_MOMENT_ELEVATION_CORRECTION,
+            pile["moment_local"][:] / 1000.0,
         )
         order = np.argsort(elevation)
         elevation, moments = elevation[order], moments[order]
@@ -656,7 +658,7 @@ def _plot_pile_moment_comparison(numerical, experiment, output_dir: Path) -> Tup
     limit = 1.08 * x_limit if x_limit else 1.0
     for axis in plotted:
         axis.set_xlim(-limit, limit)
-        axis.set_ylim(-14.3, 3.9)
+        axis.set_ylim(-15.5, 3.9)
     handles, labels = axes[0, 1].get_legend_handles_labels()
     figure.legend(handles, labels, loc="upper center", ncol=2)
     figure.tight_layout(rect=(0, 0, 1, 0.96))
