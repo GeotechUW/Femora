@@ -11,10 +11,13 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import io
 import json
 import math
 from pathlib import Path
+import re
 from urllib.request import urlopen
+from xml.etree import ElementTree
 from typing import Dict, List, Optional, Sequence, Tuple
 
 import matplotlib
@@ -408,6 +411,80 @@ def _base_acceleration(path: Path, time: np.ndarray, dt: float) -> np.ndarray:
     return np.interp(time, source_time, values, left=values[0], right=0.0)
 
 
+def _node_coordinates(tcl_file: Path) -> Dict[int, np.ndarray]:
+    """Read node coordinates from the exported model without loading the model."""
+    pattern = re.compile(
+        r"^\s*node\s+(\d+)\s+([-+\d.eE]+)\s+([-+\d.eE]+)\s+([-+\d.eE]+)"
+    )
+    coordinates = {}
+    with tcl_file.open(encoding="utf-8") as source:
+        for line in source:
+            match = pattern.match(line)
+            if match:
+                coordinates[int(match.group(1))] = np.asarray(match.groups()[1:], dtype=float)
+    return coordinates
+
+
+def _read_pile_force_xml(path: Path, reference_time: np.ndarray) -> List[dict]:
+    """Read global beam end actions and their element/node metadata."""
+    root = ElementTree.parse(path).getroot()
+    outputs = root.findall(".//ElementOutput")
+    data = root.find(".//Data")
+    if not outputs or data is None or not data.text:
+        raise ValueError(f"Incomplete pile-force recorder: {path}")
+    rows = np.loadtxt(io.StringIO(data.text), ndmin=2)
+    expected_columns = 1 + 12 * len(outputs)
+    if rows.shape != (len(reference_time), expected_columns):
+        raise ValueError(f"Unexpected recorder shape {rows.shape} in {path}")
+    if not np.allclose(rows[:, 0], reference_time, rtol=0, atol=1.0e-8):
+        raise ValueError(f"Pile-force and VTKHDF times disagree in {path}")
+    records = []
+    for index, output in enumerate(outputs):
+        records.append({
+            "element": int(output.attrib["eleTag"]),
+            "node1": int(output.attrib["node1"]),
+            "node2": int(output.attrib["node2"]),
+            "force": rows[:, 1 + 12 * index:1 + 12 * (index + 1)],
+        })
+    return records
+
+
+def _extract_pile_moments(case_dir: Path, group, time: np.ndarray, angle: int) -> None:
+    """Store unaveraged signed end moments for both piles in bent-local axes."""
+    coordinates = _node_coordinates(case_dir / "model.tcl")
+    theta = math.radians(angle)
+    rotation = np.asarray([
+        [math.cos(theta), math.sin(theta), 0.0],
+        [-math.sin(theta), math.cos(theta), 0.0],
+        [0.0, 0.0, 1.0],
+    ])
+    pile_group = group.create_group("pile_moments")
+    for pile in ("left", "right"):
+        paths = sorted((case_dir / "results").glob(
+            f"pile_{pile}_force_pile_{pile}_*_Core*_globalForce.xml"
+        ))
+        if len(paths) != 3:
+            raise FileNotFoundError(f"Expected three {pile} pile-force recorders in {case_dir}")
+        records = [record for path in paths for record in _read_pile_force_xml(path, time)]
+        records.sort(key=lambda record: coordinates[record["node1"]][2])
+        elevations, element_tags, end_numbers, local_moments = [], [], [], []
+        for record in records:
+            end1 = record["force"][:, 3:6]
+            end2 = -record["force"][:, 9:12]
+            for node, end, moments in (
+                (record["node1"], 1, end1), (record["node2"], 2, end2)
+            ):
+                elevations.append(coordinates[node][2])
+                element_tags.append(record["element"])
+                end_numbers.append(end)
+                local_moments.append(moments @ rotation.T)
+        destination = pile_group.create_group(pile)
+        destination.create_dataset("elevation", data=elevations)
+        destination.create_dataset("element_tag", data=element_tags)
+        destination.create_dataset("end", data=end_numbers)
+        destination.create_dataset("moment_local", data=np.stack(local_moments), compression="gzip")
+
+
 def extract_reduced_results(
     results_root: Path,
     motion_file: Path,
@@ -417,6 +494,7 @@ def extract_reduced_results(
     """Reduce distributed VTKHDF results to portable validation histories."""
     import h5py
 
+    results_root = Path(results_root)
     output_file.parent.mkdir(parents=True, exist_ok=True)
     with h5py.File(output_file, "w") as reduced:
         reduced.attrs["units"] = "SI; acceleration stored in m/s^2"
@@ -460,6 +538,7 @@ def extract_reduced_results(
                     )
                     dataset.attrs["coordinate_m"] = coordinate
                     dataset.attrs["requested_depth_m"] = depth
+                _extract_pile_moments(results_root / case_name, group, time, angle)
             print(f"  {len(time)} samples, time {time[0]:g} to {time[-1]:g} s", flush=True)
     return output_file
 
@@ -518,6 +597,70 @@ def _amplitude_spectrum(time: np.ndarray, values: np.ndarray) -> Tuple[np.ndarra
     uniform = np.interp(uniform_time, time, values)
     windowed = (uniform - np.mean(uniform)) * np.hanning(len(uniform))
     return np.fft.rfftfreq(len(uniform), dt), np.abs(np.fft.rfft(windowed))
+
+
+def _average_duplicate_elevations(
+    elevation: np.ndarray, values: np.ndarray
+) -> Tuple[np.ndarray, np.ndarray]:
+    """Average adjacent element-end moments at each shared pile node."""
+    rounded = np.round(elevation, decimals=8)
+    unique = np.unique(rounded)
+    return (
+        np.asarray([np.mean(elevation[rounded == value]) for value in unique]),
+        np.asarray([np.mean(values[rounded == value], axis=0) for value in unique]),
+    )
+
+
+def _plot_pile_moment_comparison(numerical, experiment, output_dir: Path) -> Tuple[Path, Path]:
+    """Plot numerical and measured pile moment envelopes in thesis format."""
+    components = ((0, "Local Mx", "Mxx"), (1, "Local My", "Myy"))
+    figure, axes = plt.subplots(4, 2, figsize=(8, 12), sharex=True, sharey=True)
+    x_limit = 0.0
+    plotted = []
+    for row, (case_name, angle) in enumerate(CASE_ANGLES.items()):
+        pile = numerical[f"{case_name}/pile_moments/left"]
+        elevation, moments = _average_duplicate_elevations(
+            pile["elevation"][:], pile["moment_local"][:] / 1000.0
+        )
+        order = np.argsort(elevation)
+        elevation, moments = elevation[order], moments[order]
+        for column, (index, title, experiment_component) in enumerate(components):
+            axis = axes[row, column]
+            minimum = np.nanmin(moments[:, :, index], axis=1)
+            maximum = np.nanmax(moments[:, :, index], axis=1)
+            axis.fill_betweenx(elevation, minimum, maximum, color="#1f4e79", alpha=0.12)
+            axis.plot(maximum, elevation, color="#1f4e79", lw=2.0, label="Numerical")
+            axis.plot(minimum, elevation, color="#1f4e79", lw=2.0)
+            path = f"theta_{angle}/{experiment_component}"
+            if path in experiment:
+                measured = experiment[f"{path}/moment"][:]
+                measured_elevation = experiment[f"{path}/depth"][:]
+                measured_min = np.nanmin(measured, axis=1)
+                measured_max = np.nanmax(measured, axis=1)
+                axis.scatter(measured_max, measured_elevation, s=45, color="#b23a48",
+                             edgecolors="white", linewidth=0.7, zorder=5,
+                             label="Experiment")
+                axis.scatter(measured_min, measured_elevation, s=45, color="#b23a48",
+                             edgecolors="white", linewidth=0.7, zorder=5)
+                x_limit = max(x_limit, float(np.nanmax(np.abs(measured))))
+            x_limit = max(x_limit, float(np.nanmax(np.abs(moments[:, :, index]))))
+            axis.axvline(0, color="#7a8797", lw=0.9, linestyle=":")
+            _style_axis(axis)
+            if row == 0:
+                axis.set_title(title)
+            if column == 0:
+                axis.set_ylabel(f"{angle} deg\nElevation (m)")
+            if row == 3:
+                axis.set_xlabel("Moment (kN m)")
+            plotted.append(axis)
+    limit = 1.08 * x_limit if x_limit else 1.0
+    for axis in plotted:
+        axis.set_xlim(-limit, limit)
+        axis.set_ylim(-14.3, 3.9)
+    handles, labels = axes[0, 1].get_legend_handles_labels()
+    figure.legend(handles, labels, loc="upper center", ncol=2)
+    figure.tight_layout(rect=(0, 0, 1, 0.96))
+    return _save_figure(figure, output_dir / "pile_moment_comparison_all_angles")
 
 
 def _save_figure(figure, base: Path) -> Tuple[Path, Path]:
@@ -608,6 +751,7 @@ def generate_validation_plots(
         figure.legend(handles, labels, loc="upper center", ncol=2)
         figure.tight_layout(rect=(0, 0, 1, 0.96))
         artifacts.extend(_save_figure(figure, output_dir / "bent_top_acceleration_comparison"))
+        artifacts.extend(_plot_pile_moment_comparison(numerical, experiment, output_dir))
     return tuple(artifacts)
 
 
