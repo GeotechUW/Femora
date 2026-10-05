@@ -10,9 +10,11 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import math
 from pathlib import Path
+from urllib.request import urlopen
 from typing import Dict, List, Optional, Sequence, Tuple
 
 import matplotlib
@@ -66,11 +68,37 @@ FREE_FIELD_CHANNELS = {
     "ax_tipSoil_global": 5.876,
     "ax_soilBottom_global": 21.0,
 }
-EXPERIMENT_BENT_CHANNEL = {0: "ax_local", 30: "ax_local", 60: "ax_local", 90: "ay_global"}
+EXPERIMENT_URL = (
+    "https://raw.githubusercontent.com/GeotechUW/Femora/main/"
+    "examples/inputs/validation/rotated_two_pile_bent/selected_experiment_processed.h5"
+)
+EXPERIMENT_SHA256 = "cbab6292fb10919bd4ce03e3e11bf09acc7fca05be5b1d16965f4322dc06803b"
 DEFAULT_EXPERIMENT = (
     Path(__file__).resolve().parents[1]
     / "inputs/validation/rotated_two_pile_bent/selected_experiment_processed.h5"
 )
+
+
+def get_experiment_file(path: Path = DEFAULT_EXPERIMENT) -> Path:
+    """Return the local experiment file, downloading and verifying it if absent."""
+    path = Path(path)
+    if path.is_file():
+        return path
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = path.with_suffix(path.suffix + ".download")
+    print(f"Downloading experimental validation data from {EXPERIMENT_URL}", flush=True)
+    digest = hashlib.sha256()
+    try:
+        with urlopen(EXPERIMENT_URL, timeout=60) as source, temporary.open("wb") as target:
+            while block := source.read(1024 * 1024):
+                target.write(block)
+                digest.update(block)
+        if digest.hexdigest() != EXPERIMENT_SHA256:
+            raise ValueError("Downloaded experimental file failed its SHA-256 check")
+        temporary.replace(path)
+    finally:
+        temporary.unlink(missing_ok=True)
+    return path
 
 
 def read_single_case_response(
@@ -440,6 +468,58 @@ def _time_window(time: np.ndarray) -> np.ndarray:
     return (time >= TIME_WINDOW[0]) & (time <= TIME_WINDOW[1])
 
 
+def _experiment_series(group) -> np.ndarray:
+    """Select the north sensor used by the thesis from a processed data group."""
+    labels = [value.decode() if isinstance(value, bytes) else str(value)
+              for value in group["labels"][:]]
+    index = labels.index("north") if "north" in labels else 0
+    return np.asarray(group["values"][index], dtype=float)
+
+
+def _apply_thesis_style() -> None:
+    plt.rcParams.update({
+        "font.family": "serif",
+        "font.serif": ["Times New Roman", "Times", "DejaVu Serif"],
+        "font.size": 11,
+        "axes.titlesize": 12,
+        "axes.labelweight": "semibold",
+        "axes.edgecolor": "#4a5568",
+        "axes.linewidth": 0.9,
+        "grid.color": "#d9dee5",
+        "grid.linewidth": 0.8,
+        "legend.frameon": True,
+        "legend.fancybox": False,
+        "savefig.facecolor": "white",
+    })
+
+
+def _style_axis(axis) -> None:
+    axis.grid(True, linestyle="--")
+    for spine in axis.spines.values():
+        spine.set_color("#4a5568")
+        spine.set_linewidth(0.9)
+
+
+def _symmetric_limits(axes) -> None:
+    maximum = max(
+        (float(np.nanmax(np.abs(line.get_ydata())))
+         for axis in np.ravel(axes) for line in axis.lines if len(line.get_ydata())),
+        default=1.0,
+    )
+    for axis in np.ravel(axes):
+        axis.set_ylim(-1.08 * maximum, 1.08 * maximum)
+
+
+def _amplitude_spectrum(time: np.ndarray, values: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+    keep = _time_window(time)
+    time, values = time[keep], values[keep]
+    dt = float(np.median(np.diff(time)))
+    uniform_time = np.arange(time[0], time[-1] + 0.5 * dt, dt)
+    uniform = np.interp(uniform_time, time, values)
+    windowed = (uniform - np.mean(uniform)) * np.hanning(len(uniform))
+    return np.fft.rfftfreq(len(uniform), dt), np.abs(np.fft.rfft(windowed))
+
+
 def _save_figure(figure, base: Path) -> Tuple[Path, Path]:
     png, pdf = base.with_suffix(".png"), base.with_suffix(".pdf")
     figure.savefig(png, dpi=220, bbox_inches="tight")
@@ -454,55 +534,79 @@ def generate_validation_plots(
     """Compare compact numerical histories with the shake-table measurements."""
     import h5py
 
+    experiment_file = get_experiment_file(experiment_file)
     output_dir.mkdir(parents=True, exist_ok=True)
+    _apply_thesis_style()
     artifacts: List[Path] = []
     with h5py.File(numerical_file, "r") as numerical, h5py.File(experiment_file, "r") as experiment:
         case = numerical["angle_000"]
         numerical_time = case["time"][:]
         experiment_time = experiment["time"][:] - EXPERIMENT_TIME_SHIFT
-        figure, axes = plt.subplots(5, 1, figsize=(10, 10), sharex=True)
-        for axis, channel in zip(axes, ("ax_base", *FREE_FIELD_CHANNELS)):
-            measured = experiment[f"free_field/acceleration/{channel}"][:]
+        channels = [*FREE_FIELD_CHANNELS.items(), ("ax_base", 27.8)]
+        figure, axes = plt.subplots(5, 2, figsize=(12, 11),
+                                   gridspec_kw={"width_ratios": [2.7, 1.0]})
+        for row, (channel, depth) in enumerate(channels):
+            time_axis, frequency_axis = axes[row]
+            measured = _experiment_series(experiment[f"free_field/acceleration/{channel}"])
             if channel == "ax_base":
                 calculated = case["base_acceleration_x"][:] / GRAVITY
-                title = "Base"
             else:
                 calculated = case[f"free_field/{channel}"][:] / GRAVITY
-                title = f"Depth {FREE_FIELD_CHANNELS[channel]:g} m"
-            axis.plot(experiment_time[_time_window(experiment_time)],
-                      measured[_time_window(experiment_time)], color="#a44a3f", lw=0.9,
-                      label="Experiment")
-            axis.plot(numerical_time[_time_window(numerical_time)],
-                      calculated[_time_window(numerical_time)], color="#1f5a7a", lw=0.9,
-                      label="Femora")
-            axis.set(title=title, ylabel="a (g)")
-            axis.grid(alpha=0.25)
-        axes[0].legend(ncol=2, frameon=False)
-        axes[-1].set(xlabel="Time (s)", xlim=TIME_WINDOW)
-        figure.suptitle("Free-field acceleration validation")
-        figure.tight_layout()
+            time_axis.plot(numerical_time, calculated, color="#1f4e79", lw=1.2,
+                           label="Numerical")
+            time_axis.plot(experiment_time, measured, color="#b23a48", lw=1.2,
+                           label="Experiment")
+            time_axis.set(xlim=TIME_WINDOW, ylabel="Accel. (g)")
+            time_axis.text(0.99, 0.90, f"Depth = {depth:.2f} m",
+                           transform=time_axis.transAxes, ha="right", va="top", fontsize=9)
+            _style_axis(time_axis)
+            for time, values, color, label in (
+                (numerical_time, calculated, "#1f4e79", "Numerical"),
+                (experiment_time, measured, "#b23a48", "Experiment"),
+            ):
+                frequency, amplitude = _amplitude_spectrum(time, values)
+                selected = frequency <= 15.0
+                frequency_axis.plot(frequency[selected], amplitude[selected], color=color,
+                                    lw=1.2, label=label)
+            frequency_axis.set(xlim=(0, 15), ylabel="|FFT|")
+            _style_axis(frequency_axis)
+        axes[0, 0].set_title("Acceleration Time History")
+        axes[0, 1].set_title("Frequency Content")
+        axes[-1, 0].set_xlabel("Time (s)")
+        axes[-1, 1].set_xlabel("Frequency (Hz)")
+        handles, labels = axes[0, 0].get_legend_handles_labels()
+        figure.legend(handles, labels, loc="upper center", ncol=2)
+        _symmetric_limits(axes[:, 0])
+        figure.tight_layout(rect=(0, 0, 1, 0.96))
         artifacts.extend(_save_figure(figure, output_dir / "free_field_acceleration_comparison"))
 
-        figure, axes = plt.subplots(2, 2, figsize=(12, 7), sharex=True, sharey=True)
-        for axis, (case_name, angle) in zip(axes.flat, CASE_ANGLES.items()):
+        figure, axes = plt.subplots(2, 4, figsize=(16, 7), sharex=True)
+        for column, (case_name, angle) in enumerate(CASE_ANGLES.items()):
             group = numerical[case_name]
             time = group["time"][:]
-            calculated = group["bent_top/acceleration_local"][:, 0] / GRAVITY
-            channel = EXPERIMENT_BENT_CHANNEL[angle]
-            measured = experiment[f"bent_top/theta_{angle}/acceleration/{channel}"][:]
-            axis.plot(experiment_time[_time_window(experiment_time)],
-                      measured[_time_window(experiment_time)], color="#a44a3f", lw=0.9,
-                      label="Experiment")
-            axis.plot(time[_time_window(time)], calculated[_time_window(time)],
-                      color=CASE_COLORS[case_name], lw=0.9, label="Femora")
-            axis.set(title=f"Bent orientation: {angle} deg", xlim=TIME_WINDOW)
-            axis.grid(alpha=0.25)
-        axes[0, 0].legend(ncol=2, frameon=False)
-        axes[1, 0].set(xlabel="Time (s)", ylabel="Local acceleration (g)")
-        axes[1, 1].set(xlabel="Time (s)")
-        axes[0, 0].set_ylabel("Local acceleration (g)")
-        figure.suptitle("Bent-top acceleration validation")
-        figure.tight_layout()
+            for row, (index, component, channel) in enumerate(
+                ((0, "x", "ax_local"), (1, "y", "ay_global"))
+            ):
+                axis = axes[row, column]
+                calculated = group["bent_top/acceleration_local"][:, index] / GRAVITY
+                path = f"bent_top/theta_{angle}/acceleration/{channel}"
+                measured = (_experiment_series(experiment[path]) if path in experiment
+                            else np.zeros_like(experiment_time))
+                axis.plot(time, calculated, color="#1f4e79", lw=1.2, label="Numerical")
+                axis.plot(experiment_time, measured, color="#b23a48", lw=1.2,
+                          label="Experiment")
+                axis.set_xlim(*TIME_WINDOW)
+                _style_axis(axis)
+                if row == 0:
+                    axis.set_title(f"{angle} deg")
+                if column == 0:
+                    axis.set_ylabel(f"Accel. {component} (g)")
+                if row == 1:
+                    axis.set_xlabel("Time (s)")
+        _symmetric_limits(axes)
+        handles, labels = axes[0, 0].get_legend_handles_labels()
+        figure.legend(handles, labels, loc="upper center", ncol=2)
+        figure.tight_layout(rect=(0, 0, 1, 0.96))
         artifacts.extend(_save_figure(figure, output_dir / "bent_top_acceleration_comparison"))
     return tuple(artifacts)
 
