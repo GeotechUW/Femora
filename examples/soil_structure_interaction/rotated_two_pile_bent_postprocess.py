@@ -426,7 +426,7 @@ def _node_coordinates(tcl_file: Path) -> Dict[int, np.ndarray]:
     return coordinates
 
 
-def _read_pile_force_xml(path: Path, reference_time: np.ndarray) -> List[dict]:
+def _read_pile_force_xml(path: Path) -> Tuple[np.ndarray, List[dict]]:
     """Read global beam end actions and their element/node metadata."""
     root = ElementTree.parse(path).getroot()
     outputs = root.findall(".//ElementOutput")
@@ -435,10 +435,11 @@ def _read_pile_force_xml(path: Path, reference_time: np.ndarray) -> List[dict]:
         raise ValueError(f"Incomplete pile-force recorder: {path}")
     rows = np.loadtxt(io.StringIO(data.text), ndmin=2)
     expected_columns = 1 + 12 * len(outputs)
-    if rows.shape != (len(reference_time), expected_columns):
+    if rows.ndim != 2 or rows.shape[1] != expected_columns:
         raise ValueError(f"Unexpected recorder shape {rows.shape} in {path}")
-    if not np.allclose(rows[:, 0], reference_time, rtol=0, atol=1.0e-8):
-        raise ValueError(f"Pile-force and VTKHDF times disagree in {path}")
+    force_time = rows[:, 0]
+    if len(force_time) < 2 or np.any(np.diff(force_time) <= 0.0):
+        raise ValueError(f"Invalid pile-force time vector in {path}")
     records = []
     for index, output in enumerate(outputs):
         records.append({
@@ -447,7 +448,7 @@ def _read_pile_force_xml(path: Path, reference_time: np.ndarray) -> List[dict]:
             "node2": int(output.attrib["node2"]),
             "force": rows[:, 1 + 12 * index:1 + 12 * (index + 1)],
         })
-    return records
+    return force_time, records
 
 
 def _extract_pile_moments(case_dir: Path, group, time: np.ndarray, angle: int) -> None:
@@ -466,7 +467,17 @@ def _extract_pile_moments(case_dir: Path, group, time: np.ndarray, angle: int) -
         ))
         if len(paths) != 3:
             raise FileNotFoundError(f"Expected three {pile} pile-force recorders in {case_dir}")
-        records = [record for path in paths for record in _read_pile_force_xml(path, time)]
+        force_time = None
+        records = []
+        for path in paths:
+            path_time, path_records = _read_pile_force_xml(path)
+            if force_time is None:
+                force_time = path_time
+            elif not np.allclose(path_time, force_time, rtol=0, atol=1.0e-8):
+                raise ValueError(f"Pile-force recorder times disagree in {case_dir}")
+            records.extend(path_records)
+        if abs(force_time[0] - time[0]) > 0.011 or abs(force_time[-1] - time[-1]) > 0.011:
+            raise ValueError(f"Pile-force and VTKHDF durations disagree in {case_dir}")
         records.sort(key=lambda record: coordinates[record["node1"]][2])
         elevations, element_tags, end_numbers, local_moments = [], [], [], []
         for record in records:
@@ -480,6 +491,7 @@ def _extract_pile_moments(case_dir: Path, group, time: np.ndarray, angle: int) -
                 end_numbers.append(end)
                 local_moments.append(moments @ rotation.T)
         destination = pile_group.create_group(pile)
+        destination.create_dataset("time", data=force_time, compression="gzip")
         destination.create_dataset("elevation", data=elevations)
         destination.create_dataset("element_tag", data=element_tags)
         destination.create_dataset("end", data=end_numbers)

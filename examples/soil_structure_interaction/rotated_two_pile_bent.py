@@ -20,7 +20,7 @@
 # %%
 """Rotated two-pile bent tutorial with a parallel remote Femora workflow.
 
-Stages: build(angle_000/030/060/090) -> solve (4 x 9 ranks) -> postprocess/responses.
+Stages: build(angle_000/030/060/090) -> solve (4 x 33 ranks) -> postprocess/responses.
 Task functions are context callbacks; importing this module runs no simulation.
 """
 
@@ -36,7 +36,7 @@ from femora import Model
 from femora.utils.paths import motions_dir
 
 
-RANKS_PER_CASE = 9  # 1 structural + 8 soil partitions
+RANKS_PER_CASE = 33  # 1 structural + 32 soil partitions
 MOTION_FILE = "CFG2_ax_base_02g_avg.acc"
 POSTPROCESS = "rotated_two_pile_bent_postprocess.py"
 
@@ -67,6 +67,7 @@ def build_model(context, angle_degrees=0):
     #########################################################################
     # soil definition
     #########################################################################
+    # --8<-- [start:soil]
     # All three mesh layers use the same nonlinear soil; the split at -1 m
     # controls interface coupling, not material assignment.
     soil_density = 1660.0  # 1.66 tonne/m3 in the source model
@@ -115,10 +116,12 @@ def build_model(context, angle_degrees=0):
         x_min=-15.0, x_max=15.0, y_min=-15.0, y_max=15.0,
         z_min=-1.0, z_max=0.0, nx=30, ny=30, nz=1,
     )
+    # --8<-- [end:soil]
 
     # ########################################################################
     # piles
     # ########################################################################
+    # --8<-- [start:piles]
     aluminum_e = 6.89e10
     aluminum_nu = 0.33
     aluminum_density = 2700.0
@@ -148,12 +151,11 @@ def build_model(context, angle_degrees=0):
         end_ang=360.0,
     )
 
-    # Source (-1, 0, 0) rotated about z: (-cos, -sin, 0).
-    theta = math.radians(angle_degrees)
+    # Keep the thesis transformation vector fixed in global coordinates.
     transformation = model.transformation.transformation3d(
         transf_type="PDelta",
-        vecxz_x=-math.cos(theta),
-        vecxz_y=-math.sin(theta),
+        vecxz_x=-1.0,
+        vecxz_y=0.0,
         vecxz_z=0.0,
     )
     pile_element = model.element.beam.disp(
@@ -196,10 +198,12 @@ def build_model(context, angle_degrees=0):
         x0=3.809, y0=0.0, z0=cap_base_z, x1=3.809, y1=0.0, z1=5.6,
         number_of_lines=2, merge_points=True, density=above_density,
     )
+    # --8<-- [end:piles]
 
     #########################################################################
     # cap
     #########################################################################
+    # --8<-- [start:cap]
     # Solid cap, not a line beam and carrying no lumped mass.
     cap_material = model.material.nd.elastic_isotropic(
         user_name="cap_mat", E=aluminum_e, nu=aluminum_nu, rho=aluminum_density,
@@ -223,31 +227,35 @@ def build_model(context, angle_degrees=0):
     right_free.transform.rotate_z(angle=angle_degrees)
     right_cap.transform.rotate_z(angle=angle_degrees)
     cap_part.transform.rotate_z(angle=angle_degrees)
+    # --8<-- [end:cap]
 
     #########################################################################
     # interfaces
     #########################################################################
+    # --8<-- [start:interfaces]
+    # The thesis interface diameter is 1.181 m, larger than the physical pile diameter.
+    interface_radius = 1.181 / 2.0
     # Only the two deeper soil grids transfer force to the piles; the top 1 m does not.
     left_soil_interface = model.interface.beam_solid_interface(
         name="pile_soil_interface_left", beam_part=left_soil,
         solid_parts=["soil_grid_1", "soil_grid_2"],
-        radius=pile_outer_radius, n_peri=8, n_long=3,
+        radius=interface_radius, n_peri=8, n_long=3,
         penalty_param=1.0e9, g_penalty=True,
     )
     right_soil_interface = model.interface.beam_solid_interface(
         name="pile_soil_interface_right", beam_part=right_soil,
         solid_parts=["soil_grid_1", "soil_grid_2"],
-        radius=pile_outer_radius, n_peri=8, n_long=3,
+        radius=interface_radius, n_peri=8, n_long=3,
         penalty_param=1.0e9, g_penalty=True,
     )
     left_cap_interface = model.interface.beam_solid_interface(
         name="pile_cap_interface_left", beam_part=left_cap,
-        solid_parts=["cap"], radius=pile_outer_radius, n_peri=8, n_long=3,
+        solid_parts=["cap"], radius=interface_radius, n_peri=8, n_long=3,
         penalty_param=1.0e9, g_penalty=True,
     )
     right_cap_interface = model.interface.beam_solid_interface(
         name="pile_cap_interface_right", beam_part=right_cap,
-        solid_parts=["cap"], radius=pile_outer_radius, n_peri=8, n_long=3,
+        solid_parts=["cap"], radius=interface_radius, n_peri=8, n_long=3,
         penalty_param=1.0e9, g_penalty=True,
     )
 
@@ -266,11 +274,12 @@ def build_model(context, angle_degrees=0):
     )
     model.assembler.create_section(
         meshparts=["soil_grid_1", "soil_grid_2", "soil_grid_3"],
-        num_partitions=8,
+        num_partitions=32,
         partition_algorithm="kd-tree",
         merge_points=True,
     )
     model.assembler.assemble(merge_points=True, progress_callback=lambda *_: None)
+    # --8<-- [end:interfaces]
 
 
     # ########################################################################
@@ -284,18 +293,16 @@ def build_model(context, angle_degrees=0):
     #########################################################################
     # gravity
     #########################################################################
+    # --8<-- [start:gravity]
 
     # Settle under self-weight before starting the explicit dynamic solution.
     gravity_settings = dict(
         constraint_handler=model.analysis.constraint.transformation(),
         numberer=model.analysis.numberer.parallelrcm(),
-        system=model.analysis.system.mumps(),
-        test=model.analysis.test.energyincr(tol=1.0, max_iter=20, print_flag=2),
+        system=model.analysis.system.mumps(icntl14=400, icntl7=7),
+        test=model.analysis.test.energyincr(tol=1.0e-3, max_iter=20, print_flag=2),
         algorithm=model.analysis.algorithm.modifiednewton(factor_once=True),
         integrator=model.analysis.integrator.newmark(gamma=0.6, beta=0.3025),
-        max_retries=3,
-        num_sublevels=3,
-        num_substeps=2,
     )
     gravity_elastic = model.analysis.transient(
         name="gravity_elastic", num_steps=100, dt=1.0, **gravity_settings,
@@ -304,20 +311,24 @@ def build_model(context, angle_degrees=0):
         name="gravity_plastic", num_steps=500, dt_min=0.001, dt_max=0.1,
         **gravity_settings,
     )
+    # --8<-- [end:gravity]
 
     #########################################################################
     # excitation
     #########################################################################
+    # --8<-- [start:excitation]
     # Reset the clock while keeping gravity state, then apply uniform x excitation.
     motion_series = model.time_series.path(
         dt=motion_dt, filePath=str(motion_path), factor=gravity,
     )
     uniform_x = model.pattern.uniform_excitation(dof=1, time_series=motion_series)
+    # --8<-- [end:excitation]
 
     #########################################################################
     #    recorders
     #########################################################################
     recorder_dt = 0.02
+    pile_recorder_dt = 0.01
     response_recorder = model.recorder.vtkhdf(
         file_base_name="rotated_bent_response.vtkhdf",
         resp_types=["disp", "vel", "accel"],
@@ -329,7 +340,7 @@ def build_model(context, angle_degrees=0):
         file_prefix="pile_left_force",
         output_format="xml",
         include_time=True,
-        delta_t=recorder_dt,
+        delta_t=pile_recorder_dt,
         precision=16,
     )
     right_pile_force = model.recorder.beam_force(
@@ -338,7 +349,7 @@ def build_model(context, angle_degrees=0):
         file_prefix="pile_right_force",
         output_format="xml",
         include_time=True,
-        delta_t=recorder_dt,
+        delta_t=pile_recorder_dt,
         precision=16,
     )
     interface_recorder = model.recorder.embedded_beam_solid_interface(
@@ -350,9 +361,10 @@ def build_model(context, angle_degrees=0):
     )
 
     ###########################################################################
-    # Explicit shaking: one structural rank and eight soil ranks per case.
+    # Explicit shaking: one structural rank and 32 soil ranks per case.
     # No retry or substepping: changing the step would change explicit stability.
     ###########################################################################
+    # --8<-- [start:dynamic]
     dynamic_dt = 4.0e-5
     dynamic_analysis = model.analysis.transient(
         name="dynamic",
@@ -367,22 +379,24 @@ def build_model(context, angle_degrees=0):
         max_retries=0,
         initialize=True,
     )
+    # --8<-- [end:dynamic]
 
     #########################################################################
     # process
-    # ########################################################################
+    ##########################################################################
+    # --8<-- [start:gravity-process]
     model.process.add_step(model.actions.update_material_stage_to_elastic(), "Elastic gravity stage")
     model.process.add_step(gravity_elastic, "Gravity elastic (100 steps, dt=1.0)")
     model.process.add_step(model.actions.update_material_stage_to_plastic(), "Plastic gravity stage")
     model.process.add_step(gravity_plastic, "Gravity plastic (500 ramped steps)")
-    model.process.add_step(model.actions.load_const(), "Freeze existing loads before base excitation")
-    model.process.add_step(model.actions.set_time(0.0), "Reset time, keeping gravity state")
     model.process.add_step(uniform_x, "Uniform global-x base excitation")
     model.process.add_step(response_recorder, "Record displacement, velocity, acceleration")
     model.process.add_step(left_pile_force, "Record left pile end forces")
     model.process.add_step(right_pile_force, "Record right pile end forces")
     model.process.add_step(interface_recorder, "Record pile-soil and pile-cap interfaces")
+    model.process.add_step(model.actions.set_time(0.0), "Reset time, keeping gravity state")
     model.process.add_step(dynamic_analysis, "Run the 50 s dynamic analysis")
+    # --8<-- [end:gravity-process]
 
     #########################################################################
     # export
@@ -407,14 +421,12 @@ def build_model(context, angle_degrees=0):
 #     )
 
 
-# ########################################################################
-    #     [start:workflow]
+# --8<-- [start:workflow]
 def build_workflow():
-    """Build and solve four rotated cases; keep raw results for later review."""
+    """Build four cases sequentially, then solve them in parallel."""
     workflow = fm.Workflow("rotated-two-pile-bent")
     workflow.add(
         "build",
-        parallel=True,
         tasks=[
             fm.tasks.Python("angle_000", build_model, kwargs={"angle_degrees": 0}),
             fm.tasks.Python("angle_030", build_model, kwargs={"angle_degrees": 30}),
@@ -444,12 +456,10 @@ def build_workflow():
         "solve/**/*",
     )
     return workflow
-# ########################################################################
-    #     [end:workflow]
+# --8<-- [end:workflow]
 
 
-# ########################################################################
-    #     [start:submission]
+# --8<-- [start:submission]
 if __name__ == "__main__":
     job = fm.submit(
         function=build_workflow,
@@ -457,11 +467,11 @@ if __name__ == "__main__":
         settings={
             "app_id": "amnp95-femora-workflow-stampede3",
             "system": "stampede3",
-            "queue": "skx-dev",
+            "queue": "skx",
             "allocation": "DesignSafe-SimCenter",
-            "nodes": 1,
+            "nodes": 3,
             "cores_per_node": 48,
-            "minutes": 120,
+            "minutes": 2880,
         },
         files={
             # POSTPROCESS: Path(__file__).with_name(POSTPROCESS),
@@ -469,5 +479,4 @@ if __name__ == "__main__":
         },
     )
     print(f"Job UUID: {job.id}")
-# ########################################################################
-    #     [end:submission]
+# --8<-- [end:submission]
