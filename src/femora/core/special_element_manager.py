@@ -24,6 +24,13 @@ class SpecialElementManager:
 
         return self._manager.add(ASDEmbeddedNodeElement3D(ndof, **kwargs))
 
+    def embedded_node_contact(self, ndof: int, Kn: float, Kt: float, mu: float, **kwargs):
+        from femora.components.element.embedded_node_contact import EmbeddedNodeContact3D
+
+        return self._manager.add(
+            EmbeddedNodeContact3D(ndof=ndof, Kn=Kn, Kt=Kt, mu=mu, **kwargs)
+        )
+
     def zero_length_contact(self, ndof: int, Kn: float, Kt: float, mu: float, **kwargs):
         from femora.components.element.zero_length_contact import ZeroLengthContactASDimplex
 

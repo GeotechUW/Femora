@@ -1,4 +1,4 @@
-﻿# =============================================================================
+# =============================================================================
 # Femora: Fast Efficient Meta-modeling for OpenSees-based Resilience Analysis
 # Copyright 2026 Amin Pakzad and Pedro Arduino
 # Developed at the UW Geotechnical Lab
@@ -75,11 +75,11 @@ class EmbeddedNodeInterface(InterfaceBase, GeneratesMeshMixin):
         use_mesh_part_points = True,
         normal_filter: list[float] | None = None,
         filter_tolerance: float = 0.98,
-        friction_interface: bool = True,
-        friction_interface_kn: float = 1e8,
-        friction_interface_kt: float = 1e8,
-        friction_interface_mu: float = 0.5,
-        friction_interface_int_type: int = 1,
+        contact: bool = False,
+        Kn: float = 1e8,
+        Kt: float = 1e8,
+        mu: float = 0.5,
+        int_type: int = 1,
         *,
         meshpart,
 
@@ -99,11 +99,14 @@ class EmbeddedNodeInterface(InterfaceBase, GeneratesMeshMixin):
             use_mesh_part_points: If True, uses mesh part nodal points directly. Defaults to True.
             normal_filter: Optional 3D orientation direction vector to filter points. Defaults to None.
             filter_tolerance: Direction cosine tolerance for the normal filter. Defaults to 0.98.
-            friction_interface: If True, applies frictional interface properties. Defaults to True.
-            friction_interface_kn: Normal penalty stiffness for friction contact. Defaults to 1e8.
-            friction_interface_kt: Tangent penalty stiffness for friction contact. Defaults to 1e8.
-            friction_interface_mu: Friction coefficient (mu). Defaults to 0.5.
-            friction_interface_int_type: Frictional element interface formulation type. Defaults to 1.
+            contact: If True, creates a frictional ``EmbeddedNodeContact``
+                interface. Otherwise, creates a tied ``ASDEmbeddedNodeElement``
+                interface. Defaults to False.
+            Kn: Normal penalty stiffness for contact. Defaults to 1e8.
+            Kt: Tangential penalty stiffness for contact. Defaults to 1e8.
+            mu: Friction coefficient for contact. Defaults to 0.5.
+            int_type: Contact integration type: 0 for implicit or 1 for
+                IMPL-EX. Defaults to 1.
             meshpart: MeshPart registry manager from the parent model.
 
         Raises:
@@ -136,17 +139,22 @@ class EmbeddedNodeInterface(InterfaceBase, GeneratesMeshMixin):
             normal_filter = np.array(normal_filter) / np.linalg.norm(normal_filter)
         self._normal_filter = normal_filter
         self._filter_tolerance = filter_tolerance
-        self._friction_interface = friction_interface
-        self._friction_interface_kn = friction_interface_kn
-        self._friction_interface_kt = friction_interface_kt
-        self._friction_interface_mu = friction_interface_mu
-        self._friction_interface_int_type = friction_interface_int_type
+        self._contact = bool(contact)
+        self._Kn = Kn
+        self._Kt = Kt
+        self._mu = mu
+        self._int_type = int_type
+        if self._contact and (rot or p or K is not None or KP is not None):
+            raise ValueError(
+                "Contact interfaces do not support rot, p, K, or KP; "
+                "these options belong to tied embedded-node interfaces"
+            )
         self._interface_part_tag: int | None = None
 
-        if self._friction_interface :
+        if self._contact:
             if not self._use_mesh_part_points:
                 self._use_mesh_part_points = True
-                print("Warning: Using use_friction_interface=True will automatically set use_mesh_part_points=True")
+                print("Warning: contact=True automatically enables use_mesh_part_points")
             
 
         super().__init__(name, owners=[self.constrained_node.user_name])
@@ -257,7 +265,7 @@ class EmbeddedNodeInterface(InterfaceBase, GeneratesMeshMixin):
             raise RuntimeError("The model must be assembled before plotting an interface.")
 
         (
-            _tetrahedra_mesh,
+            tetrahedra_mesh,
             original_cells,
             selected_points,
             _selected_point_ids,
@@ -266,7 +274,7 @@ class EmbeddedNodeInterface(InterfaceBase, GeneratesMeshMixin):
 
         constrained_mask = mesh.cell_data['MeshPartTag_celldata'] == self.constrained_node.tag
         constrained_mesh = mesh.extract_cells(constrained_mask, progress_bar=False)
-        host_mesh = mesh.extract_cells(original_cells, progress_bar=False)
+        host_mesh = tetrahedra_mesh.extract_cells(original_cells, progress_bar=False)
 
         interface_mesh = None
         if (
@@ -321,7 +329,9 @@ class EmbeddedNodeInterface(InterfaceBase, GeneratesMeshMixin):
             arrow_scale = max(float(self.offset), 1.0) * 0.35
             glyph_source = pv.Arrow()
             glyphs = pv.PolyData(selected_points)
-            glyphs["vectors"] = selected_normals
+            # For contact, show the normal used by EmbeddedNodeContact rather
+            # than the constrained surface normal used to find the host cell.
+            glyphs["vectors"] = -selected_normals if self._contact else selected_normals
             glyphs = glyphs.glyph(
                 orient="vectors",
                 scale=False,
@@ -514,7 +524,7 @@ class EmbeddedNodeInterface(InterfaceBase, GeneratesMeshMixin):
         # 10) create tet cores
         # each selected point is related to a tetrahedron element so the point should be in the core
         # each point id is related to selected_point but the point can be exist in a different core
-        tet_cores = tetrahedra_mesh_filtered.cell_data['Core'][selected_cells]
+        tet_cores = tetrahedra_mesh.cell_data['Core'][original_cells]
         point_id_cores = []
         for point_id in point_ids:
             tmp_mesh = asembelled_mesh.extract_points(point_id,include_cells = True)
@@ -554,21 +564,28 @@ class EmbeddedNodeInterface(InterfaceBase, GeneratesMeshMixin):
                 node_tag = point_ids[i] + start_node_tag
             else:
                 node_tag = offset + i + start_node_tag
-            orientation_map[node_tag] = selected_normals[i].tolist()
+            # Surface normals point from the constrained body toward the host.
+            # EmbeddedNodeContact expects the opposite: host (master) to the
+            # embedded node (slave).
+            orientation_map[node_tag] = (-selected_normals[i]).tolist()
             
-        embededd_ele = mesh_maker.element.special.asd_embedded_node(
-            ndof=ndf,
-            rot=self._rot,
-            p=self._p,
-            K=self._K,
-            KP=self._KP,
-            contact=self._friction_interface,
-            Kn=self._friction_interface_kn,
-            Kt=self._friction_interface_kt,
-            mu=self._friction_interface_mu,
-            int_type=self._friction_interface_int_type,
-            orient_map=orientation_map,
-        )
+        if self._contact:
+            embededd_ele = mesh_maker.element.special.embedded_node_contact(
+                ndof=ndf,
+                Kn=self._Kn,
+                Kt=self._Kt,
+                mu=self._mu,
+                int_type=self._int_type,
+                orient_map=orientation_map,
+            )
+        else:
+            embededd_ele = mesh_maker.element.special.asd_embedded_node(
+                ndof=ndf,
+                rot=self._rot,
+                p=self._p,
+                K=self._K,
+                KP=self._KP,
+            )
 
         # mesh_maker.assembled_mesh.merge(embedded_mesh, merge_points=True, inplace=True)
         old_cells = base_mesh.cells
