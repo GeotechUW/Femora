@@ -84,6 +84,28 @@
       "tags": ["Two piles", "H5DRM", "PML", "16 ranks"],
       "level": "Advanced",
       "prerequisites": ["dynamic-pile-soil-interaction"]
+    },
+    {
+      "slug": "rotated-two-pile-bent",
+      "title": "Rotated Two-Pile Bent",
+      "summary": "Compare four orientations of a two-pile bent in nonlinear soil under one base motion.",
+      "preview": "../assets/examples/rotated-two-pile-bent/index.html",
+      "previewTitle": "Bent and soil mesh with 0, 30, 60, and 90 degree orientations",
+      "categories": ["Soil-Structure Interaction", "Nonlinear Analysis", "Interfaces", "Parallel Models"],
+      "tags": ["Fiber sections", "Base excitation", "Orientation"],
+      "level": "Advanced",
+      "prerequisites": ["two-pile-bent-drm", "nonlinear-layered-soil-column"]
+    },
+    {
+      "slug": "embedded-block-contact",
+      "title": "Foundation Contact and Separation",
+      "summary": "Connect a shallow foundation to soil with frictional contact, then expose uplift through lateral rocking.",
+      "preview": "../assets/examples/embedded-block-contact/index.html",
+      "previewTitle": "Rocking foundation contact shown in three-dimensional and section views",
+      "categories": ["Soil-Structure Interaction", "Interfaces"],
+      "tags": ["Contact", "Separation", "Foundation rocking"],
+      "level": "Intermediate",
+      "prerequisites": []
     }
   ]
 }

@@ -44,5 +44,7 @@ nav:
           - 'Laterally Loaded Pile': examples/laterally-loaded-pile.md
           - 'Boundary Effects in Dynamic Pile-Soil Interaction': examples/dynamic-pile-soil-interaction.md
           - 'Two-Pile Bent Under DRM Excitation': examples/two-pile-bent-drm.md
+          - 'Rotated Two-Pile Bent': examples/rotated-two-pile-bent.md
+          - 'Foundation Contact and Separation': examples/embedded-block-contact.md
   - 'Technical Reference':
       - 'Mesh Data Schema': technical-reference/mesh-data-schema.md
