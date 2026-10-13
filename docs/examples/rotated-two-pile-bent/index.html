@@ -1690,6 +1690,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#results" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Results
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#workflow-and-execution" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1714,17 +1725,6 @@
         
       </ul>
     </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#results" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Results
-      
-    </span>
-  </a>
   
 </li>
       
@@ -14295,6 +14295,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#results" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Results
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#workflow-and-execution" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -14322,17 +14333,6 @@
   
 </li>
       
-        <li class="md-nav__item">
-  <a href="#results" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Results
-      
-    </span>
-  </a>
-  
-</li>
-      
     </ul>
   
 </nav>
@@ -14355,7 +14355,7 @@
 
 <h1 id="rotated-two-pile-bent">Rotated Two-Pile Bent</h1>
 <p>This example applies the same base motion to four configurations of a
-two-pile aluminum bent. The pile axis rotates relative to the shaking direction,
+two-pile aluminum bent. The bent's plan orientation rotates relative to the shaking direction,
 and the assigned pile yield strength also follows the thesis validation cases.
 It therefore compares those four configurations, not the isolated effect of
 rotation. All four cases share one Femora workflow.</p>
@@ -14394,8 +14394,10 @@ not a coupled pore-pressure or liquefaction analysis.
 <li><strong>Solid aluminum cap:</strong> A solid 3D brick mesh (<span class="arithmatex">\(11.44\text{ m} \times 6.24\text{ m} \times 3.38\text{ m}\)</span>,
   from <span class="arithmatex">\(z = 3.9\text{ m}\)</span> to <span class="arithmatex">\(z = 7.28\text{ m}\)</span>) rather than a 1D line beam.
   The cap provides distributed structural mass and stiffness directly through
-  its solid continuum elements. Its density is <span class="arithmatex">\(2700\text{ kg/m}^3\)</span>; no lumped
-  mass is added. The pile beam elements also carry distributed mass, and use a
+  its solid continuum elements. Its density is <span class="arithmatex">\(2700\text{ kg/m}^3\)</span>; its brick
+  mass matrix is lumped, with no separate point mass added. Buried pile segments
+  use <span class="arithmatex">\(2700\text{ kg/m}^3\)</span>; segments above grade use an effective line mass of
+  <span class="arithmatex">\(909\text{ kg/m}\)</span>. The pile beam elements use a
   <code>PDelta</code> geometric transformation.</li>
 <li><strong>Embedded beam-solid interfaces:</strong> The two piles couple to soil below
   <span class="arithmatex">\(z=-1\text{ m}\)</span> and separately to the cap. The upper 1 m of soil remains in
@@ -14403,8 +14405,9 @@ not a coupled pore-pressure or liquefaction analysis.
   approximately one-diameter free length below grade. This is a zero-transfer
   idealization, not a gap-contact law that can re-engage.</li>
 </ul>
-<p>The soil has 5% frequency-based Rayleigh damping, and the pile/cap region has
-7% structural damping, following the validation model. These are prescribed
+<p>The soil has frequency-based Rayleigh damping calibrated to 5% at 0.2 and 20 Hz,
+and the pile/cap region uses a 7% Uniform damping object over 2.2-15 Hz.
+These are prescribed
 model parameters, not values calibrated by this example.</p>
 <div class="admonition warning">
 <p class="admonition-title">Interface Sampling Radius vs. Physical Outer Radius</p>
@@ -14442,7 +14445,7 @@ record an earthquake name.</p>
 </ol>
 <p>The gravity state is retained, but the specified settling steps alone do not
 prove equilibrium. Check residual motion and convergence before interpreting
-the shaking response. Gravity uses bounded retries and subdivision; a failed
+the shaking response. Gravity permits up to ten same-step retries, without subdivision; a failed
 dynamic step stops the job rather than silently continuing.</p>
 <p>Recorded displacements under uniform base excitation represent motion relative
 to the moving base. Raw histories retain the initial offset from gravity
@@ -14707,8 +14710,10 @@ actions change the soil behavior; they do not rebuild the mesh.</p>
 </div>
 <div class="tabbed-block">
 <p>Define the sampled motion and the uniform-excitation pattern. The model
-process freezes existing loads and resets time before adding this pattern;
-neither the deformed configuration nor the material state is reset.</p>
+process adds this pattern after gravity, then registers the recorders and
+resets time before dynamic analysis. There is no explicit load-freezing
+action; self-weight remains assigned through element body forces. Neither
+the deformed configuration nor the material state is reset.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>    <span class="c1"># Reset the clock while keeping gravity state, then apply uniform x excitation.</span>
 <a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>    <span class="n">motion_series</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">time_series</span><span class="o">.</span><span class="n">path</span><span class="p">(</span>
 <a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>        <span class="n">dt</span><span class="o">=</span><span class="n">motion_dt</span><span class="p">,</span> <span class="n">filePath</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">motion_path</span><span class="p">),</span> <span class="n">factor</span><span class="o">=</span><span class="n">gravity</span><span class="p">,</span>
@@ -14738,14 +14743,85 @@ a failed step stops the run.</p>
 </div>
 </div>
 </div>
+<h2 id="results">Results</h2>
+<p>The workflow automatically reduces the four solved configurations and generates
+the comparisons below. Blue curves show numerical responses; red curves or
+markers show experimental measurements. Full-domain fields are not needed to
+download and inspect these comparisons. The compact numerical file retains
+acceleration histories and signed element-end moments for both piles, allowing
+the figures to be regenerated locally.</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="2:3"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><input id="__tabbed_2_3" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">Free-Field Soil Response</label><label for="__tabbed_2_2">Bent-Top Acceleration</label><label for="__tabbed_2_3">Pile Bending Moments</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<p><img alt="Free-field acceleration histories and frequency content compared with experiment" src="../../assets/examples/rotated-two-pile-bent/free_field_acceleration_comparison.png" /></p>
+<p>The left column compares acceleration histories at four soil depths and at the
+base for the 0-degree configuration. The right column compares their frequency
+content. The prescribed base history closely follows the experimental input,
+but this is an input consistency check rather than an independent prediction.
+At 21 m depth the response follows the measured motion more closely than in the
+shallow soil. At 0.5, 2.6, and 5.88 m, numerical peaks are visibly larger and
+the spectral response is more concentrated around 2-3 Hz. The model captures
+the main shaking interval but overpredicts shallow-soil amplification.</p>
+<p>Depth labels refer to requested experimental sensor depths. The nearest
+numerical nodes are at 1.000, 3.046, 6.115, and 20.171 m depth for requests
+of 0.5, 2.6, 5.876, and 21 m, respectively. Histories are not spatially
+interpolated to sensor elevations, which limits this comparison.
+The spectra use mean removal and a Hann window over 10-40 s. Their plotted
+FFT magnitudes are not normalized for sample count or window gain; compare
+frequency locations, not absolute spectral amplitudes across sampling rates.</p>
+</div>
+<div class="tabbed-block">
+<p><img alt="Bent-top horizontal acceleration compared with experiment for four configurations" src="../../assets/examples/rotated-two-pile-bent/bent_top_acceleration_comparison.png" /></p>
+<p>Columns represent the 0, 30, 60, and 90-degree configurations; rows show the
+two bent-local horizontal components. Longitudinal histories at 0 and 30 degrees
+reproduce much of the measured timing and amplitude, although individual peaks
+differ. The 60-degree longitudinal response is smaller, with visible phase and
+amplitude differences. Numerical transverse peaks are larger than the measured
+curves at 30, 60, and 90 degrees. Since assigned pile strength also varies,
+these differences cannot be attributed to orientation alone.</p>
+<p>Acceleration is shown in g. The postprocessor adds the prescribed base motion
+to the relative numerical acceleration before rotating into bent-local axes.
+Experimental time is shifted by 11.45 s; the figures display 10-40 s.
+The numerical probe is the mesh node nearest the cap-top center, not an
+interpolated center response. In the 0-degree case it is at
+<span class="arithmatex">\((-0.52, 0, 7.28)\text{ m}\)</span>.</p>
+<div class="admonition warning">
+<p class="admonition-title">Experimental Component Conventions</p>
+<p>The transverse experimental channel is named <code>ay_global</code>, whereas the
+numerical curve uses bent-local y. Its measurement-axis convention needs
+confirmation before interpreting transverse agreement quantitatively.
+Missing experimental acceleration channels currently appear as zero curves;
+a flat red line must not be interpreted as a measured zero response without
+checking channel availability.</p>
+</div>
+</div>
+<div class="tabbed-block">
+<p><img alt="Left-pile local bending moment envelopes compared with experimental measurements" src="../../assets/examples/rotated-two-pile-bent/pile_moment_comparison_all_angles.png" /></p>
+<p>The curves show minimum and maximum left-pile bending moments along elevation;
+red markers are experimental envelopes at instrumented elevations. Moments are
+in kN m. The dominant component changes from local My at 0 degrees to local Mx
+at 90 degrees, with both components active at intermediate orientations.
+Local My envelopes at 0 and 30 degrees follow the measured depth-wise shape
+reasonably, but disagreement remains at individual elevations. The large
+60-degree local Mx measurements near the upper pile are not reproduced, and
+the 90-degree Mx envelope also differs from several measured values.</p>
+<p>For plotting, duplicate element-end elevations are averaged and the existing
+elevation shift of -1.15 m is applied. Envelopes use the full recorded
+0-50 s history, unlike the acceleration plots' 10-40 s display window.
+The compact file preserves unaveraged
+signed end moments. These figures demonstrate the comparison workflow and its
+remaining model discrepancies, not exact agreement or complete validation.</p>
+</div>
+</div>
+</div>
 <h2 id="workflow-and-execution">Workflow and Execution</h2>
 <p>Femora coordinates model generation, parallel numerical solution, and
 cross-case response postprocessing using a structured workflow. For general
 workflow concepts and execution modes, see the
 <a href="../../concepts/workflows/">Workflows and Remote Execution</a> guide.</p>
-<p>The workflow builds all four cases (<code>angle_000</code>, <code>angle_030</code>, <code>angle_060</code>, <code>angle_090</code>) in
-parallel, solves each case on 9 MPI ranks (one structural and eight soil;
-36 ranks concurrently across the study),
+<p>The workflow builds all four cases (<code>angle_000</code>, <code>angle_030</code>, <code>angle_060</code>, <code>angle_090</code>)
+sequentially, solves each case on 33 MPI ranks (one structural and 32 soil;
+132 ranks concurrently across the study),
 and passes the resulting partition datasets to the companion postprocessor:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">build_workflow</span><span class="p">():</span>
 <a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="w">    </span><span class="sd">"""Build four cases sequentially, then solve them in parallel."""</span>
@@ -14769,18 +14845,17 @@ and passes the resulting partition datasets to the companion postprocessor:</p>
 <a id="__codelineno-8-20" name="__codelineno-8-20" href="#__codelineno-8-20"></a>            <span class="n">fm</span><span class="o">.</span><span class="n">tasks</span><span class="o">.</span><span class="n">OpenSees</span><span class="p">(</span><span class="s2">"angle_090"</span><span class="p">,</span> <span class="s2">"build/angle_090/model.tcl"</span><span class="p">,</span> <span class="n">ranks</span><span class="o">=</span><span class="n">RANKS_PER_CASE</span><span class="p">),</span>
 <a id="__codelineno-8-21" name="__codelineno-8-21" href="#__codelineno-8-21"></a>        <span class="p">],</span>
 <a id="__codelineno-8-22" name="__codelineno-8-22" href="#__codelineno-8-22"></a>    <span class="p">)</span>
-<a id="__codelineno-8-23" name="__codelineno-8-23" href="#__codelineno-8-23"></a>    <span class="c1"># Run postprocessing after reviewing the raw solver results.</span>
-<a id="__codelineno-8-24" name="__codelineno-8-24" href="#__codelineno-8-24"></a>    <span class="c1"># workflow.add(</span>
-<a id="__codelineno-8-25" name="__codelineno-8-25" href="#__codelineno-8-25"></a>    <span class="c1">#     "postprocess", tasks=[fm.tasks.Python("responses", postprocess_results)]</span>
-<a id="__codelineno-8-26" name="__codelineno-8-26" href="#__codelineno-8-26"></a>    <span class="c1"># )</span>
-<a id="__codelineno-8-27" name="__codelineno-8-27" href="#__codelineno-8-27"></a>    <span class="n">workflow</span><span class="o">.</span><span class="n">outputs</span><span class="p">(</span>
-<a id="__codelineno-8-28" name="__codelineno-8-28" href="#__codelineno-8-28"></a>        <span class="c1"># "postprocess/responses/*",</span>
-<a id="__codelineno-8-29" name="__codelineno-8-29" href="#__codelineno-8-29"></a>        <span class="s2">"**/stdout.log"</span><span class="p">,</span>
-<a id="__codelineno-8-30" name="__codelineno-8-30" href="#__codelineno-8-30"></a>        <span class="s2">"build/**/*"</span><span class="p">,</span>
-<a id="__codelineno-8-31" name="__codelineno-8-31" href="#__codelineno-8-31"></a>        <span class="s2">"motions/**/*"</span><span class="p">,</span>
-<a id="__codelineno-8-32" name="__codelineno-8-32" href="#__codelineno-8-32"></a>        <span class="s2">"solve/**/*"</span><span class="p">,</span>
-<a id="__codelineno-8-33" name="__codelineno-8-33" href="#__codelineno-8-33"></a>    <span class="p">)</span>
-<a id="__codelineno-8-34" name="__codelineno-8-34" href="#__codelineno-8-34"></a>    <span class="k">return</span> <span class="n">workflow</span>
+<a id="__codelineno-8-23" name="__codelineno-8-23" href="#__codelineno-8-23"></a>    <span class="n">workflow</span><span class="o">.</span><span class="n">add</span><span class="p">(</span>
+<a id="__codelineno-8-24" name="__codelineno-8-24" href="#__codelineno-8-24"></a>        <span class="s2">"postprocess"</span><span class="p">,</span> <span class="n">tasks</span><span class="o">=</span><span class="p">[</span><span class="n">fm</span><span class="o">.</span><span class="n">tasks</span><span class="o">.</span><span class="n">Python</span><span class="p">(</span><span class="s2">"responses"</span><span class="p">,</span> <span class="n">postprocess_results</span><span class="p">)]</span>
+<a id="__codelineno-8-25" name="__codelineno-8-25" href="#__codelineno-8-25"></a>    <span class="p">)</span>
+<a id="__codelineno-8-26" name="__codelineno-8-26" href="#__codelineno-8-26"></a>    <span class="n">workflow</span><span class="o">.</span><span class="n">outputs</span><span class="p">(</span>
+<a id="__codelineno-8-27" name="__codelineno-8-27" href="#__codelineno-8-27"></a>        <span class="s2">"postprocess/responses/*"</span><span class="p">,</span>
+<a id="__codelineno-8-28" name="__codelineno-8-28" href="#__codelineno-8-28"></a>        <span class="s2">"**/stdout.log"</span><span class="p">,</span>
+<a id="__codelineno-8-29" name="__codelineno-8-29" href="#__codelineno-8-29"></a>        <span class="s2">"build/*/model.tcl"</span><span class="p">,</span>
+<a id="__codelineno-8-30" name="__codelineno-8-30" href="#__codelineno-8-30"></a>        <span class="s2">"motions/**/*"</span><span class="p">,</span>
+<a id="__codelineno-8-31" name="__codelineno-8-31" href="#__codelineno-8-31"></a>        <span class="s2">"solve/**/*"</span><span class="p">,</span>
+<a id="__codelineno-8-32" name="__codelineno-8-32" href="#__codelineno-8-32"></a>    <span class="p">)</span>
+<a id="__codelineno-8-33" name="__codelineno-8-33" href="#__codelineno-8-33"></a>    <span class="k">return</span> <span class="n">workflow</span>
 </code></pre></div>
 <h3 id="remote-submission">Remote Submission</h3>
 <p>Run the study directly on DesignSafe / TACC systems using Femora's remote submission
@@ -14799,11 +14874,16 @@ interface:</p>
 <a id="__codelineno-9-12" name="__codelineno-9-12" href="#__codelineno-9-12"></a>            <span class="s2">"minutes"</span><span class="p">:</span> <span class="mi">2880</span><span class="p">,</span>
 <a id="__codelineno-9-13" name="__codelineno-9-13" href="#__codelineno-9-13"></a>        <span class="p">},</span>
 <a id="__codelineno-9-14" name="__codelineno-9-14" href="#__codelineno-9-14"></a>        <span class="n">files</span><span class="o">=</span><span class="p">{</span>
-<a id="__codelineno-9-15" name="__codelineno-9-15" href="#__codelineno-9-15"></a>            <span class="c1"># POSTPROCESS: Path(__file__).with_name(POSTPROCESS),</span>
-<a id="__codelineno-9-16" name="__codelineno-9-16" href="#__codelineno-9-16"></a>            <span class="sa">f</span><span class="s2">"motions/</span><span class="si">{</span><span class="n">MOTION_FILE</span><span class="si">}</span><span class="s2">"</span><span class="p">:</span> <span class="n">motions_dir</span><span class="p">()</span> <span class="o">/</span> <span class="n">MOTION_FILE</span><span class="p">,</span>
-<a id="__codelineno-9-17" name="__codelineno-9-17" href="#__codelineno-9-17"></a>        <span class="p">},</span>
-<a id="__codelineno-9-18" name="__codelineno-9-18" href="#__codelineno-9-18"></a>    <span class="p">)</span>
-<a id="__codelineno-9-19" name="__codelineno-9-19" href="#__codelineno-9-19"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Job UUID: </span><span class="si">{</span><span class="n">job</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<a id="__codelineno-9-15" name="__codelineno-9-15" href="#__codelineno-9-15"></a>            <span class="n">POSTPROCESS</span><span class="p">:</span> <span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">with_name</span><span class="p">(</span><span class="n">POSTPROCESS</span><span class="p">),</span>
+<a id="__codelineno-9-16" name="__codelineno-9-16" href="#__codelineno-9-16"></a>            <span class="n">EXPERIMENT_FILE</span><span class="p">:</span> <span class="p">(</span>
+<a id="__codelineno-9-17" name="__codelineno-9-17" href="#__codelineno-9-17"></a>                <span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span><span class="o">.</span><span class="n">parents</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+<a id="__codelineno-9-18" name="__codelineno-9-18" href="#__codelineno-9-18"></a>                <span class="o">/</span> <span class="s2">"inputs/validation/rotated_two_pile_bent"</span>
+<a id="__codelineno-9-19" name="__codelineno-9-19" href="#__codelineno-9-19"></a>                <span class="o">/</span> <span class="n">EXPERIMENT_FILE</span>
+<a id="__codelineno-9-20" name="__codelineno-9-20" href="#__codelineno-9-20"></a>            <span class="p">),</span>
+<a id="__codelineno-9-21" name="__codelineno-9-21" href="#__codelineno-9-21"></a>            <span class="sa">f</span><span class="s2">"motions/</span><span class="si">{</span><span class="n">MOTION_FILE</span><span class="si">}</span><span class="s2">"</span><span class="p">:</span> <span class="n">motions_dir</span><span class="p">()</span> <span class="o">/</span> <span class="n">MOTION_FILE</span><span class="p">,</span>
+<a id="__codelineno-9-22" name="__codelineno-9-22" href="#__codelineno-9-22"></a>        <span class="p">},</span>
+<a id="__codelineno-9-23" name="__codelineno-9-23" href="#__codelineno-9-23"></a>    <span class="p">)</span>
+<a id="__codelineno-9-24" name="__codelineno-9-24" href="#__codelineno-9-24"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Job UUID: </span><span class="si">{</span><span class="n">job</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </code></pre></div>
 <p>Submit from the command line:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>python<span class="w"> </span>examples/soil_structure_interaction/rotated_two_pile_bent.py
@@ -14812,30 +14892,15 @@ interface:</p>
 CLI tool:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>femora<span class="w"> </span><span class="nb">jobs</span><span class="w"> </span>track
 </code></pre></div>
-<p>Select the submitted job in the tracker. All generated model files, raw
-partition outputs, interface records, and XML pile forces are selected for
-download while the processing is being checked.</p>
-<h2 id="results">Results</h2>
-<p>Quantitative response curves and directional stiffness comparisons between the
-0 deg, 30 deg, 60 deg, and 90 deg orientations are pending multi-rank remote solver
-verification. Upon completion, the companion postprocessor generates:</p>
-<ul>
-<li>16 raw displacement history CSV files (4 cases x 4 probes: <code>left_head</code>,
-  <code>right_head</code>, <code>cap_top</code>, and <code>ground_surface</code>) containing time, <span class="arithmatex">\(dx\)</span>, <span class="arithmatex">\(dy\)</span>,
-  and <span class="arithmatex">\(dz\)</span> in meters.</li>
-<li>A multi-panel comparison figure showing side-by-side relative-to-ground <span class="arithmatex">\(dx\)</span>
-  displacement histories across the four angles.</li>
-<li>A <code>summary.json</code> file capturing extrema, timestamps, and initial gravity
-  settlement offsets for each probe.</li>
-</ul>
-<p><code>cap_top</code> is the actual top-surface mesh node closest to the cap center, not
-an interpolated response at its geometric center. The postprocessor locates
-the pile heads and other probes in each case's recorded mesh, so the model
-does not need to export separate geometry or metadata files. Each orientation
-retains its own recorded times;
-adaptive stepping can shift sample times, so the plot does not silently
-resample the histories. Forces and movies are not interpreted by this
-postprocessor yet; the raw files remain available for that separate review.</p>
+<p>Select the submitted job in the tracker. After solving, the postprocessor
+extracts compact histories and generates experimental comparison plots remotely.
+The download package includes the reduced HDF5 file, comparison plots, model Tcl,
+motion input, and logs. Raw VTKHDF and pile-force XML files are not selected for
+download; they remain in the remote workspace subject to cluster retention.</p>
+<p>To regenerate plots locally from the downloaded reduced file:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>python<span class="w"> </span>examples/soil_structure_interaction/rotated_two_pile_bent_postprocess.py<span class="w"> </span>plot<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a><span class="w">  </span>--numerical-file<span class="w"> </span>rotated_bent_numerical.h5<span class="w"> </span>--output<span class="w"> </span>post_processing
+</code></pre></div>
 
 
 
@@ -14858,7 +14923,7 @@ postprocessor yet; the raw files remain available for that separate review.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="October 6, 2026 00:12:08 UTC">October 6, 2026</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="October 13, 2026 03:55:21 UTC">October 13, 2026</span>
   </span>
 
     
@@ -14868,7 +14933,7 @@ postprocessor yet; the raw files remain available for that separate review.</p>
     <span class="md-icon" title="Created">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M14.47 15.08 11 13V7h1.5v5.25l3.08 1.83c-.41.28-.79.62-1.11 1m-1.39 4.84c-.36.05-.71.08-1.08.08-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8c0 .37-.03.72-.08 1.08.69.1 1.33.32 1.92.64.1-.56.16-1.13.16-1.72 0-5.5-4.5-10-10-10S2 6.5 2 12s4.47 10 10 10c.59 0 1.16-.06 1.72-.16-.32-.59-.54-1.23-.64-1.92M18 15v3h-3v2h3v3h2v-3h3v-2h-3v-3z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="October 6, 2026 00:12:08 UTC">October 6, 2026</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="October 13, 2026 03:55:21 UTC">October 13, 2026</span>
   </span>
 
     
