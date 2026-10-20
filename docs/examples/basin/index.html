@@ -1717,10 +1717,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#model" class="md-nav__link">
+  <a href="#regional-background" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Model
+        Regional Background
       
     </span>
   </a>
@@ -1728,10 +1728,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#inspect-the-actual-mesh" class="md-nav__link">
+  <a href="#model-and-assumptions" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Inspect the Actual Mesh
+        Model and Assumptions
       
     </span>
   </a>
@@ -1739,10 +1739,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#worked-model" class="md-nav__link">
+  <a href="#model-construction" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Worked Model
+        Model Construction
       
     </span>
   </a>
@@ -1750,10 +1750,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#tacc-workflow" class="md-nav__link">
+  <a href="#results" class="md-nav__link">
     <span class="md-ellipsis">
       
-        TACC Workflow
+        Results
       
     </span>
   </a>
@@ -1761,21 +1761,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#differences-from-the-legacy-examples" class="md-nav__link">
+  <a href="#run-the-workflow" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Differences from the Legacy Examples
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#planned-response-comparisons" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Planned Response Comparisons
+        Run the Workflow
       
     </span>
   </a>
@@ -14286,10 +14275,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#model" class="md-nav__link">
+  <a href="#regional-background" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Model
+        Regional Background
       
     </span>
   </a>
@@ -14297,10 +14286,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#inspect-the-actual-mesh" class="md-nav__link">
+  <a href="#model-and-assumptions" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Inspect the Actual Mesh
+        Model and Assumptions
       
     </span>
   </a>
@@ -14308,10 +14297,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#worked-model" class="md-nav__link">
+  <a href="#model-construction" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Worked Model
+        Model Construction
       
     </span>
   </a>
@@ -14319,10 +14308,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#tacc-workflow" class="md-nav__link">
+  <a href="#results" class="md-nav__link">
     <span class="md-ellipsis">
       
-        TACC Workflow
+        Results
       
     </span>
   </a>
@@ -14330,21 +14319,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#differences-from-the-legacy-examples" class="md-nav__link">
+  <a href="#run-the-workflow" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Differences from the Legacy Examples
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#planned-response-comparisons" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Planned Response Comparisons
+        Run the Workflow
       
     </span>
   </a>
@@ -14372,23 +14350,69 @@
 
 
 <h1 id="elastic-and-plastic-basin">Elastic and Plastic Basin</h1>
-<p>Compare a soft elastic basin with a pressure-independent elastoplastic basin
-inside the same six-layer elastic background. One setting changes the basin
-material; the geometry, density, viscous damping, input, and recording settings
-remain unchanged.</p>
-<p>A third <code>no_basin</code> reference keeps exactly the same extracted cells and mesh
-parts, but assigns each basin part its host layer's material, density, and
-damping. It therefore represents the original six-layer background without a
-soft inclusion. All three cases use the same process steps; each site supplies its own shared DRM input.</p>
-<div class="admonition warning">
-<p class="admonition-title">Initial migration, not a validated benchmark</p>
-<p>Geometry previews are not simulation results. Gravity equilibrium,
-implicit convergence and time-step accuracy, DRM compatibility, and absorbing-boundary
-performance must be checked before interpreting a full run.</p>
-</div>
+<p>How does a soft soil basin change earthquake motion at the ground surface?
+This example compares an elastic basin, a plastic basin, and a layered
+background without a basin at three sites. It walks through model construction,
+DRM excitation, surface-response interpretation, and remote workflow execution.</p>
+<p>Within each site, the three configurations share the same geometry, mesh,
+incoming wave field, and recording settings. The no-basin configuration assigns
+the host layer's material, density, and damping to the basin cells. Comparing
+against this background isolates the effect of the soft inclusion.</p>
 <div class="tutorial-actions">
 <p><a class="tutorial-action tutorial-action--source" href="https://github.com/GeotechUW/Femora/blob/main/examples/domain_reduction_method/basin.py"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M8 3a2 2 0 0 0-2 2v4a2 2 0 0 1-2 2H3v2h1a2 2 0 0 1 2 2v4a2 2 0 0 0 2 2h2v-2H8v-5a2 2 0 0 0-2-2 2 2 0 0 0 2-2V5h2V3m6 0a2 2 0 0 1 2 2v4a2 2 0 0 0 2 2h1v2h-1a2 2 0 0 0-2 2v4a2 2 0 0 1-2 2h-2v-2h2v-5a2 2 0 0 1 2-2 2 2 0 0 1-2-2V5h-2V3z"/></svg></span> View source</a></p>
 </div>
+<h2 id="regional-background">Regional Background</h2>
+<p>The incoming motions come from a physics-based <strong>SW4 regional earthquake
+simulation</strong>, described by <a href="https://doi.org/10.1002/eqe.4350">Huang and McCallen (2025)</a>.
+The scenario represents a magnitude Mw 6.5 strike-slip earthquake. SW4 computes
+wave propagation from the fault through the regional geology, including a
+sedimentary basin. Three DRM boxes extract the wave field at different sites.</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">3D View</label><label for="__tabbed_1_2">Site Plan</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<p><iframe src="../../assets/viewer/viewer.html?scene=../scenes/basin-regional.js&amp;fallback=../examples/basin/regional_3d.png" title="Interactive regional basin, fault plane, and DRM sites" loading="lazy" style="width:100%;height:clamp(340px,65vw,720px);border:0;border-radius:6px"></iframe></p>
+<p><a href="../../assets/examples/basin/regional_3d.png">View static figure</a></p>
+</div>
+<div class="tabbed-block">
+<p><div class="femora-boundary-schematic">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 570" role="img" aria-labelledby="regional-title regional-desc"><title id="regional-title">Regional SW4 problem and three local DRM sites</title><desc id="regional-desc">A three-dimensional cutaway shows the regional SW4 domain, shallow sedimentary basin, kinematic fault plane, and hypocenter at approximately eight kilometers depth. The domain is approximately 44 by 25 by 25 kilometers. The plan view below shows Sites 1 and 2 one kilometer fault-normal from the fault, separated by twenty kilometers along strike. Site 3 is seventeen kilometers farther fault-normal than Site 1, eighteen kilometers from the fault. Enlarged DRM boxes supply wave fields to local Femora models.</desc><defs><marker id="regional-arrow" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#657a82"/></marker></defs><style> .regional-text {font-family:sans-serif;fill:var(--md-default-fg-color,#293e45)} .regional-muted {fill:var(--md-default-fg-color--light,#536b70)} .regional-dimension {stroke:#657a82;stroke-width:1.3;fill:none;marker-start:url(#regional-arrow);marker-end:url(#regional-arrow)} .regional-guide {stroke:#657a82;stroke-dasharray:4 4;fill:none;opacity:.65} .regional-box {fill:#bb6449;fill-opacity:.14;stroke:#bb6449;stroke-width:2} </style><g class="regional-text"><text x="80" y="32" font-size="21" font-weight="600">Regional wave field / SW4</text><text x="80" y="55" font-size="14" class="regional-muted">Plan view</text><rect x="80" y="70" width="704" height="400" rx="3" fill="#cbbd84" fill-opacity=".2" stroke="#8b806b"/><rect x="80" y="430" width="704" height="40" fill="#8b929b" fill-opacity=".2"/><text x="477" y="108" font-size="17">Regional sedimentary basin</text><text x="104" y="456" font-size="15">Rock</text><path d="M185 430H702" stroke="#b34c46" stroke-width="5"/><text x="596" y="456" font-size="15">Fault trace</text><path class="regional-guide" d="M230 142V414H550"/><rect class="regional-box" x="223" y="407" width="14" height="14"/><circle cx="230" cy="414" r="3" fill="#bb6449"/><text x="251" y="409" font-size="17" font-weight="600">Site 1</text><rect class="regional-box" x="543" y="407" width="14" height="14"/><circle cx="550" cy="414" r="3" fill="#bb6449"/><text x="569" y="409" font-size="17" font-weight="600">Site 2</text><rect class="regional-box" x="223" y="135" width="14" height="14"/><circle cx="230" cy="142" r="3" fill="#bb6449"/><text x="251" y="148" font-size="17" font-weight="600">Site 3</text><path class="regional-dimension" d="M244 382H536"/><text x="390" y="370" text-anchor="middle" font-size="15">20 km along strike</text><path class="regional-dimension" d="M195 155V400"/><text x="179" y="278" text-anchor="middle" font-size="15" transform="rotate(-90 179 278)">17 km farther into the basin</text><path class="regional-dimension" d="M123 145V427"/><text x="106" y="286" text-anchor="middle" font-size="14" transform="rotate(-90 106 286)">Site 3: 18 km fault-normal</text><path d="M285 500H324V422" fill="none" stroke="#657a82" stroke-width="1.2"/><text x="80" y="507" font-size="14">Sites 1 and 2: 1 km fault-normal</text><text x="80" y="541" font-size="13" class="regional-muted">Relative site layout; DRM boxes enlarged for visibility.</text><path d="M793 280H840" stroke="#657a82" stroke-width="2" marker-end="url(#regional-arrow)"/><text x="805" y="259" font-size="13" text-anchor="middle">DRM</text><text x="860" y="174" font-size="18" font-weight="600">Local model / Femora</text><rect x="862" y="204" width="222" height="146" rx="3" fill="#60979d" fill-opacity=".12" stroke="#60979d" stroke-dasharray="5 4"/><rect x="885" y="224" width="176" height="104" fill="#b9ad91" fill-opacity=".3" stroke="#8b806b"/><path d="M907 224Q973 290 1039 224Z" fill="#bb6449" fill-opacity=".8" stroke="#91452e"/><text x="973" y="308" font-size="14" text-anchor="middle">Layered background</text><text x="973" y="378" font-size="14" text-anchor="middle">Additional local soft basin</text><text x="973" y="403" font-size="13" text-anchor="middle" class="regional-muted">128 x 128 x 48 m domain</text></g></svg></p>
+</div>
+</div>
+</div>
+</div>
+<table>
+<thead>
+<tr>
+<th>Site</th>
+<th>Approximate Fault-Normal Distance</th>
+<th>Position Relative to Site 1</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>1 km</td>
+<td>Near-fault reference site</td>
+</tr>
+<tr>
+<td>2</td>
+<td>1 km</td>
+<td>20 km along the fault</td>
+</tr>
+<tr>
+<td>3</td>
+<td>18 km</td>
+<td>17 km farther from the fault</td>
+</tr>
+</tbody>
+</table>
+<p>DRM transfers the regional wave field into each local Femora model. The
+<strong>regional sedimentary basin in SW4</strong> and the <strong>small local soft basin added
+in Femora</strong> are distinct. The no-basin case omits only the additional local
+basin; its excitation still contains the regional source, propagation, and
+site effects. The following model focuses on how that additional soft deposit
+changes the surface motion.</p>
+<h2 id="model-and-assumptions">Model and Assumptions</h2>
 <table>
 <thead>
 <tr>
@@ -14407,35 +14431,38 @@ performance must be checked before interpreting a full run.</p>
 </tr>
 <tr>
 <td>Mesh</td>
-<td>4 m bricks; 12,288 physical cells</td>
+<td>4 m bricks; 12,288 physical cells; consistent mass</td>
 </tr>
 <tr>
 <td>Basin</td>
-<td>Sphere center (0, 0, 70) m, radius 85 m, clipped by soil</td>
+<td>Sphere center (0, 0, 70) m, radius 85 m, intersected with the soil</td>
 </tr>
 <tr>
 <td>Materials</td>
 <td>Elastic host; elastic or PressureIndependMultiYield basin</td>
 </tr>
 <tr>
+<td>Absorber</td>
+<td>Eight layers on the sides and bottom; Rayleigh damping setting 0.95</td>
+</tr>
+<tr>
 <td>Analysis</td>
-<td>Implicit Newmark; ModifiedNewton with factor-once dynamics</td>
+<td>Implicit Newmark; Modified Newton with factor-once dynamics</td>
 </tr>
 <tr>
 <td>Time</td>
-<td>27.4 s at all sites; initial integration interval 0.01 s, recording interval 0.02 s</td>
+<td>27.4 s; initial integration step 0.01 s; recording interval 0.02 s</td>
 </tr>
 <tr>
-<td>Parallel export</td>
-<td>32 physical + 64 absorber partitions = 96 ranks</td>
+<td>Partitions</td>
+<td>32 physical + 64 absorber partitions = 96 MPI ranks per case</td>
 </tr>
 </tbody>
 </table>
-<h2 id="model">Model</h2>
 <div class="femora-boundary-schematic">
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1040 480" role="img" aria-labelledby="basin-title basin-desc">
 <title id="basin-title">Soft basin in six elastic strata</title>
-<desc id="basin-desc">A shallow basin in six elastic strata. Absorbing rows extend 20 meters at the sides and below the soil, never above the free surface.</desc>
+<desc id="basin-desc">A shallow basin in six elastic strata. Absorbing rows extend 32 meters at the sides and below the soil, never above the free surface. Schematic not to scale.</desc>
 <style>
 text {font-family:sans-serif;fill:var(--md-default-fg-color,#293e45)}
 .host {fill:#b9ad91;fill-opacity:.45;stroke:#8b806b}
@@ -14446,7 +14473,7 @@ text {font-family:sans-serif;fill:var(--md-default-fg-color,#293e45)}
 .dimension {fill:none;stroke:var(--md-default-fg-color,#536b70);stroke-width:1;opacity:.7}
 </style>
 <text x="272" y="32" text-anchor="middle" font-size="21">Center section</text>
-<!-- 3 px/m: each side and the bottom extend 20 m, or 60 px. -->
+<!-- Physical domain uses 3 px/m; absorber width is schematic. -->
 <path class="shell" d="M20 100H80V244H464V100H524V304H20Z"/>
 <rect class="stratum" x="80" y="100" width="384" height="24" fill="#cfb781"/>
 <rect class="stratum" x="80" y="124" width="384" height="24" fill="#b7c79f"/>
@@ -14457,13 +14484,13 @@ text {font-family:sans-serif;fill:var(--md-default-fg-color,#293e45)}
 <path class="basin" d="M127.345 100 A255 255 0 0 0 416.655 100 Z"/>
 <text x="272" y="80" text-anchor="middle" font-size="15">Free surface, z = 0 m</text>
 <text x="272" y="193" text-anchor="middle" font-size="15">Six elastic layers, 8 m each</text>
-<text x="272" y="280" text-anchor="middle" font-size="14">20 m absorbing extension</text>
+<text x="272" y="280" text-anchor="middle" font-size="14">32 m absorbing extension</text>
 <path class="dimension" d="M80 323V337 M464 323V337 M80 330H464"/>
 <text x="272" y="357" text-anchor="middle" font-size="15">128 m physical domain</text>
 <text x="272" y="394" text-anchor="middle" font-size="15">Basin: Vs = 150 m/s, Vp = 300 m/s</text>
 <text x="272" y="421" text-anchor="middle" font-size="14">Ideal depth 15 m; surface radius 48.22 m</text>
 <text x="778" y="32" text-anchor="middle" font-size="21">Surface plan</text>
-<!-- 2 px/m: all four lateral bands extend 20 m, or 40 px. -->
+<!-- Physical domain uses 2 px/m; absorber width is schematic. -->
 <path class="shell" fill-rule="evenodd" d="M610 50H946V386H610Z M650 90H906V346H650Z"/>
 <rect class="host" x="650" y="90" width="256" height="256"/>
 <circle class="basin" cx="778" cy="218" r="96.436"/>
@@ -14471,382 +14498,495 @@ text {font-family:sans-serif;fill:var(--md-default-fg-color,#293e45)}
 <text x="778" y="207" text-anchor="middle" font-size="16">Elastic or plastic basin</text>
 <text x="778" y="236" text-anchor="middle" font-size="13">Shared geometry and density</text>
 <text x="778" y="414" text-anchor="middle" font-size="14">Absorber surrounds the four sides</text>
-<text x="520" y="467" text-anchor="middle" font-size="13">Ideal geometry. Actual basin cells follow the 4 m mesh; no absorber covers the free surface.</text>
+<text x="520" y="467" text-anchor="middle" font-size="13">Schematic, not to scale. Basin cells follow the 4 m mesh; no absorber covers the free surface.</text>
 </svg>
 
 </div>
 
-<p>The basin is a <strong>shallow spherical cap</strong>, not a hemisphere. Its ideal bottom is
-at z = -15 m and its surface radius is approximately 48.22 m. Cells are assigned
-by their centers, so the actual interface is stepped and the modeled depth is
-quantized by the 4 m spacing. Basin and host points are merged during assembly:
-this is a continuous soil domain, not a contact interface.</p>
-<h2 id="inspect-the-actual-mesh">Inspect the Actual Mesh</h2>
-<p><img alt="Actual 4 m basin mesh: perspective cutaway and center section" src="../../assets/examples/basin/mesh.png" /></p>
-<p>The figure is generated by the postprocessor, separately from model construction:</p>
-<p><div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>python<span class="w"> </span>examples/domain_reduction_method/basin_postprocess.py<span class="w"> </span>--mesh
-</code></pre></div>
-This renders geometry only. Running <code>basin.py</code> submits the TACC workflow.</p>
-<h2 id="worked-model">Worked Model</h2>
-<div class="tabbed-set tabbed-alternate" data-tabs="1:4"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><input id="__tabbed_1_4" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">1. Select the material</label><label for="__tabbed_1_2">2. Build the layers</label><label for="__tabbed_1_3">3. Add the boundary</label><label for="__tabbed_1_4">4. Initialize and record</label></div>
+<p>The basin is a <strong>shallow spherical cap</strong> with its ideal bottom at z = -15 m
+and surface radius approximately 48.22 m. Whole bricks are assigned by their
+cell centers, producing a stepped interface. Shared basin and host nodes are
+merged during assembly so that the materials form one continuous soil domain.</p>
+<p><img alt="Basin mesh: perspective cutaway and center section showing the stepped interface" src="../../assets/examples/basin/mesh.png#only-light" />
+<img alt="Basin mesh: perspective cutaway and center section showing the stepped interface" src="../../assets/examples/basin/mesh_dark.png#only-dark" /></p>
+<p>The cutaway and center section show the physical soil mesh. The absorbing
+extension is omitted from this view. All cases use small-strain brick elements;
+only the plastic basin has nonlinear material behavior.</p>
+<h2 id="model-construction">Model Construction</h2>
+<div class="tabbed-set tabbed-alternate" data-tabs="2:4"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><input id="__tabbed_2_3" name="__tabbed_2" type="radio" /><input id="__tabbed_2_4" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">1. Define the basin</label><label for="__tabbed_2_2">2. Build the layers</label><label for="__tabbed_2_3">3. Add the boundary</label><label for="__tabbed_2_4">4. Initialize and analyze</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="n">BASIN_MATERIAL</span> <span class="o">=</span> <span class="s2">"elastic"</span>  <span class="c1"># Options: "elastic", "plastic", "no_basin".</span>
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="c1"># Units: m, kN, tonne, s; stresses and moduli are in kPa.</span>
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="c1"># Both cases use the elastic legacy density, not Example6's 1.3 tonne/m3.</span>
-<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="n">BASIN_DENSITY</span> <span class="o">=</span> <span class="mf">1.8</span>
-<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="n">FINAL_TIME</span> <span class="o">=</span> <span class="mf">27.4</span>  <span class="c1"># Shared duration within all three SW4 reference windows.</span>
-<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="n">DYNAMIC_DT</span> <span class="o">=</span> <span class="mf">0.01</span>  <span class="c1"># Initial implicit step; check convergence and time-step sensitivity.</span>
-<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="n">RECORDER_DT</span> <span class="o">=</span> <span class="mf">0.02</span>
-<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="n">NO_PHYSICAL_DAMPING</span> <span class="o">=</span> <span class="kc">False</span>  <span class="c1"># Disable basin/host damping only; retain absorber damping.</span>
-<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="c1"># Shared scratch inputs are accessible from compute nodes; Corral is not.</span>
-<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="n">DRM_ROOT</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">"/scratch/08189/amnp95/drm_inputs"</span><span class="p">)</span>
-<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="c1"># Top to bottom: name, density, Vp, Vs, viscous damping ratio, thickness.</span>
-<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="n">LAYERS</span> <span class="o">=</span> <span class="p">[</span>
-<a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>    <span class="p">(</span><span class="s2">"layer_1"</span><span class="p">,</span> <span class="mf">2.14205</span><span class="p">,</span> <span class="mf">669.05</span><span class="p">,</span> <span class="mf">353.10</span><span class="p">,</span> <span class="mf">0.0296</span><span class="p">,</span> <span class="mf">8.0</span><span class="p">),</span>
-<a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>    <span class="p">(</span><span class="s2">"layer_2"</span><span class="p">,</span> <span class="mf">2.14620</span><span class="p">,</span> <span class="mf">785.25</span><span class="p">,</span> <span class="mf">414.40</span><span class="p">,</span> <span class="mf">0.0269</span><span class="p">,</span> <span class="mf">8.0</span><span class="p">),</span>
-<a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>    <span class="p">(</span><span class="s2">"layer_3"</span><span class="p">,</span> <span class="mf">2.15035</span><span class="p">,</span> <span class="mf">886.05</span><span class="p">,</span> <span class="mf">467.60</span><span class="p">,</span> <span class="mf">0.0249</span><span class="p">,</span> <span class="mf">8.0</span><span class="p">),</span>
-<a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a>    <span class="p">(</span><span class="s2">"layer_4"</span><span class="p">,</span> <span class="mf">2.15445</span><span class="p">,</span> <span class="mf">976.40</span><span class="p">,</span> <span class="mf">515.30</span><span class="p">,</span> <span class="mf">0.0234</span><span class="p">,</span> <span class="mf">8.0</span><span class="p">),</span>
-<a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a>    <span class="p">(</span><span class="s2">"layer_5"</span><span class="p">,</span> <span class="mf">2.15860</span><span class="p">,</span> <span class="mf">1059.05</span><span class="p">,</span> <span class="mf">558.95</span><span class="p">,</span> <span class="mf">0.0221</span><span class="p">,</span> <span class="mf">8.0</span><span class="p">),</span>
-<a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a>    <span class="p">(</span><span class="s2">"layer_6"</span><span class="p">,</span> <span class="mf">2.16275</span><span class="p">,</span> <span class="mf">1135.65</span><span class="p">,</span> <span class="mf">599.40</span><span class="p">,</span> <span class="mf">0.0211</span><span class="p">,</span> <span class="mf">8.0</span><span class="p">),</span>
-<a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a><span class="p">]</span>
+<p>The <code>material</code> argument of <code>build_model()</code> selects <code>"elastic"</code>,
+<code>"plastic"</code>, or <code>"no_basin"</code>. The workflow builds all three at each site.</p>
+<p>Both basin materials use density 1.8 tonne/m3, Vs = 150 m/s, and
+Vp = 300 m/s. These give shear modulus G = 40,500 kPa and bulk modulus
+K = 108,000 kPa. The plastic material uses cohesion 8 kPa and peak shear
+strain 0.1. The no-basin case retains the same cells but uses their
+corresponding host-layer properties.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>    <span class="c1"># 1. Define the soft basin material from Vs = 150 and Vp = 300 m/s.</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="c1"># G = rho*Vs^2 and K = rho*(Vp^2 - 4*Vs^2/3); both cases start equally stiff.</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="n">basin_g</span> <span class="o">=</span> <span class="n">BASIN_DENSITY</span> <span class="o">*</span> <span class="mf">150.0</span><span class="o">**</span><span class="mi">2</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="n">basin_k</span> <span class="o">=</span> <span class="n">BASIN_DENSITY</span> <span class="o">*</span> <span class="p">(</span><span class="mf">300.0</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="mf">4.0</span> <span class="o">*</span> <span class="mf">150.0</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="mf">3.0</span><span class="p">)</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="k">if</span> <span class="n">material</span> <span class="o">==</span> <span class="s2">"elastic"</span><span class="p">:</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>        <span class="n">basin_material</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">material</span><span class="o">.</span><span class="n">nd</span><span class="o">.</span><span class="n">elastic_isotropic</span><span class="p">(</span>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>            <span class="n">user_name</span><span class="o">=</span><span class="s2">"basin"</span><span class="p">,</span> <span class="n">E</span><span class="o">=</span><span class="mf">2.0</span> <span class="o">*</span> <span class="n">basin_g</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="mf">3.0</span><span class="p">),</span> <span class="n">nu</span><span class="o">=</span><span class="mf">1.0</span> <span class="o">/</span> <span class="mf">3.0</span><span class="p">,</span> <span class="n">rho</span><span class="o">=</span><span class="n">BASIN_DENSITY</span><span class="p">,</span>
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>        <span class="p">)</span>
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>    <span class="k">elif</span> <span class="n">material</span> <span class="o">==</span> <span class="s2">"plastic"</span><span class="p">:</span>
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>        <span class="n">basin_material</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">material</span><span class="o">.</span><span class="n">nd</span><span class="o">.</span><span class="n">pressure_independ_multi_yield</span><span class="p">(</span>
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>            <span class="n">user_name</span><span class="o">=</span><span class="s2">"basin"</span><span class="p">,</span> <span class="n">nd</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">rho</span><span class="o">=</span><span class="n">BASIN_DENSITY</span><span class="p">,</span>
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>            <span class="n">refShearModul</span><span class="o">=</span><span class="n">basin_g</span><span class="p">,</span> <span class="n">refBulkModul</span><span class="o">=</span><span class="n">basin_k</span><span class="p">,</span>
+<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>            <span class="n">cohesi</span><span class="o">=</span><span class="mf">8.0</span><span class="p">,</span> <span class="n">peakShearStra</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
+<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>        <span class="p">)</span>
+<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>    <span class="k">if</span> <span class="n">material</span> <span class="o">!=</span> <span class="s2">"no_basin"</span><span class="p">:</span>
+<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>        <span class="c1"># Both basin cases share viscous damping; plasticity adds hysteresis.</span>
+<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>        <span class="n">basin_damping</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">no_physical_damping</span> <span class="k">else</span> <span class="n">model</span><span class="o">.</span><span class="n">damping</span><span class="o">.</span><span class="n">frequency_rayleigh</span><span class="p">(</span><span class="n">damping_factor</span><span class="o">=</span><span class="mf">0.03</span><span class="p">,</span> <span class="n">f1</span><span class="o">=</span><span class="mf">3.0</span><span class="p">,</span> <span class="n">f2</span><span class="o">=</span><span class="mf">15.0</span><span class="p">)</span>
+<a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a>        <span class="n">basin_region</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">region</span><span class="o">.</span><span class="n">element</span><span class="p">(</span><span class="n">user_name</span><span class="o">=</span><span class="s2">"basin"</span><span class="p">,</span> <span class="n">damping</span><span class="o">=</span><span class="n">basin_damping</span><span class="p">)</span>
+<a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a>        <span class="c1"># stdBrick expects body force per volume: density times gravity, in kN/m^3.</span>
+<a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a>        <span class="n">basin_element</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">element</span><span class="o">.</span><span class="n">brick</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">ndof</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">material</span><span class="o">=</span><span class="n">basin_material</span><span class="p">,</span> <span class="n">lumped</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">b3</span><span class="o">=-</span><span class="mf">9.81</span> <span class="o">*</span> <span class="n">BASIN_DENSITY</span><span class="p">)</span>
 </code></pre></div>
-<p>Change <code>BASIN_MATERIAL</code> to <code>"plastic"</code> to use the nonlinear material. Both
-variants use density 1.8 tonne/m3, Vs = 150 m/s, Vp = 300 m/s, G = 40,500 kPa,
-and K = 108,000 kPa. The nonlinear material uses cohesion 8 kPa and peak shear
-strain 0.1; these inherited parameters are illustrative, not a calibration.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>    <span class="c1"># 1. Define the soft basin material from Vs = 150 and Vp = 300 m/s.</span>
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>    <span class="c1"># G = rho*Vs^2 and K = rho*(Vp^2 - 4*Vs^2/3); both cases start equally stiff.</span>
-<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>    <span class="n">basin_g</span> <span class="o">=</span> <span class="n">BASIN_DENSITY</span> <span class="o">*</span> <span class="mf">150.0</span><span class="o">**</span><span class="mi">2</span>
-<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>    <span class="n">basin_k</span> <span class="o">=</span> <span class="n">BASIN_DENSITY</span> <span class="o">*</span> <span class="p">(</span><span class="mf">300.0</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="mf">4.0</span> <span class="o">*</span> <span class="mf">150.0</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="mf">3.0</span><span class="p">)</span>
-<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>    <span class="k">if</span> <span class="n">material</span> <span class="o">==</span> <span class="s2">"elastic"</span><span class="p">:</span>
-<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>        <span class="n">basin_material</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">material</span><span class="o">.</span><span class="n">nd</span><span class="o">.</span><span class="n">elastic_isotropic</span><span class="p">(</span>
-<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>            <span class="n">user_name</span><span class="o">=</span><span class="s2">"basin"</span><span class="p">,</span> <span class="n">E</span><span class="o">=</span><span class="mf">2.0</span> <span class="o">*</span> <span class="n">basin_g</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="mf">3.0</span><span class="p">),</span> <span class="n">nu</span><span class="o">=</span><span class="mf">1.0</span> <span class="o">/</span> <span class="mf">3.0</span><span class="p">,</span> <span class="n">rho</span><span class="o">=</span><span class="n">BASIN_DENSITY</span><span class="p">,</span>
+</div>
+<div class="tabbed-block">
+<p>The six host layers extend downward from the surface, each with two rows
+of 4 m bricks. Only the upper two layers intersect the basin. The mesh
+separates basin cells from host cells without duplicating either.</p>
+<table>
+<thead>
+<tr>
+<th>Layer</th>
+<th style="text-align: right;">Thickness (m)</th>
+<th style="text-align: right;">Density (tonne/m3)</th>
+<th style="text-align: right;">Vp (m/s)</th>
+<th style="text-align: right;">Vs (m/s)</th>
+<th style="text-align: right;">Damping Ratio</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">2.14205</td>
+<td style="text-align: right;">669.05</td>
+<td style="text-align: right;">353.10</td>
+<td style="text-align: right;">0.0296</td>
+</tr>
+<tr>
+<td>2</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">2.14620</td>
+<td style="text-align: right;">785.25</td>
+<td style="text-align: right;">414.40</td>
+<td style="text-align: right;">0.0269</td>
+</tr>
+<tr>
+<td>3</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">2.15035</td>
+<td style="text-align: right;">886.05</td>
+<td style="text-align: right;">467.60</td>
+<td style="text-align: right;">0.0249</td>
+</tr>
+<tr>
+<td>4</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">2.15445</td>
+<td style="text-align: right;">976.40</td>
+<td style="text-align: right;">515.30</td>
+<td style="text-align: right;">0.0234</td>
+</tr>
+<tr>
+<td>5</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">2.15860</td>
+<td style="text-align: right;">1059.05</td>
+<td style="text-align: right;">558.95</td>
+<td style="text-align: right;">0.0221</td>
+</tr>
+<tr>
+<td>6</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">2.16275</td>
+<td style="text-align: right;">1135.65</td>
+<td style="text-align: right;">599.40</td>
+<td style="text-align: right;">0.0211</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>    <span class="c1"># 2. Build the six host layers, walking downward from the surface.</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>    <span class="c1"># Each 8 m layer contains two 4 m brick rows.</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>    <span class="c1"># Cell-center selection makes a stepped, conforming basin/host boundary.</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>    <span class="n">part_names</span> <span class="o">=</span> <span class="p">[]</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>    <span class="n">z_top</span> <span class="o">=</span> <span class="mf">0.0</span>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">density</span><span class="p">,</span> <span class="n">vp</span><span class="p">,</span> <span class="n">vs</span><span class="p">,</span> <span class="n">damping_ratio</span><span class="p">,</span> <span class="n">thickness</span> <span class="ow">in</span> <span class="n">LAYERS</span><span class="p">:</span>
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>        <span class="n">z_bottom</span> <span class="o">=</span> <span class="n">z_top</span> <span class="o">-</span> <span class="n">thickness</span>
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>        <span class="c1"># Convert each layer's wave speeds into elastic stiffness and Poisson ratio.</span>
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>        <span class="n">shear_modulus</span> <span class="o">=</span> <span class="n">density</span> <span class="o">*</span> <span class="n">vs</span><span class="o">**</span><span class="mi">2</span>
+<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>        <span class="n">poisson_ratio</span> <span class="o">=</span> <span class="p">(</span><span class="n">vp</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">vs</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mf">2.0</span> <span class="o">*</span> <span class="p">(</span><span class="n">vp</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="n">vs</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>        <span class="n">layer_material</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">material</span><span class="o">.</span><span class="n">nd</span><span class="o">.</span><span class="n">elastic_isotropic</span><span class="p">(</span>
+<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>            <span class="n">user_name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">E</span><span class="o">=</span><span class="mf">2.0</span> <span class="o">*</span> <span class="n">shear_modulus</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="n">poisson_ratio</span><span class="p">),</span>
+<a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>            <span class="n">nu</span><span class="o">=</span><span class="n">poisson_ratio</span><span class="p">,</span> <span class="n">rho</span><span class="o">=</span><span class="n">density</span><span class="p">,</span>
+<a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>        <span class="p">)</span>
+<a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>        <span class="c1"># A region assigns this layer's damping to its host bricks.</span>
+<a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a>        <span class="n">damping</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">no_physical_damping</span> <span class="k">else</span> <span class="n">model</span><span class="o">.</span><span class="n">damping</span><span class="o">.</span><span class="n">frequency_rayleigh</span><span class="p">(</span><span class="n">damping_factor</span><span class="o">=</span><span class="n">damping_ratio</span><span class="p">,</span> <span class="n">f1</span><span class="o">=</span><span class="mf">3.0</span><span class="p">,</span> <span class="n">f2</span><span class="o">=</span><span class="mf">15.0</span><span class="p">)</span>
+<a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a>        <span class="n">region</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">region</span><span class="o">.</span><span class="n">element</span><span class="p">(</span><span class="n">user_name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">damping</span><span class="o">=</span><span class="n">damping</span><span class="p">)</span>
+<a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a>        <span class="n">element</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">element</span><span class="o">.</span><span class="n">brick</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">ndof</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">material</span><span class="o">=</span><span class="n">layer_material</span><span class="p">,</span> <span class="n">lumped</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">b3</span><span class="o">=-</span><span class="mf">9.81</span> <span class="o">*</span> <span class="n">density</span><span class="p">)</span>
+<a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a>        <span class="c1"># 33 points span each horizontal direction: 32 cells across 128 m.</span>
+<a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a>        <span class="c1"># StructuredGrid produces hexahedral corner ordering required by stdBrick.</span>
+<a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a>        <span class="c1"># RectilinearGrid would produce voxels with a different node order.</span>
+<a id="__codelineno-1-22" name="__codelineno-1-22" href="#__codelineno-1-22"></a>        <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span>
+<a id="__codelineno-1-23" name="__codelineno-1-23" href="#__codelineno-1-23"></a>            <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mf">64.0</span><span class="p">,</span> <span class="mf">64.0</span><span class="p">,</span> <span class="mi">33</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mf">64.0</span><span class="p">,</span> <span class="mf">64.0</span><span class="p">,</span> <span class="mi">33</span><span class="p">),</span>
+<a id="__codelineno-1-24" name="__codelineno-1-24" href="#__codelineno-1-24"></a>            <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">z_bottom</span><span class="p">,</span> <span class="n">z_top</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
+<a id="__codelineno-1-25" name="__codelineno-1-25" href="#__codelineno-1-25"></a>            <span class="n">indexing</span><span class="o">=</span><span class="s2">"ij"</span><span class="p">,</span>
+<a id="__codelineno-1-26" name="__codelineno-1-26" href="#__codelineno-1-26"></a>        <span class="p">)</span>
+<a id="__codelineno-1-27" name="__codelineno-1-27" href="#__codelineno-1-27"></a>        <span class="n">grid</span> <span class="o">=</span> <span class="n">pv</span><span class="o">.</span><span class="n">StructuredGrid</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span><span class="o">.</span><span class="n">cast_to_unstructured_grid</span><span class="p">()</span>
+<a id="__codelineno-1-28" name="__codelineno-1-28" href="#__codelineno-1-28"></a>        <span class="c1"># The sphere center lies above ground; its intersection with soil is a bowl.</span>
+<a id="__codelineno-1-29" name="__codelineno-1-29" href="#__codelineno-1-29"></a>        <span class="c1"># Classify whole bricks rather than cutting curved, non-brick cells.</span>
+<a id="__codelineno-1-30" name="__codelineno-1-30" href="#__codelineno-1-30"></a>        <span class="n">centers</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">cell_centers</span><span class="p">()</span><span class="o">.</span><span class="n">points</span>
+<a id="__codelineno-1-31" name="__codelineno-1-31" href="#__codelineno-1-31"></a>        <span class="n">inside_basin</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">centers</span> <span class="o">-</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">70.0</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mf">85.0</span>
+<a id="__codelineno-1-32" name="__codelineno-1-32" href="#__codelineno-1-32"></a>        <span class="c1"># Outside the bowl, retain the layer's elastic material.</span>
+<a id="__codelineno-1-33" name="__codelineno-1-33" href="#__codelineno-1-33"></a>        <span class="n">host_mesh</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">extract_cells</span><span class="p">(</span><span class="o">~</span><span class="n">inside_basin</span><span class="p">)</span>
+<a id="__codelineno-1-34" name="__codelineno-1-34" href="#__codelineno-1-34"></a>        <span class="n">model</span><span class="o">.</span><span class="n">meshpart</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">external_mesh</span><span class="p">(</span><span class="n">user_name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">element</span><span class="o">=</span><span class="n">element</span><span class="p">,</span> <span class="n">region</span><span class="o">=</span><span class="n">region</span><span class="p">,</span> <span class="n">mesh</span><span class="o">=</span><span class="n">host_mesh</span><span class="p">)</span>
+<a id="__codelineno-1-35" name="__codelineno-1-35" href="#__codelineno-1-35"></a>        <span class="n">part_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+<a id="__codelineno-1-36" name="__codelineno-1-36" href="#__codelineno-1-36"></a>        <span class="c1"># Inside the bowl, replace host bricks with the shared basin material.</span>
+<a id="__codelineno-1-37" name="__codelineno-1-37" href="#__codelineno-1-37"></a>        <span class="c1"># Only the upper two layers contain basin cells; no cells are duplicated.</span>
+<a id="__codelineno-1-38" name="__codelineno-1-38" href="#__codelineno-1-38"></a>        <span class="k">if</span> <span class="n">inside_basin</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
+<a id="__codelineno-1-39" name="__codelineno-1-39" href="#__codelineno-1-39"></a>            <span class="n">basin_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"basin_</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">"</span>
+<a id="__codelineno-1-40" name="__codelineno-1-40" href="#__codelineno-1-40"></a>            <span class="n">basin_mesh</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">extract_cells</span><span class="p">(</span><span class="n">inside_basin</span><span class="p">)</span>
+<a id="__codelineno-1-41" name="__codelineno-1-41" href="#__codelineno-1-41"></a>            <span class="c1"># Preserve the extracted geometry in the baseline, but give these</span>
+<a id="__codelineno-1-42" name="__codelineno-1-42" href="#__codelineno-1-42"></a>            <span class="c1"># cells the same material, density, and damping as this host layer.</span>
+<a id="__codelineno-1-43" name="__codelineno-1-43" href="#__codelineno-1-43"></a>            <span class="k">if</span> <span class="n">material</span> <span class="o">==</span> <span class="s2">"no_basin"</span><span class="p">:</span>
+<a id="__codelineno-1-44" name="__codelineno-1-44" href="#__codelineno-1-44"></a>                <span class="n">basin_element</span> <span class="o">=</span> <span class="n">element</span>
+<a id="__codelineno-1-45" name="__codelineno-1-45" href="#__codelineno-1-45"></a>                <span class="n">basin_region</span> <span class="o">=</span> <span class="n">region</span>
+<a id="__codelineno-1-46" name="__codelineno-1-46" href="#__codelineno-1-46"></a>            <span class="n">model</span><span class="o">.</span><span class="n">meshpart</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">external_mesh</span><span class="p">(</span>
+<a id="__codelineno-1-47" name="__codelineno-1-47" href="#__codelineno-1-47"></a>                <span class="n">user_name</span><span class="o">=</span><span class="n">basin_name</span><span class="p">,</span> <span class="n">element</span><span class="o">=</span><span class="n">basin_element</span><span class="p">,</span> <span class="n">region</span><span class="o">=</span><span class="n">basin_region</span><span class="p">,</span> <span class="n">mesh</span><span class="o">=</span><span class="n">basin_mesh</span><span class="p">,</span>
+<a id="__codelineno-1-48" name="__codelineno-1-48" href="#__codelineno-1-48"></a>            <span class="p">)</span>
+<a id="__codelineno-1-49" name="__codelineno-1-49" href="#__codelineno-1-49"></a>            <span class="n">part_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">basin_name</span><span class="p">)</span>
+<a id="__codelineno-1-50" name="__codelineno-1-50" href="#__codelineno-1-50"></a>        <span class="c1"># Start the next layer at the bottom of the current one.</span>
+<a id="__codelineno-1-51" name="__codelineno-1-51" href="#__codelineno-1-51"></a>        <span class="n">z_top</span> <span class="o">=</span> <span class="n">z_bottom</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<p>Eight 4 m absorbing rows extend the model 32 m at each side and below.
+The extension uses <code>rayleigh_damping=0.95</code> to attenuate outgoing waves,
+separately from the physical-soil damping. The outer side and bottom
+faces are fixed; the top surface remains free.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>        <span class="c1"># 3. Partition the physical soil and add absorbing rows at sides and bottom.</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>        <span class="c1"># 32 physical + 64 absorbing partitions = 96 MPI ranks.</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>        <span class="n">model</span><span class="o">.</span><span class="n">assembler</span><span class="o">.</span><span class="n">create_section</span><span class="p">(</span><span class="n">meshparts</span><span class="o">=</span><span class="n">part_names</span><span class="p">,</span> <span class="n">num_partitions</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> <span class="n">partition_algorithm</span><span class="o">=</span><span class="s2">"kd-tree"</span><span class="p">)</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>        <span class="n">model</span><span class="o">.</span><span class="n">interface</span><span class="o">.</span><span class="n">boundary</span><span class="o">.</span><span class="n">absorber</span><span class="p">(</span>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>            <span class="n">num_layers</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">num_partitions</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span> <span class="n">partition_algo</span><span class="o">=</span><span class="s2">"kd-tree"</span><span class="p">,</span>
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>            <span class="n">geometry</span><span class="o">=</span><span class="s2">"Rectangular"</span><span class="p">,</span> <span class="n">boundary_type</span><span class="o">=</span><span class="s2">"Rayleigh"</span><span class="p">,</span>
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>            <span class="n">rayleigh_damping</span><span class="o">=</span><span class="mf">0.95</span><span class="p">,</span> <span class="n">match_damping</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
 <a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>        <span class="p">)</span>
-<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>    <span class="k">elif</span> <span class="n">material</span> <span class="o">==</span> <span class="s2">"plastic"</span><span class="p">:</span>
-<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>        <span class="n">basin_material</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">material</span><span class="o">.</span><span class="n">nd</span><span class="o">.</span><span class="n">pressure_independ_multi_yield</span><span class="p">(</span>
-<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>            <span class="n">user_name</span><span class="o">=</span><span class="s2">"basin"</span><span class="p">,</span> <span class="n">nd</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">rho</span><span class="o">=</span><span class="n">BASIN_DENSITY</span><span class="p">,</span>
-<a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a>            <span class="n">refShearModul</span><span class="o">=</span><span class="n">basin_g</span><span class="p">,</span> <span class="n">refBulkModul</span><span class="o">=</span><span class="n">basin_k</span><span class="p">,</span>
-<a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a>            <span class="n">cohesi</span><span class="o">=</span><span class="mf">8.0</span><span class="p">,</span> <span class="n">peakShearStra</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
-<a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a>        <span class="p">)</span>
-<a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a>    <span class="k">if</span> <span class="n">material</span> <span class="o">!=</span> <span class="s2">"no_basin"</span><span class="p">:</span>
-<a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a>        <span class="c1"># Both basin cases share viscous damping; plasticity adds hysteresis.</span>
-<a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a>        <span class="n">basin_damping</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">no_physical_damping</span> <span class="k">else</span> <span class="n">model</span><span class="o">.</span><span class="n">damping</span><span class="o">.</span><span class="n">frequency_rayleigh</span><span class="p">(</span><span class="n">damping_factor</span><span class="o">=</span><span class="mf">0.03</span><span class="p">,</span> <span class="n">f1</span><span class="o">=</span><span class="mf">3.0</span><span class="p">,</span> <span class="n">f2</span><span class="o">=</span><span class="mf">15.0</span><span class="p">)</span>
-<a id="__codelineno-2-18" name="__codelineno-2-18" href="#__codelineno-2-18"></a>        <span class="n">basin_region</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">region</span><span class="o">.</span><span class="n">element</span><span class="p">(</span><span class="n">user_name</span><span class="o">=</span><span class="s2">"basin"</span><span class="p">,</span> <span class="n">damping</span><span class="o">=</span><span class="n">basin_damping</span><span class="p">)</span>
-<a id="__codelineno-2-19" name="__codelineno-2-19" href="#__codelineno-2-19"></a>        <span class="c1"># stdBrick expects body force per volume: density times gravity, in kN/m^3.</span>
-<a id="__codelineno-2-20" name="__codelineno-2-20" href="#__codelineno-2-20"></a>        <span class="n">basin_element</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">element</span><span class="o">.</span><span class="n">brick</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">ndof</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">material</span><span class="o">=</span><span class="n">basin_material</span><span class="p">,</span> <span class="n">lumped</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">b3</span><span class="o">=-</span><span class="mf">9.81</span> <span class="o">*</span> <span class="n">BASIN_DENSITY</span><span class="p">)</span>
+<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>        <span class="c1"># Merge shared nodes so layers and basin transfer forces continuously.</span>
+<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>        <span class="n">model</span><span class="o">.</span><span class="n">assembler</span><span class="o">.</span><span class="n">assemble</span><span class="p">(</span><span class="n">merge_points</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">progress_callback</span><span class="o">=</span><span class="k">lambda</span> <span class="o">*</span><span class="n">_</span><span class="p">:</span> <span class="kc">None</span><span class="p">)</span>
+<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>        <span class="c1"># Fix only the outer absorber faces; leave the ground surface free.</span>
+<a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a>        <span class="n">model</span><span class="o">.</span><span class="n">constraint</span><span class="o">.</span><span class="n">sp</span><span class="o">.</span><span class="n">fix_macro_x_min</span><span class="p">(</span><span class="n">dofs</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">tol</span><span class="o">=</span><span class="mf">0.01</span><span class="p">)</span>
+<a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a>        <span class="n">model</span><span class="o">.</span><span class="n">constraint</span><span class="o">.</span><span class="n">sp</span><span class="o">.</span><span class="n">fix_macro_x_max</span><span class="p">(</span><span class="n">dofs</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">tol</span><span class="o">=</span><span class="mf">0.01</span><span class="p">)</span>
+<a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a>        <span class="n">model</span><span class="o">.</span><span class="n">constraint</span><span class="o">.</span><span class="n">sp</span><span class="o">.</span><span class="n">fix_macro_y_min</span><span class="p">(</span><span class="n">dofs</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">tol</span><span class="o">=</span><span class="mf">0.01</span><span class="p">)</span>
+<a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a>        <span class="n">model</span><span class="o">.</span><span class="n">constraint</span><span class="o">.</span><span class="n">sp</span><span class="o">.</span><span class="n">fix_macro_y_max</span><span class="p">(</span><span class="n">dofs</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">tol</span><span class="o">=</span><span class="mf">0.01</span><span class="p">)</span>
+<a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a>        <span class="n">model</span><span class="o">.</span><span class="n">constraint</span><span class="o">.</span><span class="n">sp</span><span class="o">.</span><span class="n">fix_macro_z_min</span><span class="p">(</span><span class="n">dofs</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">tol</span><span class="o">=</span><span class="mf">0.01</span><span class="p">)</span>
 </code></pre></div>
 </div>
 <div class="tabbed-block">
-<p>The loop walks downward from z = 0, creates the elastic host material, and
-separates basin cells from host cells. Only the upper two layers intersect
-the basin. No cells are duplicated between the two materials.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>    <span class="c1"># 2. Build the six host layers, walking downward from the surface.</span>
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>    <span class="c1"># Each 8 m layer contains two 4 m brick rows.</span>
-<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>    <span class="c1"># Cell-center selection makes a stepped, conforming basin/host boundary.</span>
-<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>    <span class="n">part_names</span> <span class="o">=</span> <span class="p">[]</span>
-<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>    <span class="n">z_top</span> <span class="o">=</span> <span class="mf">0.0</span>
-<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">density</span><span class="p">,</span> <span class="n">vp</span><span class="p">,</span> <span class="n">vs</span><span class="p">,</span> <span class="n">damping_ratio</span><span class="p">,</span> <span class="n">thickness</span> <span class="ow">in</span> <span class="n">LAYERS</span><span class="p">:</span>
-<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>        <span class="n">z_bottom</span> <span class="o">=</span> <span class="n">z_top</span> <span class="o">-</span> <span class="n">thickness</span>
-<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>        <span class="c1"># Convert each layer's wave speeds into elastic stiffness and Poisson ratio.</span>
-<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>        <span class="n">shear_modulus</span> <span class="o">=</span> <span class="n">density</span> <span class="o">*</span> <span class="n">vs</span><span class="o">**</span><span class="mi">2</span>
-<a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a>        <span class="n">poisson_ratio</span> <span class="o">=</span> <span class="p">(</span><span class="n">vp</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">vs</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mf">2.0</span> <span class="o">*</span> <span class="p">(</span><span class="n">vp</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="n">vs</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
-<a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a>        <span class="n">layer_material</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">material</span><span class="o">.</span><span class="n">nd</span><span class="o">.</span><span class="n">elastic_isotropic</span><span class="p">(</span>
-<a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a>            <span class="n">user_name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">E</span><span class="o">=</span><span class="mf">2.0</span> <span class="o">*</span> <span class="n">shear_modulus</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="n">poisson_ratio</span><span class="p">),</span>
-<a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a>            <span class="n">nu</span><span class="o">=</span><span class="n">poisson_ratio</span><span class="p">,</span> <span class="n">rho</span><span class="o">=</span><span class="n">density</span><span class="p">,</span>
-<a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a>        <span class="p">)</span>
-<a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a>        <span class="c1"># A region assigns this layer's damping to its host bricks.</span>
-<a id="__codelineno-3-16" name="__codelineno-3-16" href="#__codelineno-3-16"></a>        <span class="n">damping</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">no_physical_damping</span> <span class="k">else</span> <span class="n">model</span><span class="o">.</span><span class="n">damping</span><span class="o">.</span><span class="n">frequency_rayleigh</span><span class="p">(</span><span class="n">damping_factor</span><span class="o">=</span><span class="n">damping_ratio</span><span class="p">,</span> <span class="n">f1</span><span class="o">=</span><span class="mf">3.0</span><span class="p">,</span> <span class="n">f2</span><span class="o">=</span><span class="mf">15.0</span><span class="p">)</span>
-<a id="__codelineno-3-17" name="__codelineno-3-17" href="#__codelineno-3-17"></a>        <span class="n">region</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">region</span><span class="o">.</span><span class="n">element</span><span class="p">(</span><span class="n">user_name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">damping</span><span class="o">=</span><span class="n">damping</span><span class="p">)</span>
-<a id="__codelineno-3-18" name="__codelineno-3-18" href="#__codelineno-3-18"></a>        <span class="n">element</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">element</span><span class="o">.</span><span class="n">brick</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">ndof</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">material</span><span class="o">=</span><span class="n">layer_material</span><span class="p">,</span> <span class="n">lumped</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">b3</span><span class="o">=-</span><span class="mf">9.81</span> <span class="o">*</span> <span class="n">density</span><span class="p">)</span>
-<a id="__codelineno-3-19" name="__codelineno-3-19" href="#__codelineno-3-19"></a>        <span class="c1"># 33 points span each horizontal direction: 32 cells across 128 m.</span>
-<a id="__codelineno-3-20" name="__codelineno-3-20" href="#__codelineno-3-20"></a>        <span class="c1"># StructuredGrid produces hexahedral corner ordering required by stdBrick.</span>
-<a id="__codelineno-3-21" name="__codelineno-3-21" href="#__codelineno-3-21"></a>        <span class="c1"># RectilinearGrid would produce voxels with a different node order.</span>
-<a id="__codelineno-3-22" name="__codelineno-3-22" href="#__codelineno-3-22"></a>        <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span>
-<a id="__codelineno-3-23" name="__codelineno-3-23" href="#__codelineno-3-23"></a>            <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mf">64.0</span><span class="p">,</span> <span class="mf">64.0</span><span class="p">,</span> <span class="mi">33</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mf">64.0</span><span class="p">,</span> <span class="mf">64.0</span><span class="p">,</span> <span class="mi">33</span><span class="p">),</span>
-<a id="__codelineno-3-24" name="__codelineno-3-24" href="#__codelineno-3-24"></a>            <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">z_bottom</span><span class="p">,</span> <span class="n">z_top</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
-<a id="__codelineno-3-25" name="__codelineno-3-25" href="#__codelineno-3-25"></a>            <span class="n">indexing</span><span class="o">=</span><span class="s2">"ij"</span><span class="p">,</span>
-<a id="__codelineno-3-26" name="__codelineno-3-26" href="#__codelineno-3-26"></a>        <span class="p">)</span>
-<a id="__codelineno-3-27" name="__codelineno-3-27" href="#__codelineno-3-27"></a>        <span class="n">grid</span> <span class="o">=</span> <span class="n">pv</span><span class="o">.</span><span class="n">StructuredGrid</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span><span class="o">.</span><span class="n">cast_to_unstructured_grid</span><span class="p">()</span>
-<a id="__codelineno-3-28" name="__codelineno-3-28" href="#__codelineno-3-28"></a>        <span class="c1"># The sphere center lies above ground; its intersection with soil is a bowl.</span>
-<a id="__codelineno-3-29" name="__codelineno-3-29" href="#__codelineno-3-29"></a>        <span class="c1"># Classify whole bricks rather than cutting curved, non-brick cells.</span>
-<a id="__codelineno-3-30" name="__codelineno-3-30" href="#__codelineno-3-30"></a>        <span class="n">centers</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">cell_centers</span><span class="p">()</span><span class="o">.</span><span class="n">points</span>
-<a id="__codelineno-3-31" name="__codelineno-3-31" href="#__codelineno-3-31"></a>        <span class="n">inside_basin</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">centers</span> <span class="o">-</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">70.0</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mf">85.0</span>
-<a id="__codelineno-3-32" name="__codelineno-3-32" href="#__codelineno-3-32"></a>        <span class="c1"># Outside the bowl, retain the layer's elastic material.</span>
-<a id="__codelineno-3-33" name="__codelineno-3-33" href="#__codelineno-3-33"></a>        <span class="n">host_mesh</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">extract_cells</span><span class="p">(</span><span class="o">~</span><span class="n">inside_basin</span><span class="p">)</span>
-<a id="__codelineno-3-34" name="__codelineno-3-34" href="#__codelineno-3-34"></a>        <span class="n">model</span><span class="o">.</span><span class="n">meshpart</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">external_mesh</span><span class="p">(</span><span class="n">user_name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">element</span><span class="o">=</span><span class="n">element</span><span class="p">,</span> <span class="n">region</span><span class="o">=</span><span class="n">region</span><span class="p">,</span> <span class="n">mesh</span><span class="o">=</span><span class="n">host_mesh</span><span class="p">)</span>
-<a id="__codelineno-3-35" name="__codelineno-3-35" href="#__codelineno-3-35"></a>        <span class="n">part_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
-<a id="__codelineno-3-36" name="__codelineno-3-36" href="#__codelineno-3-36"></a>        <span class="c1"># Inside the bowl, replace host bricks with the shared basin material.</span>
-<a id="__codelineno-3-37" name="__codelineno-3-37" href="#__codelineno-3-37"></a>        <span class="c1"># Only the upper two layers contain basin cells; no cells are duplicated.</span>
-<a id="__codelineno-3-38" name="__codelineno-3-38" href="#__codelineno-3-38"></a>        <span class="k">if</span> <span class="n">inside_basin</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
-<a id="__codelineno-3-39" name="__codelineno-3-39" href="#__codelineno-3-39"></a>            <span class="n">basin_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"basin_</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">"</span>
-<a id="__codelineno-3-40" name="__codelineno-3-40" href="#__codelineno-3-40"></a>            <span class="n">basin_mesh</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">extract_cells</span><span class="p">(</span><span class="n">inside_basin</span><span class="p">)</span>
-<a id="__codelineno-3-41" name="__codelineno-3-41" href="#__codelineno-3-41"></a>            <span class="c1"># Preserve the extracted geometry in the baseline, but give these</span>
-<a id="__codelineno-3-42" name="__codelineno-3-42" href="#__codelineno-3-42"></a>            <span class="c1"># cells the same material, density, and damping as this host layer.</span>
-<a id="__codelineno-3-43" name="__codelineno-3-43" href="#__codelineno-3-43"></a>            <span class="k">if</span> <span class="n">material</span> <span class="o">==</span> <span class="s2">"no_basin"</span><span class="p">:</span>
-<a id="__codelineno-3-44" name="__codelineno-3-44" href="#__codelineno-3-44"></a>                <span class="n">basin_element</span> <span class="o">=</span> <span class="n">element</span>
-<a id="__codelineno-3-45" name="__codelineno-3-45" href="#__codelineno-3-45"></a>                <span class="n">basin_region</span> <span class="o">=</span> <span class="n">region</span>
-<a id="__codelineno-3-46" name="__codelineno-3-46" href="#__codelineno-3-46"></a>            <span class="n">model</span><span class="o">.</span><span class="n">meshpart</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">external_mesh</span><span class="p">(</span>
-<a id="__codelineno-3-47" name="__codelineno-3-47" href="#__codelineno-3-47"></a>                <span class="n">user_name</span><span class="o">=</span><span class="n">basin_name</span><span class="p">,</span> <span class="n">element</span><span class="o">=</span><span class="n">basin_element</span><span class="p">,</span> <span class="n">region</span><span class="o">=</span><span class="n">basin_region</span><span class="p">,</span> <span class="n">mesh</span><span class="o">=</span><span class="n">basin_mesh</span><span class="p">,</span>
-<a id="__codelineno-3-48" name="__codelineno-3-48" href="#__codelineno-3-48"></a>            <span class="p">)</span>
-<a id="__codelineno-3-49" name="__codelineno-3-49" href="#__codelineno-3-49"></a>            <span class="n">part_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">basin_name</span><span class="p">)</span>
-<a id="__codelineno-3-50" name="__codelineno-3-50" href="#__codelineno-3-50"></a>        <span class="c1"># Start the next layer at the bottom of the current one.</span>
-<a id="__codelineno-3-51" name="__codelineno-3-51" href="#__codelineno-3-51"></a>        <span class="n">z_top</span> <span class="o">=</span> <span class="n">z_bottom</span>
-</code></pre></div>
-</div>
-<div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>        <span class="c1"># 3. Partition the physical soil and add absorbing rows at sides and bottom.</span>
-<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>        <span class="c1"># 32 physical + 64 absorbing partitions = 96 MPI ranks.</span>
-<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>        <span class="n">model</span><span class="o">.</span><span class="n">assembler</span><span class="o">.</span><span class="n">create_section</span><span class="p">(</span><span class="n">meshparts</span><span class="o">=</span><span class="n">part_names</span><span class="p">,</span> <span class="n">num_partitions</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> <span class="n">partition_algorithm</span><span class="o">=</span><span class="s2">"kd-tree"</span><span class="p">)</span>
-<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>        <span class="n">model</span><span class="o">.</span><span class="n">interface</span><span class="o">.</span><span class="n">boundary</span><span class="o">.</span><span class="n">absorber</span><span class="p">(</span>
-<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>            <span class="n">num_layers</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">num_partitions</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span> <span class="n">partition_algo</span><span class="o">=</span><span class="s2">"kd-tree"</span><span class="p">,</span>
-<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>            <span class="n">geometry</span><span class="o">=</span><span class="s2">"Rectangular"</span><span class="p">,</span> <span class="n">boundary_type</span><span class="o">=</span><span class="s2">"Rayleigh"</span><span class="p">,</span>
-<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>            <span class="n">rayleigh_damping</span><span class="o">=</span><span class="mf">0.95</span><span class="p">,</span> <span class="n">match_damping</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>        <span class="p">)</span>
-<a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a>        <span class="c1"># Merge shared nodes so layers and basin transfer forces continuously.</span>
-<a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a>        <span class="n">model</span><span class="o">.</span><span class="n">assembler</span><span class="o">.</span><span class="n">assemble</span><span class="p">(</span><span class="n">merge_points</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">progress_callback</span><span class="o">=</span><span class="k">lambda</span> <span class="o">*</span><span class="n">_</span><span class="p">:</span> <span class="kc">None</span><span class="p">)</span>
-<a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a>        <span class="c1"># Fix only the outer absorber faces; leave the ground surface free.</span>
-<a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a>        <span class="n">model</span><span class="o">.</span><span class="n">constraint</span><span class="o">.</span><span class="n">sp</span><span class="o">.</span><span class="n">fix_macro_x_min</span><span class="p">(</span><span class="n">dofs</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">tol</span><span class="o">=</span><span class="mf">0.01</span><span class="p">)</span>
-<a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a>        <span class="n">model</span><span class="o">.</span><span class="n">constraint</span><span class="o">.</span><span class="n">sp</span><span class="o">.</span><span class="n">fix_macro_x_max</span><span class="p">(</span><span class="n">dofs</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">tol</span><span class="o">=</span><span class="mf">0.01</span><span class="p">)</span>
-<a id="__codelineno-4-14" name="__codelineno-4-14" href="#__codelineno-4-14"></a>        <span class="n">model</span><span class="o">.</span><span class="n">constraint</span><span class="o">.</span><span class="n">sp</span><span class="o">.</span><span class="n">fix_macro_y_min</span><span class="p">(</span><span class="n">dofs</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">tol</span><span class="o">=</span><span class="mf">0.01</span><span class="p">)</span>
-<a id="__codelineno-4-15" name="__codelineno-4-15" href="#__codelineno-4-15"></a>        <span class="n">model</span><span class="o">.</span><span class="n">constraint</span><span class="o">.</span><span class="n">sp</span><span class="o">.</span><span class="n">fix_macro_y_max</span><span class="p">(</span><span class="n">dofs</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">tol</span><span class="o">=</span><span class="mf">0.01</span><span class="p">)</span>
-<a id="__codelineno-4-16" name="__codelineno-4-16" href="#__codelineno-4-16"></a>        <span class="n">model</span><span class="o">.</span><span class="n">constraint</span><span class="o">.</span><span class="n">sp</span><span class="o">.</span><span class="n">fix_macro_z_min</span><span class="p">(</span><span class="n">dofs</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">tol</span><span class="o">=</span><span class="mf">0.01</span><span class="p">)</span>
-</code></pre></div>
-<p>The eight-layer Rayleigh absorbing extension retains the legacy damping
-setting of 0.95. This is separate from physical-soil damping and requires
-reflection checks; it is not a claim of perfect absorption. The free surface
-has no absorber above it. Eight 4 m rows extend 32 m at each side and below.</p>
-</div>
-<div class="tabbed-block">
-<p>Physical strata use their listed viscous damping ratios, fitted at 3 and
-15 Hz; the basin uses 3% in both variants. Plastic hysteresis adds dissipation
-on top of this common viscous damping. Self-weight is enabled in the bricks.
-The plastic basin is initialized elastically, switched to plastic, and
-equilibrated again before DRM excitation. Check residual velocities and
-equilibrium before accepting that initialization.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>        <span class="c1"># 4. Define the analyses, loading, and recorders without running them yet.</span>
-<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>        <span class="c1"># Static gravity establishes equilibrium without startup inertia.</span>
-<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>        <span class="c1"># ICNTL14 increases Mumps workspace allowance; ICNTL7 selects ordering.</span>
-<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>        <span class="c1"># Hold the body-force loading fixed and correct equilibrium for 10 steps.</span>
-<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>        <span class="n">gravity_elastic</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">static</span><span class="p">(</span>
-<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>            <span class="n">name</span><span class="o">=</span><span class="s2">"gravity_elastic"</span><span class="p">,</span> <span class="n">constraint_handler</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">constraint</span><span class="o">.</span><span class="n">transformation</span><span class="p">(),</span>
-<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>            <span class="n">numberer</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">numberer</span><span class="o">.</span><span class="n">parallelrcm</span><span class="p">(),</span> <span class="n">system</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">system</span><span class="o">.</span><span class="n">mumps</span><span class="p">(</span><span class="n">icntl14</span><span class="o">=</span><span class="mi">400</span><span class="p">,</span> <span class="n">icntl7</span><span class="o">=</span><span class="mi">7</span><span class="p">),</span>
-<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>            <span class="n">test</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">test</span><span class="o">.</span><span class="n">energyincr</span><span class="p">(</span><span class="n">tol</span><span class="o">=</span><span class="mf">1.0e-8</span><span class="p">,</span> <span class="n">max_iter</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">print_flag</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span>
-<a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a>            <span class="n">algorithm</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">algorithm</span><span class="o">.</span><span class="n">modifiednewton</span><span class="p">(</span><span class="n">factor_once</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
-<a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a>            <span class="n">integrator</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">integrator</span><span class="o">.</span><span class="n">loadcontrol</span><span class="p">(</span><span class="n">incr</span><span class="o">=</span><span class="mf">0.0</span><span class="p">),</span>
-<a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a>            <span class="n">num_steps</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">max_retries</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-<a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a>        <span class="p">)</span>
-<a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a>        <span class="n">gravity_reequilibrate</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">static</span><span class="p">(</span>
-<a id="__codelineno-5-14" name="__codelineno-5-14" href="#__codelineno-5-14"></a>            <span class="n">name</span><span class="o">=</span><span class="s2">"gravity_reequilibrate"</span><span class="p">,</span> <span class="n">constraint_handler</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">constraint</span><span class="o">.</span><span class="n">transformation</span><span class="p">(),</span>
-<a id="__codelineno-5-15" name="__codelineno-5-15" href="#__codelineno-5-15"></a>            <span class="n">numberer</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">numberer</span><span class="o">.</span><span class="n">parallelrcm</span><span class="p">(),</span> <span class="n">system</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">system</span><span class="o">.</span><span class="n">mumps</span><span class="p">(</span><span class="n">icntl14</span><span class="o">=</span><span class="mi">400</span><span class="p">,</span> <span class="n">icntl7</span><span class="o">=</span><span class="mi">7</span><span class="p">),</span>
-<a id="__codelineno-5-16" name="__codelineno-5-16" href="#__codelineno-5-16"></a>            <span class="n">test</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">test</span><span class="o">.</span><span class="n">energyincr</span><span class="p">(</span><span class="n">tol</span><span class="o">=</span><span class="mf">1.0e-5</span><span class="p">,</span> <span class="n">max_iter</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">print_flag</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span>
-<a id="__codelineno-5-17" name="__codelineno-5-17" href="#__codelineno-5-17"></a>            <span class="n">algorithm</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">algorithm</span><span class="o">.</span><span class="n">modifiednewton</span><span class="p">(</span><span class="n">factor_once</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
-<a id="__codelineno-5-18" name="__codelineno-5-18" href="#__codelineno-5-18"></a>            <span class="n">integrator</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">integrator</span><span class="o">.</span><span class="n">loadcontrol</span><span class="p">(</span><span class="n">incr</span><span class="o">=</span><span class="mf">0.0</span><span class="p">),</span>
-<a id="__codelineno-5-19" name="__codelineno-5-19" href="#__codelineno-5-19"></a>            <span class="n">num_steps</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">max_retries</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-<a id="__codelineno-5-20" name="__codelineno-5-20" href="#__codelineno-5-20"></a>        <span class="p">)</span>
-<a id="__codelineno-5-21" name="__codelineno-5-21" href="#__codelineno-5-21"></a>        <span class="c1"># The DRM file supplies the incoming layered-background wave field.</span>
-<a id="__codelineno-5-22" name="__codelineno-5-22" href="#__codelineno-5-22"></a>        <span class="c1"># Identity transformation preserves its coordinates and physical units.</span>
-<a id="__codelineno-5-23" name="__codelineno-5-23" href="#__codelineno-5-23"></a>        <span class="n">drm</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">pattern</span><span class="o">.</span><span class="n">h5drm</span><span class="p">(</span>
-<a id="__codelineno-5-24" name="__codelineno-5-24" href="#__codelineno-5-24"></a>            <span class="n">filepath</span><span class="o">=</span><span class="n">drm_file</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span><span class="o">.</span><span class="n">as_posix</span><span class="p">(),</span> <span class="n">factor</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">crd_scale</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
-<a id="__codelineno-5-25" name="__codelineno-5-25" href="#__codelineno-5-25"></a>            <span class="n">distance_tolerance</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">do_coordinate_transformation</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-<a id="__codelineno-5-26" name="__codelineno-5-26" href="#__codelineno-5-26"></a>            <span class="n">transform_matrix</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">origin</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
-<a id="__codelineno-5-27" name="__codelineno-5-27" href="#__codelineno-5-27"></a>        <span class="p">)</span>
-<a id="__codelineno-5-28" name="__codelineno-5-28" href="#__codelineno-5-28"></a>        <span class="c1"># Record motion and soil tensors for response plots and stress-strain checks.</span>
-<a id="__codelineno-5-29" name="__codelineno-5-29" href="#__codelineno-5-29"></a>        <span class="n">recorder</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">recorder</span><span class="o">.</span><span class="n">vtkhdf</span><span class="p">(</span>
-<a id="__codelineno-5-30" name="__codelineno-5-30" href="#__codelineno-5-30"></a>            <span class="n">file_base_name</span><span class="o">=</span><span class="s2">"basin_response.vtkhdf"</span><span class="p">,</span>
-<a id="__codelineno-5-31" name="__codelineno-5-31" href="#__codelineno-5-31"></a>            <span class="n">resp_types</span><span class="o">=</span><span class="p">[</span><span class="s2">"disp"</span><span class="p">,</span> <span class="s2">"vel"</span><span class="p">,</span> <span class="s2">"accel"</span><span class="p">,</span> <span class="s2">"stress3D6"</span><span class="p">,</span> <span class="s2">"strain3D6"</span><span class="p">],</span> <span class="n">delta_t</span><span class="o">=</span><span class="n">RECORDER_DT</span><span class="p">,</span>
-<a id="__codelineno-5-32" name="__codelineno-5-32" href="#__codelineno-5-32"></a>        <span class="p">)</span>
-<a id="__codelineno-5-33" name="__codelineno-5-33" href="#__codelineno-5-33"></a>        <span class="c1"># Implicit Newmark uses Mumps and reuses the tangent factorization per analysis.</span>
-<a id="__codelineno-5-34" name="__codelineno-5-34" href="#__codelineno-5-34"></a>        <span class="c1"># Retry once, then halve failed steps up to three levels. The exporter</span>
-<a id="__codelineno-5-35" name="__codelineno-5-35" href="#__codelineno-5-35"></a>        <span class="c1"># resets factor-once reuse whenever dt changes, including on return.</span>
-<a id="__codelineno-5-36" name="__codelineno-5-36" href="#__codelineno-5-36"></a>        <span class="n">dynamic</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">transient</span><span class="p">(</span>
-<a id="__codelineno-5-37" name="__codelineno-5-37" href="#__codelineno-5-37"></a>            <span class="n">name</span><span class="o">=</span><span class="s2">"basin_response"</span><span class="p">,</span> <span class="n">constraint_handler</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">constraint</span><span class="o">.</span><span class="n">plain</span><span class="p">(),</span>
-<a id="__codelineno-5-38" name="__codelineno-5-38" href="#__codelineno-5-38"></a>            <span class="n">numberer</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">numberer</span><span class="o">.</span><span class="n">parallelrcm</span><span class="p">(),</span> <span class="n">system</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">system</span><span class="o">.</span><span class="n">mumps</span><span class="p">(</span><span class="n">icntl14</span><span class="o">=</span><span class="mi">400</span><span class="p">,</span> <span class="n">icntl7</span><span class="o">=</span><span class="mi">7</span><span class="p">),</span>
-<a id="__codelineno-5-39" name="__codelineno-5-39" href="#__codelineno-5-39"></a>            <span class="n">test</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">test</span><span class="o">.</span><span class="n">energyincr</span><span class="p">(</span><span class="n">tol</span><span class="o">=</span><span class="mf">1.0e-4</span><span class="p">,</span> <span class="n">max_iter</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">print_flag</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span>
-<a id="__codelineno-5-40" name="__codelineno-5-40" href="#__codelineno-5-40"></a>            <span class="n">algorithm</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">algorithm</span><span class="o">.</span><span class="n">modifiednewton</span><span class="p">(</span><span class="n">factor_once</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
-<a id="__codelineno-5-41" name="__codelineno-5-41" href="#__codelineno-5-41"></a>            <span class="n">integrator</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">integrator</span><span class="o">.</span><span class="n">newmark</span><span class="p">(</span><span class="n">gamma</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">beta</span><span class="o">=</span><span class="mf">0.25</span><span class="p">),</span>
-<a id="__codelineno-5-42" name="__codelineno-5-42" href="#__codelineno-5-42"></a>            <span class="n">dt</span><span class="o">=</span><span class="n">DYNAMIC_DT</span><span class="p">,</span> <span class="n">final_time</span><span class="o">=</span><span class="n">final_time</span><span class="p">,</span> <span class="n">initialize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">max_retries</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-<a id="__codelineno-5-43" name="__codelineno-5-43" href="#__codelineno-5-43"></a>            <span class="n">num_sublevels</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">num_substeps</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
-<a id="__codelineno-5-44" name="__codelineno-5-44" href="#__codelineno-5-44"></a>        <span class="p">)</span>
-<a id="__codelineno-5-45" name="__codelineno-5-45" href="#__codelineno-5-45"></a>        <span class="c1"># 5. Put the full execution sequence together here, for both material cases.</span>
-<a id="__codelineno-5-46" name="__codelineno-5-46" href="#__codelineno-5-46"></a>        <span class="c1"># Elastic materials ignore stage updates. Re-equilibrate after the switch,</span>
-<a id="__codelineno-5-47" name="__codelineno-5-47" href="#__codelineno-5-47"></a>        <span class="c1"># reset the clock while keeping the gravity state, then apply the DRM wave.</span>
-<a id="__codelineno-5-48" name="__codelineno-5-48" href="#__codelineno-5-48"></a>        <span class="n">model</span><span class="o">.</span><span class="n">process</span><span class="o">.</span><span class="n">add_step</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">actions</span><span class="o">.</span><span class="n">update_material_stage_to_elastic</span><span class="p">(),</span> <span class="s2">"Elastic initialization"</span><span class="p">)</span>
-<a id="__codelineno-5-49" name="__codelineno-5-49" href="#__codelineno-5-49"></a>        <span class="n">model</span><span class="o">.</span><span class="n">process</span><span class="o">.</span><span class="n">add_step</span><span class="p">(</span><span class="n">gravity_elastic</span><span class="p">,</span> <span class="s2">"Equilibrate self-weight"</span><span class="p">)</span>
-<a id="__codelineno-5-50" name="__codelineno-5-50" href="#__codelineno-5-50"></a>        <span class="n">model</span><span class="o">.</span><span class="n">process</span><span class="o">.</span><span class="n">add_step</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">actions</span><span class="o">.</span><span class="n">update_material_stage_to_plastic</span><span class="p">(),</span> <span class="s2">"Enable plastic material stage"</span><span class="p">)</span>
-<a id="__codelineno-5-51" name="__codelineno-5-51" href="#__codelineno-5-51"></a>        <span class="n">model</span><span class="o">.</span><span class="n">process</span><span class="o">.</span><span class="n">add_step</span><span class="p">(</span><span class="n">gravity_reequilibrate</span><span class="p">,</span> <span class="s2">"Re-equilibrate before dynamic loading"</span><span class="p">)</span>
-<a id="__codelineno-5-52" name="__codelineno-5-52" href="#__codelineno-5-52"></a>        <span class="n">model</span><span class="o">.</span><span class="n">process</span><span class="o">.</span><span class="n">add_step</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">actions</span><span class="o">.</span><span class="n">set_time</span><span class="p">(</span><span class="mf">0.0</span><span class="p">),</span> <span class="s2">"Reset the dynamic clock"</span><span class="p">)</span>
-<a id="__codelineno-5-53" name="__codelineno-5-53" href="#__codelineno-5-53"></a>        <span class="n">model</span><span class="o">.</span><span class="n">process</span><span class="o">.</span><span class="n">add_step</span><span class="p">(</span><span class="n">drm</span><span class="p">,</span> <span class="s2">"Apply the layered background wave field"</span><span class="p">)</span>
-<a id="__codelineno-5-54" name="__codelineno-5-54" href="#__codelineno-5-54"></a>        <span class="n">model</span><span class="o">.</span><span class="n">process</span><span class="o">.</span><span class="n">add_step</span><span class="p">(</span><span class="n">recorder</span><span class="p">,</span> <span class="s2">"Record physical and absorbing domain responses"</span><span class="p">)</span>
-<a id="__codelineno-5-55" name="__codelineno-5-55" href="#__codelineno-5-55"></a>        <span class="n">model</span><span class="o">.</span><span class="n">process</span><span class="o">.</span><span class="n">add_step</span><span class="p">(</span><span class="n">dynamic</span><span class="p">,</span> <span class="s2">"Run implicit basin response"</span><span class="p">)</span>
-<a id="__codelineno-5-56" name="__codelineno-5-56" href="#__codelineno-5-56"></a>        <span class="c1"># 6. Export only; the workflow's OpenSees task executes this Tcl remotely.</span>
-<a id="__codelineno-5-57" name="__codelineno-5-57" href="#__codelineno-5-57"></a>        <span class="n">model</span><span class="o">.</span><span class="n">export_to_tcl</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">output</span> <span class="o">/</span> <span class="s2">"model.tcl"</span><span class="p">),</span> <span class="n">progress_callback</span><span class="o">=</span><span class="k">lambda</span> <span class="o">*</span><span class="n">_</span><span class="p">:</span> <span class="kc">None</span><span class="p">)</span>
-<a id="__codelineno-5-58" name="__codelineno-5-58" href="#__codelineno-5-58"></a>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Exported </span><span class="si">{</span><span class="n">output</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="s1">'model.tcl'</span><span class="si">}</span><span class="s2">; launch with 96 MPI ranks."</span><span class="p">)</span>
-<a id="__codelineno-5-59" name="__codelineno-5-59" href="#__codelineno-5-59"></a>        <span class="k">return</span> <span class="n">output</span> <span class="o">/</span> <span class="s2">"model.tcl"</span>
+<p>Host-layer Rayleigh damping uses the ratios in the table, fitted at
+3 and 15 Hz. Both basin variants use 3% viscous damping at those
+frequencies; the plastic material additionally supports hysteretic
+dissipation. Set <code>NO_PHYSICAL_DAMPING = True</code> to disable basin and host
+viscous damping while retaining the absorber damping.</p>
+<p>Self-weight is applied through the brick body forces. The first gravity
+phase initializes the basin elastically; the second re-equilibrates after
+enabling the plastic material stage. Elastic materials retain their
+elastic behavior throughout. Each phase uses ten static steps at fixed
+body-force loading rather than gradually ramping gravity.</p>
+<p>The first phase uses an energy-increment tolerance of <code>1e-8</code> and
+factor-once Modified Newton; the second uses <code>1e-5</code> and plain Modified
+Newton. Both allow 30 iterations and no retries. The dynamic clock then
+resets to zero while retaining the gravity state.</p>
+<p>Dynamics use Newmark (<code>gamma=0.5</code>, <code>beta=0.25</code>), Mumps, and factor-once
+Modified Newton, with tolerance <code>1e-4</code> and up to eight iterations.
+The initial time step is 0.01 s. A failed increment gets one retry,
+followed by up to three halving levels, down to 0.00125 s. The
+factorization refreshes when the time step changes and is reused at
+an unchanged step size. Responses are recorded every 0.02 s.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>        <span class="c1"># 4. Define the analyses, loading, and recorders without running them yet.</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>        <span class="c1"># Static gravity establishes equilibrium without startup inertia.</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>        <span class="c1"># ICNTL14 increases Mumps workspace allowance; ICNTL7 selects ordering.</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>        <span class="c1"># Hold the body-force loading fixed and correct equilibrium for 10 steps.</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>        <span class="n">gravity_elastic</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">static</span><span class="p">(</span>
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>            <span class="n">name</span><span class="o">=</span><span class="s2">"gravity_elastic"</span><span class="p">,</span> <span class="n">constraint_handler</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">constraint</span><span class="o">.</span><span class="n">transformation</span><span class="p">(),</span>
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>            <span class="n">numberer</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">numberer</span><span class="o">.</span><span class="n">parallelrcm</span><span class="p">(),</span> <span class="n">system</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">system</span><span class="o">.</span><span class="n">mumps</span><span class="p">(</span><span class="n">icntl14</span><span class="o">=</span><span class="mi">400</span><span class="p">,</span> <span class="n">icntl7</span><span class="o">=</span><span class="mi">7</span><span class="p">),</span>
+<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>            <span class="n">test</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">test</span><span class="o">.</span><span class="n">energyincr</span><span class="p">(</span><span class="n">tol</span><span class="o">=</span><span class="mf">1.0e-8</span><span class="p">,</span> <span class="n">max_iter</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">print_flag</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span>
+<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>            <span class="n">algorithm</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">algorithm</span><span class="o">.</span><span class="n">modifiednewton</span><span class="p">(</span><span class="n">factor_once</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+<a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a>            <span class="n">integrator</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">integrator</span><span class="o">.</span><span class="n">loadcontrol</span><span class="p">(</span><span class="n">incr</span><span class="o">=</span><span class="mf">0.0</span><span class="p">),</span>
+<a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a>            <span class="n">num_steps</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">max_retries</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+<a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a>        <span class="p">)</span>
+<a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a>        <span class="n">gravity_reequilibrate</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">static</span><span class="p">(</span>
+<a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a>            <span class="n">name</span><span class="o">=</span><span class="s2">"gravity_reequilibrate"</span><span class="p">,</span> <span class="n">constraint_handler</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">constraint</span><span class="o">.</span><span class="n">transformation</span><span class="p">(),</span>
+<a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a>            <span class="n">numberer</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">numberer</span><span class="o">.</span><span class="n">parallelrcm</span><span class="p">(),</span> <span class="n">system</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">system</span><span class="o">.</span><span class="n">mumps</span><span class="p">(</span><span class="n">icntl14</span><span class="o">=</span><span class="mi">400</span><span class="p">,</span> <span class="n">icntl7</span><span class="o">=</span><span class="mi">7</span><span class="p">),</span>
+<a id="__codelineno-3-16" name="__codelineno-3-16" href="#__codelineno-3-16"></a>            <span class="n">test</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">test</span><span class="o">.</span><span class="n">energyincr</span><span class="p">(</span><span class="n">tol</span><span class="o">=</span><span class="mf">1.0e-5</span><span class="p">,</span> <span class="n">max_iter</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">print_flag</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span>
+<a id="__codelineno-3-17" name="__codelineno-3-17" href="#__codelineno-3-17"></a>            <span class="n">algorithm</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">algorithm</span><span class="o">.</span><span class="n">modifiednewton</span><span class="p">(</span><span class="n">factor_once</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+<a id="__codelineno-3-18" name="__codelineno-3-18" href="#__codelineno-3-18"></a>            <span class="n">integrator</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">integrator</span><span class="o">.</span><span class="n">loadcontrol</span><span class="p">(</span><span class="n">incr</span><span class="o">=</span><span class="mf">0.0</span><span class="p">),</span>
+<a id="__codelineno-3-19" name="__codelineno-3-19" href="#__codelineno-3-19"></a>            <span class="n">num_steps</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">max_retries</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+<a id="__codelineno-3-20" name="__codelineno-3-20" href="#__codelineno-3-20"></a>        <span class="p">)</span>
+<a id="__codelineno-3-21" name="__codelineno-3-21" href="#__codelineno-3-21"></a>        <span class="c1"># The DRM file supplies the incoming layered-background wave field.</span>
+<a id="__codelineno-3-22" name="__codelineno-3-22" href="#__codelineno-3-22"></a>        <span class="c1"># Identity transformation preserves its coordinates and physical units.</span>
+<a id="__codelineno-3-23" name="__codelineno-3-23" href="#__codelineno-3-23"></a>        <span class="n">drm</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">pattern</span><span class="o">.</span><span class="n">h5drm</span><span class="p">(</span>
+<a id="__codelineno-3-24" name="__codelineno-3-24" href="#__codelineno-3-24"></a>            <span class="n">filepath</span><span class="o">=</span><span class="n">drm_file</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span><span class="o">.</span><span class="n">as_posix</span><span class="p">(),</span> <span class="n">factor</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">crd_scale</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+<a id="__codelineno-3-25" name="__codelineno-3-25" href="#__codelineno-3-25"></a>            <span class="n">distance_tolerance</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">do_coordinate_transformation</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+<a id="__codelineno-3-26" name="__codelineno-3-26" href="#__codelineno-3-26"></a>            <span class="n">transform_matrix</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">origin</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+<a id="__codelineno-3-27" name="__codelineno-3-27" href="#__codelineno-3-27"></a>        <span class="p">)</span>
+<a id="__codelineno-3-28" name="__codelineno-3-28" href="#__codelineno-3-28"></a>        <span class="c1"># Record motion and soil tensors for response plots and stress-strain checks.</span>
+<a id="__codelineno-3-29" name="__codelineno-3-29" href="#__codelineno-3-29"></a>        <span class="n">recorder</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">recorder</span><span class="o">.</span><span class="n">vtkhdf</span><span class="p">(</span>
+<a id="__codelineno-3-30" name="__codelineno-3-30" href="#__codelineno-3-30"></a>            <span class="n">file_base_name</span><span class="o">=</span><span class="s2">"basin_response.vtkhdf"</span><span class="p">,</span>
+<a id="__codelineno-3-31" name="__codelineno-3-31" href="#__codelineno-3-31"></a>            <span class="n">resp_types</span><span class="o">=</span><span class="p">[</span><span class="s2">"disp"</span><span class="p">,</span> <span class="s2">"vel"</span><span class="p">,</span> <span class="s2">"accel"</span><span class="p">,</span> <span class="s2">"stress3D6"</span><span class="p">,</span> <span class="s2">"strain3D6"</span><span class="p">],</span> <span class="n">delta_t</span><span class="o">=</span><span class="n">RECORDER_DT</span><span class="p">,</span>
+<a id="__codelineno-3-32" name="__codelineno-3-32" href="#__codelineno-3-32"></a>        <span class="p">)</span>
+<a id="__codelineno-3-33" name="__codelineno-3-33" href="#__codelineno-3-33"></a>        <span class="c1"># Implicit Newmark uses Mumps and reuses the tangent factorization per analysis.</span>
+<a id="__codelineno-3-34" name="__codelineno-3-34" href="#__codelineno-3-34"></a>        <span class="c1"># Retry once, then halve failed steps up to three levels. The exporter</span>
+<a id="__codelineno-3-35" name="__codelineno-3-35" href="#__codelineno-3-35"></a>        <span class="c1"># resets factor-once reuse whenever dt changes, including on return.</span>
+<a id="__codelineno-3-36" name="__codelineno-3-36" href="#__codelineno-3-36"></a>        <span class="n">dynamic</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">transient</span><span class="p">(</span>
+<a id="__codelineno-3-37" name="__codelineno-3-37" href="#__codelineno-3-37"></a>            <span class="n">name</span><span class="o">=</span><span class="s2">"basin_response"</span><span class="p">,</span> <span class="n">constraint_handler</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">constraint</span><span class="o">.</span><span class="n">plain</span><span class="p">(),</span>
+<a id="__codelineno-3-38" name="__codelineno-3-38" href="#__codelineno-3-38"></a>            <span class="n">numberer</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">numberer</span><span class="o">.</span><span class="n">parallelrcm</span><span class="p">(),</span> <span class="n">system</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">system</span><span class="o">.</span><span class="n">mumps</span><span class="p">(</span><span class="n">icntl14</span><span class="o">=</span><span class="mi">400</span><span class="p">,</span> <span class="n">icntl7</span><span class="o">=</span><span class="mi">7</span><span class="p">),</span>
+<a id="__codelineno-3-39" name="__codelineno-3-39" href="#__codelineno-3-39"></a>            <span class="n">test</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">test</span><span class="o">.</span><span class="n">energyincr</span><span class="p">(</span><span class="n">tol</span><span class="o">=</span><span class="mf">1.0e-4</span><span class="p">,</span> <span class="n">max_iter</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">print_flag</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span>
+<a id="__codelineno-3-40" name="__codelineno-3-40" href="#__codelineno-3-40"></a>            <span class="n">algorithm</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">algorithm</span><span class="o">.</span><span class="n">modifiednewton</span><span class="p">(</span><span class="n">factor_once</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+<a id="__codelineno-3-41" name="__codelineno-3-41" href="#__codelineno-3-41"></a>            <span class="n">integrator</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">integrator</span><span class="o">.</span><span class="n">newmark</span><span class="p">(</span><span class="n">gamma</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">beta</span><span class="o">=</span><span class="mf">0.25</span><span class="p">),</span>
+<a id="__codelineno-3-42" name="__codelineno-3-42" href="#__codelineno-3-42"></a>            <span class="n">dt</span><span class="o">=</span><span class="n">DYNAMIC_DT</span><span class="p">,</span> <span class="n">final_time</span><span class="o">=</span><span class="n">final_time</span><span class="p">,</span> <span class="n">initialize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">max_retries</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+<a id="__codelineno-3-43" name="__codelineno-3-43" href="#__codelineno-3-43"></a>            <span class="n">num_sublevels</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">num_substeps</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+<a id="__codelineno-3-44" name="__codelineno-3-44" href="#__codelineno-3-44"></a>        <span class="p">)</span>
+<a id="__codelineno-3-45" name="__codelineno-3-45" href="#__codelineno-3-45"></a>        <span class="c1"># 5. Put the full execution sequence together here, for both material cases.</span>
+<a id="__codelineno-3-46" name="__codelineno-3-46" href="#__codelineno-3-46"></a>        <span class="c1"># Elastic materials ignore stage updates. Re-equilibrate after the switch,</span>
+<a id="__codelineno-3-47" name="__codelineno-3-47" href="#__codelineno-3-47"></a>        <span class="c1"># reset the clock while keeping the gravity state, then apply the DRM wave.</span>
+<a id="__codelineno-3-48" name="__codelineno-3-48" href="#__codelineno-3-48"></a>        <span class="n">model</span><span class="o">.</span><span class="n">process</span><span class="o">.</span><span class="n">add_step</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">actions</span><span class="o">.</span><span class="n">update_material_stage_to_elastic</span><span class="p">(),</span> <span class="s2">"Elastic initialization"</span><span class="p">)</span>
+<a id="__codelineno-3-49" name="__codelineno-3-49" href="#__codelineno-3-49"></a>        <span class="n">model</span><span class="o">.</span><span class="n">process</span><span class="o">.</span><span class="n">add_step</span><span class="p">(</span><span class="n">gravity_elastic</span><span class="p">,</span> <span class="s2">"Equilibrate self-weight"</span><span class="p">)</span>
+<a id="__codelineno-3-50" name="__codelineno-3-50" href="#__codelineno-3-50"></a>        <span class="n">model</span><span class="o">.</span><span class="n">process</span><span class="o">.</span><span class="n">add_step</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">actions</span><span class="o">.</span><span class="n">update_material_stage_to_plastic</span><span class="p">(),</span> <span class="s2">"Enable plastic material stage"</span><span class="p">)</span>
+<a id="__codelineno-3-51" name="__codelineno-3-51" href="#__codelineno-3-51"></a>        <span class="n">model</span><span class="o">.</span><span class="n">process</span><span class="o">.</span><span class="n">add_step</span><span class="p">(</span><span class="n">gravity_reequilibrate</span><span class="p">,</span> <span class="s2">"Re-equilibrate before dynamic loading"</span><span class="p">)</span>
+<a id="__codelineno-3-52" name="__codelineno-3-52" href="#__codelineno-3-52"></a>        <span class="n">model</span><span class="o">.</span><span class="n">process</span><span class="o">.</span><span class="n">add_step</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">actions</span><span class="o">.</span><span class="n">set_time</span><span class="p">(</span><span class="mf">0.0</span><span class="p">),</span> <span class="s2">"Reset the dynamic clock"</span><span class="p">)</span>
+<a id="__codelineno-3-53" name="__codelineno-3-53" href="#__codelineno-3-53"></a>        <span class="n">model</span><span class="o">.</span><span class="n">process</span><span class="o">.</span><span class="n">add_step</span><span class="p">(</span><span class="n">drm</span><span class="p">,</span> <span class="s2">"Apply the layered background wave field"</span><span class="p">)</span>
+<a id="__codelineno-3-54" name="__codelineno-3-54" href="#__codelineno-3-54"></a>        <span class="n">model</span><span class="o">.</span><span class="n">process</span><span class="o">.</span><span class="n">add_step</span><span class="p">(</span><span class="n">recorder</span><span class="p">,</span> <span class="s2">"Record physical and absorbing domain responses"</span><span class="p">)</span>
+<a id="__codelineno-3-55" name="__codelineno-3-55" href="#__codelineno-3-55"></a>        <span class="n">model</span><span class="o">.</span><span class="n">process</span><span class="o">.</span><span class="n">add_step</span><span class="p">(</span><span class="n">dynamic</span><span class="p">,</span> <span class="s2">"Run implicit basin response"</span><span class="p">)</span>
+<a id="__codelineno-3-56" name="__codelineno-3-56" href="#__codelineno-3-56"></a>        <span class="c1"># 6. Export only; the workflow's OpenSees task executes this Tcl remotely.</span>
+<a id="__codelineno-3-57" name="__codelineno-3-57" href="#__codelineno-3-57"></a>        <span class="n">model</span><span class="o">.</span><span class="n">export_to_tcl</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">output</span> <span class="o">/</span> <span class="s2">"model.tcl"</span><span class="p">),</span> <span class="n">progress_callback</span><span class="o">=</span><span class="k">lambda</span> <span class="o">*</span><span class="n">_</span><span class="p">:</span> <span class="kc">None</span><span class="p">)</span>
+<a id="__codelineno-3-58" name="__codelineno-3-58" href="#__codelineno-3-58"></a>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Exported </span><span class="si">{</span><span class="n">output</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="s1">'model.tcl'</span><span class="si">}</span><span class="s2">; launch with 96 MPI ranks."</span><span class="p">)</span>
+<a id="__codelineno-3-59" name="__codelineno-3-59" href="#__codelineno-3-59"></a>        <span class="k">return</span> <span class="n">output</span> <span class="o">/</span> <span class="s2">"model.tcl"</span>
 </code></pre></div>
 </div>
 </div>
 </div>
-<h2 id="tacc-workflow">TACC Workflow</h2>
-<p>The model script follows the same submission format as the other migrated
-examples: <code>build_workflow()</code> defines the stages and the final <code>fm.submit(...)</code>
-block specifies the cluster settings. No command-line options are required.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="2:4"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><input id="__tabbed_2_3" name="__tabbed_2" type="radio" /><input id="__tabbed_2_4" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">1. Configure</label><label for="__tabbed_2_2">2. Submit</label><label for="__tabbed_2_3">3. Inspect</label><label for="__tabbed_2_4">4. Extend</label></div>
+<h2 id="results">Results</h2>
+<p>The following comparisons cover 0-27.4 s at all three sites, with physical
+viscous damping enabled. Each history contains 1,371 recorded samples at
+0.02 s intervals. Within each site, the three models share the same incoming
+DRM wave field and differ in the material assigned to the basin cells.</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="3:3"><input checked="checked" id="__tabbed_3_1" name="__tabbed_3" type="radio" /><input id="__tabbed_3_2" name="__tabbed_3" type="radio" /><input id="__tabbed_3_3" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="__tabbed_3_1">Elastic Basin</label><label for="__tabbed_3_2">Plastic Basin</label><label for="__tabbed_3_3">Peak Amplification</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<p><code>FINAL_TIME = 27.4</code> near the top selects the shared duration. The workflow
-builds elastic, plastic, and no-basin cases for Site1, Site2, and Site3.
-<code>DRM_ROOT</code> points to <code>/scratch/08189/amnp95/drm_inputs</code>, containing the
-three community records copied from Corral on the login node. This
-scratch copy is needed because the compute nodes could not access Corral.
-No new DRM input is generated or uploaded. Other users must change
-<code>DRM_ROOT</code> to their own compute-accessible input directory.
-Edit the app, allocation, queue, nodes, and minutes directly in the
-submission block to match your account.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
-<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>    <span class="n">job</span> <span class="o">=</span> <span class="n">fm</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span>
-<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>        <span class="n">function</span><span class="o">=</span><span class="n">build_workflow</span><span class="p">,</span>
-<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>        <span class="n">platform</span><span class="o">=</span><span class="s2">"tacc"</span><span class="p">,</span>
-<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>        <span class="n">settings</span><span class="o">=</span><span class="p">{</span>
-<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>            <span class="s2">"app_id"</span><span class="p">:</span> <span class="s2">"amnp95-femora-workflow-stampede3"</span><span class="p">,</span>
-<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a>            <span class="s2">"system"</span><span class="p">:</span> <span class="s2">"stampede3"</span><span class="p">,</span>
-<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>            <span class="s2">"queue"</span><span class="p">:</span> <span class="s2">"skx"</span><span class="p">,</span>
-<a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a>            <span class="s2">"allocation"</span><span class="p">:</span> <span class="s2">"DesignSafe-SimCenter"</span><span class="p">,</span>
-<a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a>            <span class="s2">"nodes"</span><span class="p">:</span> <span class="mi">6</span><span class="p">,</span>
-<a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a>            <span class="s2">"cores_per_node"</span><span class="p">:</span> <span class="mi">48</span><span class="p">,</span>
-<a id="__codelineno-6-12" name="__codelineno-6-12" href="#__codelineno-6-12"></a>            <span class="s2">"minutes"</span><span class="p">:</span> <span class="mi">240</span><span class="p">,</span>
-<a id="__codelineno-6-13" name="__codelineno-6-13" href="#__codelineno-6-13"></a>        <span class="p">},</span>
-<a id="__codelineno-6-14" name="__codelineno-6-14" href="#__codelineno-6-14"></a>        <span class="n">files</span><span class="o">=</span><span class="p">{</span>
-<a id="__codelineno-6-15" name="__codelineno-6-15" href="#__codelineno-6-15"></a>            <span class="s2">"basin_postprocess.py"</span><span class="p">:</span> <span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">with_name</span><span class="p">(</span><span class="s2">"basin_postprocess.py"</span><span class="p">),</span>
-<a id="__codelineno-6-16" name="__codelineno-6-16" href="#__codelineno-6-16"></a>        <span class="p">},</span>
-<a id="__codelineno-6-17" name="__codelineno-6-17" href="#__codelineno-6-17"></a>    <span class="p">)</span>
-<a id="__codelineno-6-18" name="__codelineno-6-18" href="#__codelineno-6-18"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Job UUID: </span><span class="si">{</span><span class="n">job</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<p><img alt="Center surface XYZ acceleration: no basin versus elastic basin at three sites" src="../../assets/examples/basin/center_elastic_comparison.png" /></p>
+<p>Columns represent Sites 1-3; rows represent X, Y, and Z acceleration at
+the center surface point <code>(0, 0, 0)</code>. The black curve is the layered
+no-basin background and the blue curve is the soft elastic basin.</p>
+<p>The elastic basin increases center peak accelerations in every component.
+Peak ratios range from approximately <strong>2.00 to 3.84</strong>, depending on site
+and direction. Site 2 has the largest absolute center acceleration:
+<strong>27.64 m/s2 in Y</strong>. Site 3 has the largest relative center Z amplification,
+<strong>3.84 times</strong> its no-basin peak; a larger ratio does not necessarily mean
+a larger absolute acceleration.</p>
+<p>The elastic basin intentionally retains its stiffness during strong
+shaking. Without modulus reduction and hysteretic dissipation, it can
+overpredict amplification compared with yielding soil. This idealized
+case illustrates the amplification potential of the soft basin rather
+than realistic strong-motion soil behavior.</p>
+</div>
+<div class="tabbed-block">
+<p><img alt="Center surface XYZ acceleration: no basin versus plastic basin at three sites" src="../../assets/examples/basin/center_plastic_comparison.png" /></p>
+<p>The black curve is again the no-basin background; the orange curve is the
+plastic basin. Each panel uses the <strong>same time and acceleration limits</strong>
+as its counterpart in the elastic tab, so changing tabs does not change
+the visual scale.</p>
+<p>Plastic-case center peaks are lower than the elastic-case peaks in every
+component at all sites. The X peak ratios are approximately <strong>1.03-1.13</strong>,
+while Y and Z still amplify by approximately <strong>1.47-2.02</strong>. Plasticity
+therefore reduces peak acceleration amplification in this comparison,
+with a different reduction in each direction. The basin effect remains
+visible, especially in Y and Z.</p>
+</div>
+<div class="tabbed-block">
+<p><img alt="Component PGA ratios at center, edge, and outside surface probes for three sites" src="../../assets/examples/basin/pga_amplification.png" /></p>
+<p>Rows show the center <code>(0, 0, 0)</code>, near-edge <code>(48, 0, 0)</code>, and outside
+<code>(60, 0, 0)</code> surface probes. Columns show the X, Y, and Z components.
+Blue bars represent the elastic basin and orange bars the plastic basin.
+Each bar is computed at the same site, component, and probe as:</p>
+<div class="arithmatex">\[
+R_{\mathrm{PGA}} =
+\frac{\max_t |a_{\mathrm{basin}}(t)|}
+     {\max_t |a_{\mathrm{no\ basin}}(t)|}.
+\]</div>
+<p>The dashed line at <strong>1</strong> denotes an unchanged peak.</p>
+<table>
+<thead>
+<tr>
+<th>Site</th>
+<th>Elastic Center X / Y / Z</th>
+<th>Plastic Center X / Y / Z</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>2.00 / 2.06 / 2.31</td>
+<td>1.03 / 1.77 / 1.59</td>
+</tr>
+<tr>
+<td>2</td>
+<td>2.74 / 3.63 / 3.22</td>
+<td>1.05 / 1.47 / 1.63</td>
+</tr>
+<tr>
+<td>3</td>
+<td>3.45 / 2.39 / 3.84</td>
+<td>1.13 / 1.74 / 2.02</td>
+</tr>
+</tbody>
+</table>
+<p>The strongest peak changes occur at the center. Near-edge ratios range
+approximately <strong>0.93-1.20</strong>, and outside ratios <strong>0.95-1.13</strong>. This shows
+spatial variation in the basin effect: center peaks change substantially
+more than those at the near-edge and outside probes.</p>
+</div>
+</div>
+</div>
+<h2 id="run-the-workflow">Run the Workflow</h2>
+<p>The workflow builds nine models, solves them on Stampede3, and reduces the
+results to the plots and histories needed for comparison. Run it from your
+local Femora environment; OpenSees executes on the remote system.</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="4:4"><input checked="checked" id="__tabbed_4_1" name="__tabbed_4" type="radio" /><input id="__tabbed_4_2" name="__tabbed_4" type="radio" /><input id="__tabbed_4_3" name="__tabbed_4" type="radio" /><input id="__tabbed_4_4" name="__tabbed_4" type="radio" /><div class="tabbed-labels"><label for="__tabbed_4_1">1. Configure</label><label for="__tabbed_4_2">2. Submit</label><label for="__tabbed_4_3">3. View the results</label><label for="__tabbed_4_4">4. Customize</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<p>Set <code>DRM_ROOT</code> near the top of the script to a directory readable by the
+remote compute nodes:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="n">DRM_ROOT</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">"/path/to/drm_inputs"</span><span class="p">)</span>
+</code></pre></div>
+<p>That directory must contain:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>HaywardFault_SW4_DRM_Site1.h5drm
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>HaywardFault_SW4_DRM_Site2.h5drm
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>HaywardFault_SW4_DRM_Site3.h5drm
+</code></pre></div>
+<p>In <code>fm.submit(...)</code>, set <code>app_id</code> and <code>allocation</code> for your account.
+The DRM files are read from <code>DRM_ROOT</code> on the remote system.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">build_workflow</span><span class="p">():</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>    <span class="n">final_time</span> <span class="o">=</span> <span class="n">FINAL_TIME</span>
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>    <span class="n">workflow</span> <span class="o">=</span> <span class="n">fm</span><span class="o">.</span><span class="n">Workflow</span><span class="p">(</span><span class="s2">"basin-comparison"</span><span class="p">)</span>
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>    <span class="c1"># Build sequentially; solve the three material cases together at each site.</span>
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>    <span class="n">workflow</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">"build"</span><span class="p">,</span> <span class="n">parallel</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">tasks</span><span class="o">=</span><span class="p">[</span>
+<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>        <span class="n">fm</span><span class="o">.</span><span class="n">tasks</span><span class="o">.</span><span class="n">Python</span><span class="p">(</span><span class="s2">"site1_elastic"</span><span class="p">,</span> <span class="n">build_case</span><span class="p">,</span>
+<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a>                        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">"site"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">"material"</span><span class="p">:</span> <span class="s2">"elastic"</span><span class="p">,</span> <span class="s2">"final_time"</span><span class="p">:</span> <span class="n">final_time</span><span class="p">}),</span>
+<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>        <span class="n">fm</span><span class="o">.</span><span class="n">tasks</span><span class="o">.</span><span class="n">Python</span><span class="p">(</span><span class="s2">"site1_plastic"</span><span class="p">,</span> <span class="n">build_case</span><span class="p">,</span>
+<a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a>                        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">"site"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">"material"</span><span class="p">:</span> <span class="s2">"plastic"</span><span class="p">,</span> <span class="s2">"final_time"</span><span class="p">:</span> <span class="n">final_time</span><span class="p">}),</span>
+<a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a>        <span class="n">fm</span><span class="o">.</span><span class="n">tasks</span><span class="o">.</span><span class="n">Python</span><span class="p">(</span><span class="s2">"site1_no_basin"</span><span class="p">,</span> <span class="n">build_case</span><span class="p">,</span>
+<a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a>                        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">"site"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">"material"</span><span class="p">:</span> <span class="s2">"no_basin"</span><span class="p">,</span> <span class="s2">"final_time"</span><span class="p">:</span> <span class="n">final_time</span><span class="p">}),</span>
+<a id="__codelineno-6-12" name="__codelineno-6-12" href="#__codelineno-6-12"></a>        <span class="n">fm</span><span class="o">.</span><span class="n">tasks</span><span class="o">.</span><span class="n">Python</span><span class="p">(</span><span class="s2">"site2_elastic"</span><span class="p">,</span> <span class="n">build_case</span><span class="p">,</span>
+<a id="__codelineno-6-13" name="__codelineno-6-13" href="#__codelineno-6-13"></a>                        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">"site"</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">"material"</span><span class="p">:</span> <span class="s2">"elastic"</span><span class="p">,</span> <span class="s2">"final_time"</span><span class="p">:</span> <span class="n">final_time</span><span class="p">}),</span>
+<a id="__codelineno-6-14" name="__codelineno-6-14" href="#__codelineno-6-14"></a>        <span class="n">fm</span><span class="o">.</span><span class="n">tasks</span><span class="o">.</span><span class="n">Python</span><span class="p">(</span><span class="s2">"site2_plastic"</span><span class="p">,</span> <span class="n">build_case</span><span class="p">,</span>
+<a id="__codelineno-6-15" name="__codelineno-6-15" href="#__codelineno-6-15"></a>                        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">"site"</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">"material"</span><span class="p">:</span> <span class="s2">"plastic"</span><span class="p">,</span> <span class="s2">"final_time"</span><span class="p">:</span> <span class="n">final_time</span><span class="p">}),</span>
+<a id="__codelineno-6-16" name="__codelineno-6-16" href="#__codelineno-6-16"></a>        <span class="n">fm</span><span class="o">.</span><span class="n">tasks</span><span class="o">.</span><span class="n">Python</span><span class="p">(</span><span class="s2">"site2_no_basin"</span><span class="p">,</span> <span class="n">build_case</span><span class="p">,</span>
+<a id="__codelineno-6-17" name="__codelineno-6-17" href="#__codelineno-6-17"></a>                        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">"site"</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">"material"</span><span class="p">:</span> <span class="s2">"no_basin"</span><span class="p">,</span> <span class="s2">"final_time"</span><span class="p">:</span> <span class="n">final_time</span><span class="p">}),</span>
+<a id="__codelineno-6-18" name="__codelineno-6-18" href="#__codelineno-6-18"></a>        <span class="n">fm</span><span class="o">.</span><span class="n">tasks</span><span class="o">.</span><span class="n">Python</span><span class="p">(</span><span class="s2">"site3_elastic"</span><span class="p">,</span> <span class="n">build_case</span><span class="p">,</span>
+<a id="__codelineno-6-19" name="__codelineno-6-19" href="#__codelineno-6-19"></a>                        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">"site"</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="s2">"material"</span><span class="p">:</span> <span class="s2">"elastic"</span><span class="p">,</span> <span class="s2">"final_time"</span><span class="p">:</span> <span class="n">final_time</span><span class="p">}),</span>
+<a id="__codelineno-6-20" name="__codelineno-6-20" href="#__codelineno-6-20"></a>        <span class="n">fm</span><span class="o">.</span><span class="n">tasks</span><span class="o">.</span><span class="n">Python</span><span class="p">(</span><span class="s2">"site3_plastic"</span><span class="p">,</span> <span class="n">build_case</span><span class="p">,</span>
+<a id="__codelineno-6-21" name="__codelineno-6-21" href="#__codelineno-6-21"></a>                        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">"site"</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="s2">"material"</span><span class="p">:</span> <span class="s2">"plastic"</span><span class="p">,</span> <span class="s2">"final_time"</span><span class="p">:</span> <span class="n">final_time</span><span class="p">}),</span>
+<a id="__codelineno-6-22" name="__codelineno-6-22" href="#__codelineno-6-22"></a>        <span class="n">fm</span><span class="o">.</span><span class="n">tasks</span><span class="o">.</span><span class="n">Python</span><span class="p">(</span><span class="s2">"site3_no_basin"</span><span class="p">,</span> <span class="n">build_case</span><span class="p">,</span>
+<a id="__codelineno-6-23" name="__codelineno-6-23" href="#__codelineno-6-23"></a>                        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">"site"</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="s2">"material"</span><span class="p">:</span> <span class="s2">"no_basin"</span><span class="p">,</span> <span class="s2">"final_time"</span><span class="p">:</span> <span class="n">final_time</span><span class="p">}),</span>
+<a id="__codelineno-6-24" name="__codelineno-6-24" href="#__codelineno-6-24"></a>    <span class="p">])</span>
+<a id="__codelineno-6-25" name="__codelineno-6-25" href="#__codelineno-6-25"></a>    <span class="c1"># Three concurrent 96-rank solves fill six 48-core SKX nodes.</span>
+<a id="__codelineno-6-26" name="__codelineno-6-26" href="#__codelineno-6-26"></a>    <span class="k">for</span> <span class="n">site</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">):</span>
+<a id="__codelineno-6-27" name="__codelineno-6-27" href="#__codelineno-6-27"></a>        <span class="n">workflow</span><span class="o">.</span><span class="n">add</span><span class="p">(</span>
+<a id="__codelineno-6-28" name="__codelineno-6-28" href="#__codelineno-6-28"></a>            <span class="sa">f</span><span class="s2">"solve_site</span><span class="si">{</span><span class="n">site</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+<a id="__codelineno-6-29" name="__codelineno-6-29" href="#__codelineno-6-29"></a>            <span class="n">parallel</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<a id="__codelineno-6-30" name="__codelineno-6-30" href="#__codelineno-6-30"></a>            <span class="n">tasks</span><span class="o">=</span><span class="p">[</span>
+<a id="__codelineno-6-31" name="__codelineno-6-31" href="#__codelineno-6-31"></a>                <span class="n">fm</span><span class="o">.</span><span class="n">tasks</span><span class="o">.</span><span class="n">OpenSees</span><span class="p">(</span>
+<a id="__codelineno-6-32" name="__codelineno-6-32" href="#__codelineno-6-32"></a>                    <span class="sa">f</span><span class="s2">"site</span><span class="si">{</span><span class="n">site</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">material</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+<a id="__codelineno-6-33" name="__codelineno-6-33" href="#__codelineno-6-33"></a>                    <span class="sa">f</span><span class="s2">"build/site</span><span class="si">{</span><span class="n">site</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">material</span><span class="si">}</span><span class="s2">/model.tcl"</span><span class="p">,</span>
+<a id="__codelineno-6-34" name="__codelineno-6-34" href="#__codelineno-6-34"></a>                    <span class="n">ranks</span><span class="o">=</span><span class="mi">96</span><span class="p">,</span>
+<a id="__codelineno-6-35" name="__codelineno-6-35" href="#__codelineno-6-35"></a>                <span class="p">)</span>
+<a id="__codelineno-6-36" name="__codelineno-6-36" href="#__codelineno-6-36"></a>                <span class="k">for</span> <span class="n">material</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"elastic"</span><span class="p">,</span> <span class="s2">"plastic"</span><span class="p">,</span> <span class="s2">"no_basin"</span><span class="p">)</span>
+<a id="__codelineno-6-37" name="__codelineno-6-37" href="#__codelineno-6-37"></a>            <span class="p">],</span>
+<a id="__codelineno-6-38" name="__codelineno-6-38" href="#__codelineno-6-38"></a>        <span class="p">)</span>
+<a id="__codelineno-6-39" name="__codelineno-6-39" href="#__codelineno-6-39"></a>    <span class="n">workflow</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">"postprocess"</span><span class="p">,</span> <span class="n">parallel</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">tasks</span><span class="o">=</span><span class="p">[</span>
+<a id="__codelineno-6-40" name="__codelineno-6-40" href="#__codelineno-6-40"></a>        <span class="n">fm</span><span class="o">.</span><span class="n">tasks</span><span class="o">.</span><span class="n">Python</span><span class="p">(</span><span class="s2">"responses"</span><span class="p">,</span> <span class="n">postprocess_results</span><span class="p">,</span> <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">"final_time"</span><span class="p">:</span> <span class="n">final_time</span><span class="p">}),</span>
+<a id="__codelineno-6-41" name="__codelineno-6-41" href="#__codelineno-6-41"></a>    <span class="p">])</span>
+<a id="__codelineno-6-42" name="__codelineno-6-42" href="#__codelineno-6-42"></a>    <span class="c1"># Download compact products; raw VTKHDF remains in the remote workspace.</span>
+<a id="__codelineno-6-43" name="__codelineno-6-43" href="#__codelineno-6-43"></a>    <span class="n">workflow</span><span class="o">.</span><span class="n">outputs</span><span class="p">(</span><span class="s2">"postprocess/responses/*"</span><span class="p">,</span> <span class="s2">"**/stdout.log"</span><span class="p">,</span> <span class="s2">"**/stderr.log"</span><span class="p">,</span>
+<a id="__codelineno-6-44" name="__codelineno-6-44" href="#__codelineno-6-44"></a>                     <span class="s2">"build/*/model.tcl"</span><span class="p">)</span>
+<a id="__codelineno-6-45" name="__codelineno-6-45" href="#__codelineno-6-45"></a>    <span class="k">return</span> <span class="n">workflow</span>
 </code></pre></div>
 </div>
 <div class="tabbed-block">
 <p>From the repository root in your configured Femora environment:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>python<span class="w"> </span>examples/domain_reduction_method/basin.py
 </code></pre></div>
-<p>This submits a job and prompts for DesignSafe authentication as needed.
-Defaults are Stampede3, <code>skx</code>, six 48-core nodes, and 240 minutes.
-Each site's three 96-rank solves run concurrently, using all 288 cores.
-The three site groups run sequentially and reuse the same allocation.
-Python stages remain sequential one-core callbacks.</p>
-<p>The three existing Hayward-fault SW4 records have matching box bounds
-(-64 to 64 m horizontally, -48 to 0 m vertically) and 4 m spacing.
-Their sample interval is 0.010778281762249068 s; the solver's initial
-0.01 s integration step is independent of this interval. Coordinates
-remain unchanged and the DRM load factor remains 1.0.</p>
-<p>Newmark uses gamma = 0.5 and beta = 0.25, Mumps, and
-ModifiedNewton with <code>factor_once=True</code>. The fixed tangent can struggle
-during plastic yielding. Each failed increment gets one same-step retry,
-then up to three halving levels (down to 0.00125 s). Factor-once reuse
-resets whenever the integration step changes, including the return to
-0.01 s. The analysis stops if recovery fails. A short smoke
-run should establish convergence before the full-duration run. Site2 and
-Site3 lack a velocity dataset; confirm the installed H5DRM reader accepts
-them. Motion units and site fault distances are not inferred from filenames.</p>
-</div>
-<div class="tabbed-block">
+<p>Complete the DesignSafe authentication prompts. The workflow builds the
+nine cases sequentially, then runs each site's three 96-rank solves
+concurrently, using all 288 cores. The three site groups reuse the
+same allocation in sequence. Postprocessing starts after all solves.</p>
+<p>Track the submitted job with:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>femora<span class="w"> </span><span class="nb">jobs</span><span class="w"> </span>track
 </code></pre></div>
-<p>Download the small acceleration plot, 27 probe-history CSV files,
-<code>summary.json</code>, solver logs, and exported Tcl. Surface probes are at
-(0, 0, 0), (48, 0, 0), and (60, 0, 0) m. The reducer checks completion,
-timestamps, coordinates, and finite acceleration and displacement.
-Inspect the peaks and solver warnings before accepting the run.</p>
-<p><code>center_acceleration_all_cases.csv</code> combines the center-surface acceleration
-for all nine cases. Its columns are <code>case,time_s,ax_m_per_s2,ay_m_per_s2,az_m_per_s2</code>.
-Each case retains its own recorded timestamps; no interpolation is applied.</p>
-<p>Raw VTKHDF stays under <code>build/site1_elastic/results</code> and the eight
-corresponding site/material folders
-in the remote workspace, outside the default download package.</p>
 </div>
 <div class="tabbed-block">
-<p>For a short smoke test, temporarily set <code>FINAL_TIME = 2.0</code>; restore
-<code>27.4</code> for the full comparison. Adjust <code>minutes</code> in <code>fm.submit(...)</code>
-based on measured timings for the three sequential site groups.</p>
-<p>The model and postprocessor are staged from your local files. The remote
-Femora installation and OpenSeesMP must already provide the APIs and
-VTKHDF recorder used by the example.</p>
+<p>Download the compact outputs from <code>postprocess/responses</code>:</p>
+<table>
+<thead>
+<tr>
+<th>Output</th>
+<th>Contents</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>center_elastic_comparison.png</code></td>
+<td>No-basin and elastic-basin center XYZ histories</td>
+</tr>
+<tr>
+<td><code>center_plastic_comparison.png</code></td>
+<td>No-basin and plastic-basin center XYZ histories</td>
+</tr>
+<tr>
+<td><code>pga_amplification.png</code></td>
+<td>Peak ratios for all sites, directions, and probes</td>
+</tr>
+<tr>
+<td><code>surface_acceleration.png</code></td>
+<td>X-acceleration overview at the three probes</td>
+</tr>
+<tr>
+<td><code>center_acceleration_all_cases.csv</code></td>
+<td>Center XYZ acceleration for all nine cases</td>
+</tr>
+<tr>
+<td>27 individual probe CSVs</td>
+<td>XYZ acceleration and displacement histories</td>
+</tr>
+<tr>
+<td><code>summary.json</code></td>
+<td>Recorded duration, probe coordinates, and peak responses</td>
+</tr>
+</tbody>
+</table>
+<p>The combined acceleration CSV has columns
+<code>case,time_s,ax_m_per_s2,ay_m_per_s2,az_m_per_s2</code> and retains each case's
+recorded timestamps. Individual probe CSVs also include displacement.
+Surface probes are at the center <code>(0, 0, 0)</code>, near the edge <code>(48, 0, 0)</code>,
+and outside the basin <code>(60, 0, 0)</code>, in meters.</p>
+<p>Solver logs and exported Tcl are included in the workflow outputs.
+Raw VTKHDF remains in the remote workspace under
+<code>build/&lt;case&gt;/results</code>, outside the default download package.</p>
+</div>
+<div class="tabbed-block">
+<p>Change the basin wave speeds or material parameters to explore stiffness
+and strength effects. Set <code>NO_PHYSICAL_DAMPING = True</code> to examine the
+contribution of physical viscous damping, keeping the no-basin case as
+the common background for peak ratios.</p>
 </div>
 </div>
 </div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">build_workflow</span><span class="p">():</span>
-<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>    <span class="n">final_time</span> <span class="o">=</span> <span class="n">FINAL_TIME</span>
-<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>    <span class="n">workflow</span> <span class="o">=</span> <span class="n">fm</span><span class="o">.</span><span class="n">Workflow</span><span class="p">(</span><span class="s2">"basin-comparison"</span><span class="p">)</span>
-<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>    <span class="c1"># Build sequentially; solve the three material cases together at each site.</span>
-<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>    <span class="n">workflow</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">"build"</span><span class="p">,</span> <span class="n">parallel</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">tasks</span><span class="o">=</span><span class="p">[</span>
-<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a>        <span class="n">fm</span><span class="o">.</span><span class="n">tasks</span><span class="o">.</span><span class="n">Python</span><span class="p">(</span><span class="s2">"site1_elastic"</span><span class="p">,</span> <span class="n">build_case</span><span class="p">,</span>
-<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a>                        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">"site"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">"material"</span><span class="p">:</span> <span class="s2">"elastic"</span><span class="p">,</span> <span class="s2">"final_time"</span><span class="p">:</span> <span class="n">final_time</span><span class="p">}),</span>
-<a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a>        <span class="n">fm</span><span class="o">.</span><span class="n">tasks</span><span class="o">.</span><span class="n">Python</span><span class="p">(</span><span class="s2">"site1_plastic"</span><span class="p">,</span> <span class="n">build_case</span><span class="p">,</span>
-<a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a>                        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">"site"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">"material"</span><span class="p">:</span> <span class="s2">"plastic"</span><span class="p">,</span> <span class="s2">"final_time"</span><span class="p">:</span> <span class="n">final_time</span><span class="p">}),</span>
-<a id="__codelineno-9-10" name="__codelineno-9-10" href="#__codelineno-9-10"></a>        <span class="n">fm</span><span class="o">.</span><span class="n">tasks</span><span class="o">.</span><span class="n">Python</span><span class="p">(</span><span class="s2">"site1_no_basin"</span><span class="p">,</span> <span class="n">build_case</span><span class="p">,</span>
-<a id="__codelineno-9-11" name="__codelineno-9-11" href="#__codelineno-9-11"></a>                        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">"site"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">"material"</span><span class="p">:</span> <span class="s2">"no_basin"</span><span class="p">,</span> <span class="s2">"final_time"</span><span class="p">:</span> <span class="n">final_time</span><span class="p">}),</span>
-<a id="__codelineno-9-12" name="__codelineno-9-12" href="#__codelineno-9-12"></a>        <span class="n">fm</span><span class="o">.</span><span class="n">tasks</span><span class="o">.</span><span class="n">Python</span><span class="p">(</span><span class="s2">"site2_elastic"</span><span class="p">,</span> <span class="n">build_case</span><span class="p">,</span>
-<a id="__codelineno-9-13" name="__codelineno-9-13" href="#__codelineno-9-13"></a>                        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">"site"</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">"material"</span><span class="p">:</span> <span class="s2">"elastic"</span><span class="p">,</span> <span class="s2">"final_time"</span><span class="p">:</span> <span class="n">final_time</span><span class="p">}),</span>
-<a id="__codelineno-9-14" name="__codelineno-9-14" href="#__codelineno-9-14"></a>        <span class="n">fm</span><span class="o">.</span><span class="n">tasks</span><span class="o">.</span><span class="n">Python</span><span class="p">(</span><span class="s2">"site2_plastic"</span><span class="p">,</span> <span class="n">build_case</span><span class="p">,</span>
-<a id="__codelineno-9-15" name="__codelineno-9-15" href="#__codelineno-9-15"></a>                        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">"site"</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">"material"</span><span class="p">:</span> <span class="s2">"plastic"</span><span class="p">,</span> <span class="s2">"final_time"</span><span class="p">:</span> <span class="n">final_time</span><span class="p">}),</span>
-<a id="__codelineno-9-16" name="__codelineno-9-16" href="#__codelineno-9-16"></a>        <span class="n">fm</span><span class="o">.</span><span class="n">tasks</span><span class="o">.</span><span class="n">Python</span><span class="p">(</span><span class="s2">"site2_no_basin"</span><span class="p">,</span> <span class="n">build_case</span><span class="p">,</span>
-<a id="__codelineno-9-17" name="__codelineno-9-17" href="#__codelineno-9-17"></a>                        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">"site"</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">"material"</span><span class="p">:</span> <span class="s2">"no_basin"</span><span class="p">,</span> <span class="s2">"final_time"</span><span class="p">:</span> <span class="n">final_time</span><span class="p">}),</span>
-<a id="__codelineno-9-18" name="__codelineno-9-18" href="#__codelineno-9-18"></a>        <span class="n">fm</span><span class="o">.</span><span class="n">tasks</span><span class="o">.</span><span class="n">Python</span><span class="p">(</span><span class="s2">"site3_elastic"</span><span class="p">,</span> <span class="n">build_case</span><span class="p">,</span>
-<a id="__codelineno-9-19" name="__codelineno-9-19" href="#__codelineno-9-19"></a>                        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">"site"</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="s2">"material"</span><span class="p">:</span> <span class="s2">"elastic"</span><span class="p">,</span> <span class="s2">"final_time"</span><span class="p">:</span> <span class="n">final_time</span><span class="p">}),</span>
-<a id="__codelineno-9-20" name="__codelineno-9-20" href="#__codelineno-9-20"></a>        <span class="n">fm</span><span class="o">.</span><span class="n">tasks</span><span class="o">.</span><span class="n">Python</span><span class="p">(</span><span class="s2">"site3_plastic"</span><span class="p">,</span> <span class="n">build_case</span><span class="p">,</span>
-<a id="__codelineno-9-21" name="__codelineno-9-21" href="#__codelineno-9-21"></a>                        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">"site"</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="s2">"material"</span><span class="p">:</span> <span class="s2">"plastic"</span><span class="p">,</span> <span class="s2">"final_time"</span><span class="p">:</span> <span class="n">final_time</span><span class="p">}),</span>
-<a id="__codelineno-9-22" name="__codelineno-9-22" href="#__codelineno-9-22"></a>        <span class="n">fm</span><span class="o">.</span><span class="n">tasks</span><span class="o">.</span><span class="n">Python</span><span class="p">(</span><span class="s2">"site3_no_basin"</span><span class="p">,</span> <span class="n">build_case</span><span class="p">,</span>
-<a id="__codelineno-9-23" name="__codelineno-9-23" href="#__codelineno-9-23"></a>                        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">"site"</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="s2">"material"</span><span class="p">:</span> <span class="s2">"no_basin"</span><span class="p">,</span> <span class="s2">"final_time"</span><span class="p">:</span> <span class="n">final_time</span><span class="p">}),</span>
-<a id="__codelineno-9-24" name="__codelineno-9-24" href="#__codelineno-9-24"></a>    <span class="p">])</span>
-<a id="__codelineno-9-25" name="__codelineno-9-25" href="#__codelineno-9-25"></a>    <span class="c1"># Three concurrent 96-rank solves fill six 48-core SKX nodes.</span>
-<a id="__codelineno-9-26" name="__codelineno-9-26" href="#__codelineno-9-26"></a>    <span class="k">for</span> <span class="n">site</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">):</span>
-<a id="__codelineno-9-27" name="__codelineno-9-27" href="#__codelineno-9-27"></a>        <span class="n">workflow</span><span class="o">.</span><span class="n">add</span><span class="p">(</span>
-<a id="__codelineno-9-28" name="__codelineno-9-28" href="#__codelineno-9-28"></a>            <span class="sa">f</span><span class="s2">"solve_site</span><span class="si">{</span><span class="n">site</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
-<a id="__codelineno-9-29" name="__codelineno-9-29" href="#__codelineno-9-29"></a>            <span class="n">parallel</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-<a id="__codelineno-9-30" name="__codelineno-9-30" href="#__codelineno-9-30"></a>            <span class="n">tasks</span><span class="o">=</span><span class="p">[</span>
-<a id="__codelineno-9-31" name="__codelineno-9-31" href="#__codelineno-9-31"></a>                <span class="n">fm</span><span class="o">.</span><span class="n">tasks</span><span class="o">.</span><span class="n">OpenSees</span><span class="p">(</span>
-<a id="__codelineno-9-32" name="__codelineno-9-32" href="#__codelineno-9-32"></a>                    <span class="sa">f</span><span class="s2">"site</span><span class="si">{</span><span class="n">site</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">material</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
-<a id="__codelineno-9-33" name="__codelineno-9-33" href="#__codelineno-9-33"></a>                    <span class="sa">f</span><span class="s2">"build/site</span><span class="si">{</span><span class="n">site</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">material</span><span class="si">}</span><span class="s2">/model.tcl"</span><span class="p">,</span>
-<a id="__codelineno-9-34" name="__codelineno-9-34" href="#__codelineno-9-34"></a>                    <span class="n">ranks</span><span class="o">=</span><span class="mi">96</span><span class="p">,</span>
-<a id="__codelineno-9-35" name="__codelineno-9-35" href="#__codelineno-9-35"></a>                <span class="p">)</span>
-<a id="__codelineno-9-36" name="__codelineno-9-36" href="#__codelineno-9-36"></a>                <span class="k">for</span> <span class="n">material</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"elastic"</span><span class="p">,</span> <span class="s2">"plastic"</span><span class="p">,</span> <span class="s2">"no_basin"</span><span class="p">)</span>
-<a id="__codelineno-9-37" name="__codelineno-9-37" href="#__codelineno-9-37"></a>            <span class="p">],</span>
-<a id="__codelineno-9-38" name="__codelineno-9-38" href="#__codelineno-9-38"></a>        <span class="p">)</span>
-<a id="__codelineno-9-39" name="__codelineno-9-39" href="#__codelineno-9-39"></a>    <span class="n">workflow</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">"postprocess"</span><span class="p">,</span> <span class="n">parallel</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">tasks</span><span class="o">=</span><span class="p">[</span>
-<a id="__codelineno-9-40" name="__codelineno-9-40" href="#__codelineno-9-40"></a>        <span class="n">fm</span><span class="o">.</span><span class="n">tasks</span><span class="o">.</span><span class="n">Python</span><span class="p">(</span><span class="s2">"responses"</span><span class="p">,</span> <span class="n">postprocess_results</span><span class="p">,</span> <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">"final_time"</span><span class="p">:</span> <span class="n">final_time</span><span class="p">}),</span>
-<a id="__codelineno-9-41" name="__codelineno-9-41" href="#__codelineno-9-41"></a>    <span class="p">])</span>
-<a id="__codelineno-9-42" name="__codelineno-9-42" href="#__codelineno-9-42"></a>    <span class="c1"># Download compact products; raw VTKHDF remains in the remote workspace.</span>
-<a id="__codelineno-9-43" name="__codelineno-9-43" href="#__codelineno-9-43"></a>    <span class="n">workflow</span><span class="o">.</span><span class="n">outputs</span><span class="p">(</span><span class="s2">"postprocess/responses/*"</span><span class="p">,</span> <span class="s2">"**/stdout.log"</span><span class="p">,</span> <span class="s2">"**/stderr.log"</span><span class="p">,</span>
-<a id="__codelineno-9-44" name="__codelineno-9-44" href="#__codelineno-9-44"></a>                     <span class="s2">"build/*/model.tcl"</span><span class="p">)</span>
-<a id="__codelineno-9-45" name="__codelineno-9-45" href="#__codelineno-9-45"></a>    <span class="k">return</span> <span class="n">workflow</span>
-</code></pre></div>
-<h2 id="differences-from-the-legacy-examples">Differences from the Legacy Examples</h2>
-<p>This consolidates <code>DRM/Example3</code> and <code>DRM/Example6</code> as a controlled comparison,
-not an exact reproduction of either. It uses density 1.8 rather than the plastic
-legacy value 1.3, enables physical viscous damping by default, uses consistent
-mass throughout, adopts eight absorber layers and 96 ranks, and uses the same
-common implicit analysis for all cases. Self-weight is now active instead of the zero
-body forces in the legacy plastic example. The obsolete
-<code>updatewithsigmav0</code> constructor argument is not carried over.</p>
-<p>Set <code>NO_PHYSICAL_DAMPING = True</code> to disable basin and host viscous damping
-without changing absorber damping. Both gravity phases use ten static
-zero-load-increment steps with 30 iterations and no retries: the elastic
-phase uses tolerance <code>1e-8</code> and factor-once Modified Newton; the subsequent
-re-equilibration uses <code>1e-5</code> and plain Modified Newton. These steps correct
-equilibrium at fixed body-force loading rather than ramping self-weight.
-Dynamics use tolerance <code>1e-4</code> and eight iterations in all three cases.
-The installed remote Femora exporter must include the time-step-dependent
-factor-once reset for this recovery behavior.</p>
-<h2 id="planned-response-comparisons">Planned Response Comparisons</h2>
-<p>After short runs establish numerical behavior, compare surface acceleration
-at the center, near the basin edge, and outside the basin; deformation; and
-representative basin stress-strain histories. The VTKHDF recorder requests
-displacement, velocity, acceleration, stress, and strain. Verify the installed
-solver's tensor output conventions before building those comparisons. No
-validated response plots or experimental validation are claimed yet. The
-workflow's initial acceleration comparison is a smoke diagnostic only.</p>
-<p>The companion <code>basin_postprocess.py</code> contains response plotting and the
-documentation mesh renderer. Recreate the mesh figure with:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>python<span class="w"> </span>examples/domain_reduction_method/basin_postprocess.py<span class="w"> </span>--mesh
-</code></pre></div>
 
 
 
@@ -14869,7 +15009,7 @@ documentation mesh renderer. Recreate the mesh figure with:</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="October 14, 2026 11:33:27 UTC">October 14, 2026</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="October 20, 2026 01:40:58 UTC">October 20, 2026</span>
   </span>
 
     
@@ -14879,7 +15019,7 @@ documentation mesh renderer. Recreate the mesh figure with:</p>
     <span class="md-icon" title="Created">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M14.47 15.08 11 13V7h1.5v5.25l3.08 1.83c-.41.28-.79.62-1.11 1m-1.39 4.84c-.36.05-.71.08-1.08.08-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8c0 .37-.03.72-.08 1.08.69.1 1.33.32 1.92.64.1-.56.16-1.13.16-1.72 0-5.5-4.5-10-10-10S2 6.5 2 12s4.47 10 10 10c.59 0 1.16-.06 1.72-.16-.32-.59-.54-1.23-.64-1.92M18 15v3h-3v2h3v3h2v-3h3v-2h-3v-3z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="October 14, 2026 11:33:27 UTC">October 14, 2026</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="October 20, 2026 01:40:58 UTC">October 20, 2026</span>
   </span>
 
     
