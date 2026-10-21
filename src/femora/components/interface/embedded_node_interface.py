@@ -80,6 +80,7 @@ class EmbeddedNodeInterface(InterfaceBase, GeneratesMeshMixin):
         Kt: float = 1e8,
         mu: float = 0.5,
         int_type: int = 1,
+        area_scaled: bool = False,
         *,
         meshpart,
 
@@ -107,6 +108,14 @@ class EmbeddedNodeInterface(InterfaceBase, GeneratesMeshMixin):
             mu: Friction coefficient for contact. Defaults to 0.5.
             int_type: Contact integration type: 0 for implicit or 1 for
                 IMPL-EX. Defaults to 1.
+            area_scaled: If True, ``Kn`` and ``Kt`` are stiffnesses per unit area
+                (force / length / area) and each contact node receives
+                ``Kn * A`` and ``Kt * A``, with ``A`` its tributary area on the
+                selected part of the constrained surface. Defaults to False.
+            normal_filter: Either a 3-vector (nodes whose surface normal is within
+                ``filter_tolerance`` of it) or a function
+                ``f(points, normals) -> bool array`` called with the surface points
+                and their face normals; see above.
             meshpart: MeshPart registry manager from the parent model.
 
         Raises:
@@ -135,7 +144,7 @@ class EmbeddedNodeInterface(InterfaceBase, GeneratesMeshMixin):
         self._p = p
         self._K = K
         self._KP = KP
-        if normal_filter is not None:
+        if normal_filter is not None and not callable(normal_filter):
             normal_filter = np.array(normal_filter) / np.linalg.norm(normal_filter)
         self._normal_filter = normal_filter
         self._filter_tolerance = filter_tolerance
@@ -144,6 +153,14 @@ class EmbeddedNodeInterface(InterfaceBase, GeneratesMeshMixin):
         self._Kt = Kt
         self._mu = mu
         self._int_type = int_type
+        self._area_scaled = bool(area_scaled)
+        if self._area_scaled and not contact:
+            raise ValueError("area_scaled applies to contact interfaces only")
+        # filled at post-assemble for inspection and plotting
+        self.selected_point_ids = np.zeros(0, dtype=int)
+        self.selected_points = np.zeros((0, 3))
+        self.selected_normals = np.zeros((0, 3))
+        self.tributary_areas = np.zeros(0)
         if self._contact and (rot or p or K is not None or KP is not None):
             raise ValueError(
                 "Contact interfaces do not support rot, p, K, or KP; "
@@ -420,15 +437,37 @@ class EmbeddedNodeInterface(InterfaceBase, GeneratesMeshMixin):
                 mask = np.zeros(original_mesh.n_points, dtype=bool)
                 pyvistaOriginalPointIds = mesh_with_normals.point_data['pyvistaOriginalPointIds']
                 normals = np.zeros((original_mesh.n_points, 3))
-                for i in range(mesh_with_normals.n_points):
-                    normal = mesh_with_normals.point_data['Normals'][i]
-                    # dot product
-                    dot_product = np.dot(normal, normal_filter)
-                    if dot_product > filter_tolerance:
-                        mask[pyvistaOriginalPointIds[i]] = True
+                if callable(normal_filter):
+                    # Function filter: called once with the (split-vertex) surface points and
+                    # their face normals, returns a boolean mask. A node is selected when any
+                    # of its face normals passes; its contact normal is the mean of the
+                    # passing normals (exactly radial on a regular cylindrical surface).
+                    split_points = np.asarray(mesh_with_normals.points)
+                    split_normals = np.asarray(mesh_with_normals.point_data['Normals'])
+                    passed = np.asarray(normal_filter(split_points, split_normals), dtype=bool)
+                    if passed.shape != (split_points.shape[0],):
+                        raise ValueError(
+                            "normal_filter(points, normals) must return a boolean array with one "
+                            "entry per surface point"
+                        )
+                    original_ids = np.asarray(pyvistaOriginalPointIds, dtype=int)
+                    accumulated = np.zeros((original_mesh.n_points, 3))
+                    np.add.at(accumulated, original_ids[passed], split_normals[passed])
+                    counts = np.zeros(original_mesh.n_points)
+                    np.add.at(counts, original_ids[passed], 1.0)
+                    mask = counts > 0
+                    lengths = np.linalg.norm(accumulated[mask], axis=1)
+                    normals[mask] = accumulated[mask] / lengths[:, None]
+                else:
+                    for i in range(mesh_with_normals.n_points):
+                        normal = mesh_with_normals.point_data['Normals'][i]
+                        # dot product
+                        dot_product = np.dot(normal, normal_filter)
+                        if dot_product > filter_tolerance:
+                            mask[pyvistaOriginalPointIds[i]] = True
 
-                ids = np.where(mask)[0]
-                normals[ids] = np.array(normal_filter)
+                    ids = np.where(mask)[0]
+                    normals[ids] = np.array(normal_filter)
                 original_mesh.point_data['Normals'] = normals
                     
 
@@ -491,6 +530,36 @@ class EmbeddedNodeInterface(InterfaceBase, GeneratesMeshMixin):
 
 
 
+    def _tributary_areas(self, assembled_mesh: pv.UnstructuredGrid, point_ids: np.ndarray) -> np.ndarray:
+        """Tributary surface area of every selected constrained node.
+
+        Each surface face of the constrained part whose nodes are all selected
+        contributes an equal share of its area to each of its nodes. Faces that
+        touch a non-selected node (free surface above the soil, end caps) are
+        excluded, so a node on the boundary of the selected region receives only
+        the share belonging to the selected faces.
+        """
+        from scipy.spatial import cKDTree
+
+        constrained_mask = assembled_mesh.cell_data['MeshPartTag_celldata'] == self.constrained_node.tag
+        surface = self._extract_surface_compat(assembled_mesh.extract_cells(constrained_mask))
+        surface = surface.compute_cell_sizes(length=False, area=True, volume=False)
+        selected_xyz = np.asarray(assembled_mesh.points)[point_ids]
+        tree = cKDTree(selected_xyz)
+        distance, local = tree.query(np.asarray(surface.points), distance_upper_bound=1e-7)
+        local = np.where(np.isfinite(distance), local, -1)
+        areas = np.zeros(point_ids.shape[0])
+        faces = surface.faces
+        face_area = surface.cell_data['Area']
+        cursor = 0
+        for cell in range(surface.n_cells):
+            n = int(faces[cursor])
+            nodes = local[faces[cursor + 1: cursor + 1 + n]]
+            cursor += n + 1
+            if np.all(nodes >= 0):
+                areas[nodes] += face_area[cell] / n
+        return areas
+
     def _on_post_assemble(self, assembled_mesh: pv.UnstructuredGrid) -> None:
         """Detect the nodes from the offset mesh that are inside tetrahedra elements of the retained nodes.
 
@@ -510,6 +579,14 @@ class EmbeddedNodeInterface(InterfaceBase, GeneratesMeshMixin):
             self._collect_embedding_data(asembelled_mesh)
         )
 
+        # expose the selection for inspection / plotting
+        self.selected_point_ids = np.asarray(point_ids, dtype=int)
+        self.selected_points = np.asarray(selected_points, dtype=float)
+        self.selected_normals = np.asarray(selected_normals, dtype=float)
+        self.tributary_areas = (
+            self._tributary_areas(asembelled_mesh, self.selected_point_ids)
+            if self._contact else np.zeros(0)
+        )
 
         # 9) create tet elements
         tet_elements = np.zeros((selected_points.shape[0], 4), dtype=int)
@@ -559,6 +636,7 @@ class EmbeddedNodeInterface(InterfaceBase, GeneratesMeshMixin):
 
         # create the element orientation map 
         orientation_map = {}
+        scale_map = {}
         for i in range(point_ids.shape[0]):
             if self._use_mesh_part_points:
                 node_tag = point_ids[i] + start_node_tag
@@ -568,6 +646,8 @@ class EmbeddedNodeInterface(InterfaceBase, GeneratesMeshMixin):
             # EmbeddedNodeContact expects the opposite: host (master) to the
             # embedded node (slave).
             orientation_map[node_tag] = (-selected_normals[i]).tolist()
+            if self._contact and self._area_scaled:
+                scale_map[node_tag] = float(self.tributary_areas[i])
             
         if self._contact:
             embededd_ele = mesh_maker.element.special.embedded_node_contact(
@@ -577,6 +657,7 @@ class EmbeddedNodeInterface(InterfaceBase, GeneratesMeshMixin):
                 mu=self._mu,
                 int_type=self._int_type,
                 orient_map=orientation_map,
+                scale_map=scale_map,
             )
         else:
             embededd_ele = mesh_maker.element.special.asd_embedded_node(
@@ -700,7 +781,6 @@ class EmbeddedNodeInterface(InterfaceBase, GeneratesMeshMixin):
                     [cell_nodes[0], cell_nodes[5], cell_nodes[2], cell_nodes[7]], # Internal bridge
                     [cell_nodes[0], cell_nodes[4], cell_nodes[5], cell_nodes[7]],
                     [cell_nodes[2], cell_nodes[5], cell_nodes[6], cell_nodes[7]],
-                    [cell_nodes[0], cell_nodes[5], cell_nodes[7], cell_nodes[2]]  # Re-oriented bridge
                 ]
                 for t in tets:
                     new_cells.extend([4] + t)
@@ -745,7 +825,7 @@ class EmbeddedNodeInterface(InterfaceBase, GeneratesMeshMixin):
         # check the number of cells are equal
         num_hex = mesh.celltypes == pv.CellType.HEXAHEDRON
         num_hex = num_hex & mask
-        assert new_mesh.n_cells == mesh.n_cells + 5*sum(num_hex), "Number of cells are not equal in the new and original mesh"        
+        assert new_mesh.n_cells == mesh.n_cells + 4*sum(num_hex), "Number of cells are not equal in the new and original mesh"
 
 
         # pl = pv.Plotter()
