@@ -55,14 +55,15 @@ class SteelConcentricallyBracedFrame3D(Building):
 
         **Material-driven fiber workflow.** Pass a managed uniaxial material,
         G, and material_density to build(). Beams/columns automatically use
-        force-based fiber sections; braces use the same material axially.
+        fiber sections with force-based or displacement-based elements;
+        braces use the same material axially.
         Uniaxial Elastic stays elastic, while Steel01 can yield. AISC supplies
         section geometry and J; user G supplies elastic torsion GJ. Density
         supplies translational mass and rotational inertia independently of
         the constitutive law. No nD reference material or initial-tangent
         extraction is required. This model does not include brace buckling,
         local plate buckling, fracture, or fatigue.
-        ``displacement_based`` is not currently a supported building option.
+        Select ``member_formulation="displacement_based"`` to use displacement-based members.
 
         **Local axes.** Local x follows the member. AISC strong-axis ``Ix`` maps
         to local ``Iy``; AISC weak-axis ``Iy`` maps to local ``Iz``. Fiber depth
@@ -219,8 +220,8 @@ class SteelConcentricallyBracedFrame3D(Building):
             length_unit_system: Unit system passed to AISC section creation.
             origin: Building origin.
             opensees_exe: Optional OpenSees executable path for validation.
-            member_formulation: ``"force_based"``. Beams and columns use
-                force-based beam-column elements with fiber sections.
+            member_formulation: ``"force_based"`` (default) or
+                ``"displacement_based"``. Both use fiber sections.
             integration_points: Integer 2-10; default 5. Number of Lobatto
                 section evaluation points per force-based element, including
                 its ends. These are not mesh nodes or cross-section fibers.
@@ -231,7 +232,7 @@ class SteelConcentricallyBracedFrame3D(Building):
                 ``section_name``, ``material``, ``category``, ``unit_system``
                 as keywords. Called once per category/section-name pair during
                 each build. Must return a section managed by that model.
-                Nonelastic sections require force-based members.
+                Both formulations support elastic and nonlinear sections.
             member_options: Overrides keyed by ``"Beam_X"``, ``"Beam_Y"``,
                 ``"Column_X"``, ``"Column_Y"``. Accepted keys are
                 ``formulation``, ``integration_points``, ``transformation``,
@@ -383,8 +384,8 @@ class SteelConcentricallyBracedFrame3D(Building):
                 raise ValueError("max_iterations must be a positive integer")
             if not math.isfinite(options["tolerance"]) or options["tolerance"] <= 0:
                 raise ValueError("tolerance must be finite and positive")
-            if options["formulation"] != "force_based":
-                raise ValueError("formulation must be force_based")
+            if options["formulation"] not in {"force_based", "displacement_based"}:
+                raise ValueError("formulation must be force_based or displacement_based")
             n = options["integration_points"]
             if isinstance(n, bool) or not isinstance(n, (int, np.integer)) or not 2 <= n <= 10:
                 raise ValueError("integration_points must be an integer from 2 through 10")
@@ -546,10 +547,15 @@ class SteelConcentricallyBracedFrame3D(Building):
                     (1, 0, 0) if category == "Column_X" else (0, 1, 0))
                 transformation = model.transformation.transformation3d(
                     settings["transformation"], *vector, description=f"CBF_{category}_Transf")
-            element = model.element.beam.force(
-                ndof=6, section=section, transformation=transformation,
-                numIntgrPts=settings["integration_points"],
-                maxIters=settings["max_iterations"], tol=settings["tolerance"])
+            if settings["formulation"] == "displacement_based":
+                element = model.element.beam.disp(
+                    ndof=6, section=section, transformation=transformation,
+                    numIntgrPts=settings["integration_points"], massDens=0.0)
+            else:
+                element = model.element.beam.force(
+                    ndof=6, section=section, transformation=transformation,
+                    numIntgrPts=settings["integration_points"],
+                    maxIters=settings["max_iterations"], tol=settings["tolerance"])
             elements_cache[key] = element
             element_categories[element.tag] = category
             self._member_densities[element.tag] = float(settings.get("material_density", density))
@@ -1384,6 +1390,13 @@ wipeAnalysis
             element_responses if element_responses is not None else ["force3D", "localForce3D"])
         responses = list(dict.fromkeys(aliases.get(value, value) for value in responses))
         options = {} if whole_model else {"region": self.building_region}
+        if not whole_model:
+            building_cells = np.asarray(mesh.cell_data["Region"]) == self.building_region.tag
+            cores = np.unique(np.asarray(mesh.cell_data["Core"])[building_cells])
+            cores = [int(core) for core in cores if core >= 0]
+            if not cores:
+                raise ValueError("No assembled MPI cores contain this building's region")
+            options["cores"] = cores[0] if len(cores) == 1 else cores
         recorder = model.recorder.vtkhdf(file_base_name=file_name, resp_types=responses, delta_t=delta_t, **options)
         self._recording_spec = dict(file_name=file_name, responses=responses, delta_t=delta_t,
                                     acceleration_basis=acceleration_basis, abscissa=abscissa)

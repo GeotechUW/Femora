@@ -14,6 +14,26 @@ def steel(model):
     return model.material.uniaxial.steel01(user_name="fiber_steel", Fy=345000., E0=200e6, b=0.01)
 
 
+@pytest.mark.parametrize("nonlinear", [False, True])
+def test_displacement_based_frame_and_category_override(nonlinear):
+    from femora.components.element.disp_beam_column import DispBeamColumnElement
+    from femora.components.element.force_beam_column import ForceBeamColumnElement
+
+    model = Model()
+    model.clear_model()
+    material = steel(model) if nonlinear else model.material.uniaxial.elastic(E=200e6)
+    frame = SteelConcentricallyBracedFrame3D(
+        num_stories=1, x_bays=[8], y_bays=[8], floor_masses=[100],
+        member_formulation="displacement_based",
+        member_options={"Column_X": {"formulation": "force_based"}},
+    )
+    part = frame.build(model, material, G=76.923e6, material_density=7.85)
+    elements = list(model.element.get_all().values())
+    assert any(isinstance(element, DispBeamColumnElement) for element in elements)
+    assert any(isinstance(element, ForceBeamColumnElement) for element in elements)
+    assert np.all(np.isfinite(part.mesh.point_data["Mass"]))
+
+
 def test_w_fiber_geometry_and_tcl():
     model = Model()
     model.clear_model()
