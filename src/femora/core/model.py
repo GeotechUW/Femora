@@ -5,7 +5,14 @@
 # SPDX-License-Identifier: Apache-2.0
 # =============================================================================
 
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Callable
+
 import numpy as np
+
+if TYPE_CHECKING:
+    import pyvista as pv
 
 from femora.core.material_manager import MaterialManager
 from femora.core.element_base import Element
@@ -34,32 +41,112 @@ from femora.core.event_bus import ModelEventBus
 from femora.core.part_registry import FemoraPart, FemoraPartRegistry
 from femora.core.group import GroupManager
 
+
 class Model:
     """
-    Root runtime object for Femora model construction, assembly, and export.
+    Own a model's definitions, mesh parts, assembly, and exported solver process.
+
+    Each Model creates its own managers. Create definitions through those
+    managers, assign them to mesh parts, assemble the parts, and export a solver
+    script. Model construction and export do not launch OpenSees.
+
+    Args:
+        model_name (str | None): Default export basename, or None to require
+            explicit filenames.
+        model_path (str | None): Default export directory. Unknown configuration
+            keywords are rejected instead of silently ignored.
+
+    Attributes:
+        assembled_mesh: Combined mesh after assembly, or None before assembly
+            and after ``clear_model()``. Export and downstream operations use it.
+        material: Material registry with ``nd`` and ``uniaxial`` factories.
+        section: Beam, shell, fiber, and other section factories.
+        transformation: Coordinate-transformation definitions for elements.
+        element: Beam, brick, quad, and special element definitions.
+        meshpart: Factories and registry for discretized component meshes.
+        assembler: Section creation, mesh combination, and partitioning.
+        interface: Connections between separate model components.
+        constraint: Single-point and multipoint constraints through ``sp`` and ``mp``.
+        mass: Nodal mass assignment helpers.
+        damping: Damping definitions.
+        region: Region definitions and damping association.
+        group: Node and element selection groups.
+        mask: Model selection masks.
+        time_series: Loading time-function definitions.
+        ground_motion: Ground-motion definitions referencing time series.
+        load: Load definitions used by patterns.
+        pattern: Load-pattern definitions.
+        recorder: Solver response-output definitions.
+        actions: Deferred solver commands.
+        analysis: Static/transient analyses and solution-stack factories.
+        process: Ordered solver operations included in the exported Tcl.
+        events: Model-owned lifecycle notification bus.
+        spatial_transform: Spatial mesh transformation service.
+
+    Example:
+        ```python
+        from femora import Model
+
+        model = Model(model_name="site", model_path="example_outputs/site")
+        soil = model.material.nd.elastic_isotropic(
+            user_name="soil", E=108000.0, nu=1.0 / 3.0, rho=1.8,
+        )
+        model.set_results_folder("results")
+        assert model.material.get_by_name("soil") is soil
+        assert model.assembled_mesh is None
+        ```
+
+    Note:
+        Femora does not convert units. Choose a consistent system for geometry,
+        material stiffness, density, loads, and time. A Model is not a Jobs
+        Workflow and its process is not a remote execution scheduler.
     """
 
-    def __init__(self, **kwargs):
+    __doc_controls__ = {
+        "summary": True,
+        "show_docstring_attributes": True,
+        "members": [
+            "set_model_info",
+            "set_results_folder",
+            "get_results_folder",
+            "export_to_tcl",
+            "export_to_vtk",
+            "export_to_json",
+            "print_info",
+            "set_nodetag_start",
+            "set_eletag_start",
+            "set_start_core_tag",
+            "get_max_ele_tag",
+            "get_max_node_tag",
+            "get_start_ele_tag",
+            "get_start_node_tag",
+            "get_femora_parts",
+            "clear_model",
+        ],
+    }
+
+    def __init__(self, *, model_name: str | None = None, model_path: str | None = None) -> None:
         """
         Initialize a Femora Model instance.
-        
+
         Args:
-            **kwargs: Keyword arguments including:
-                - model_name (str): Name of the model
-                - model_path (str): Path to save the model
+            model_name: Name used for default exported filenames.
+            model_path: Directory used for default exports.
         """
         self.model = None
         # Primary public assembled-mesh path for runtime, export, and downstream consumers.
-        self.assembled_mesh = None
+        self.assembled_mesh: pv.UnstructuredGrid | None = None
         self.events = ModelEventBus()
         self._part_registry = FemoraPartRegistry()
-        self.model_name = kwargs.get('model_name')
-        self.model_path = kwargs.get('model_path')
+        self.model_name = model_name
+        self.model_path = model_path
         self._results_folder = ""
         self.material = MaterialManager(mesh_maker=self)
         self.element = ElementManager(mesh_maker=self)
         self.time_series = TimeSeriesManager(mesh_maker=self)
-        self.ground_motion = GroundMotionManager(mesh_maker=self, time_series_manager=self.time_series)
+        self.ground_motion = GroundMotionManager(
+            mesh_maker=self, time_series_manager=self.time_series
+        )
         self.damping = DampingManager(mesh_maker=self)
         self.mass = MassManager(mesh_maker=self)
         self.region = RegionManager(mesh_maker=self)
@@ -82,7 +169,7 @@ class Model:
         self.mask = MaskManager(mesh_maker=self)
         self.spatial_transform = SpatialTransformManager()
         self.process = ProcessManager(mesh_maker=self)
-        
+
         # Tag start controls for node and element IDs written to TCL
         # These control only exported OpenSees node/element tags (not Material/Element class tags)
         self._start_nodetag: int = 1
@@ -94,7 +181,7 @@ class Model:
     def _register_model_event_subscribers(self) -> None:
         self.mass.register_events()
         self.mask.register_events()
-        
+
     # ------------------------------------------------------------------
     # Progress helpers
     # ------------------------------------------------------------------
@@ -132,7 +219,12 @@ class Model:
             raise ValueError("Core tag start must be an integer >= 0")
         self._start_core_tag = start_tag
 
-    def export_to_tcl(self, filename=None, progress_callback=None, decimals=5):
+    def export_to_tcl(
+        self,
+        filename: str | None = None,
+        progress_callback: Callable[..., None] | None = None,
+        decimals: int = 5,
+    ) -> bool:
         """
         Export the model to a TCL file
 
@@ -141,9 +233,11 @@ class Model:
                                      uses model_name in model_path
             progress_callback (callable, optional): Callback function to report progress.
                                                   If None, uses tqdm progress bar.
+            decimals (int): Coordinate precision passed to the Tcl exporter.
 
         Returns:
-            bool: True if export was successful, False otherwise
+            success (bool): True on success. Export/filesystem failures raise
+                exceptions rather than returning False.
 
         Raises:
             ValueError: If no filename is provided and model_name/model_path are not set
@@ -157,8 +251,13 @@ class Model:
             decimals=decimals,
         )
 
-    def export_to_vtk(self, filename=None, write_info_json=False, indent=2):
-        '''
+    def export_to_vtk(
+        self,
+        filename: str | None = None,
+        write_info_json: bool = False,
+        indent: int = 2,
+    ) -> bool:
+        """
         Export the model to a vtk file
 
         Args:
@@ -169,8 +268,9 @@ class Model:
             indent (int, optional): JSON indentation level for sidecar info.
 
         Returns:
-            bool: True if export was successful, False otherwise
-        '''
+            success (bool): True on success. Missing assembly and write errors
+                raise exceptions rather than returning False.
+        """
         from femora.io.export_vtk import export_to_vtk as _export_to_vtk
 
         return _export_to_vtk(
@@ -180,8 +280,8 @@ class Model:
             indent=indent,
         )
 
-    def export_to_json(self, filename=None, indent=2):
-        '''
+    def export_to_json(self, filename: str | None = None, indent: int = 2) -> bool:
+        """
         Export a lightweight structural snapshot of the model to JSON.
 
         Args:
@@ -190,16 +290,16 @@ class Model:
             indent (int, optional): JSON indentation level. Defaults to 2.
 
         Returns:
-            bool: True if export was successful
-        '''
+            success (bool): True if export was successful
+        """
         from femora.io.export_json import export_to_json as _export_to_json
 
         return _export_to_json(self, filename=filename, indent=indent)
 
-    def set_model_info(self, model_name=None, model_path=None):
+    def set_model_info(self, model_name: str | None = None, model_path: str | None = None) -> None:
         """
         Update model information
-        
+
         Args:
             model_name (str, optional): New model name
             model_path (str, optional): New model path
@@ -209,27 +309,36 @@ class Model:
         if model_path is not None:
             self.model_path = model_path
 
-    def set_results_folder(self, folder_name):
+    def set_results_folder(self, folder_name: str) -> None:
         """
-        Set the results folder for the model
-        This method updates the results folder where simulation results will be stored.
+        Store the output-folder setting used during recorder/export generation.
+
+        This setter stores the supplied value as-is. It does not create the
+        directory, inspect permissions, or change Python's working directory.
+        Relative paths are interpreted by the generated solver commands in
+        their execution environment, not resolved by this setter.
 
         Args:
             folder_name (str): path to the results folder
         """
         self._results_folder = folder_name
 
-    def get_results_folder(self):
+    def get_results_folder(self) -> str:
         """
         Get the current results folder path
-        
+
         Returns:
-            str: The path to the results folder
+            folder (str): The path to the results folder
         """
         return self._results_folder if self._results_folder else ""
 
     def get_femora_parts(self) -> list[dict]:
-        """Return a read-only snapshot of source parts registered for VTK export."""
+        """Return a detached metadata snapshot of registered source parts.
+
+        Returns:
+            list[dict]: Source-part records used by VTK export. This is not a
+            mesh-part registry or a replacement for ``model.meshpart.get_all()``.
+        """
         return self._part_registry.get_all()
 
     def _register_femora_part(
@@ -261,18 +370,13 @@ class Model:
         mesh.cell_data["FemoraPartTag"] = np.full(mesh.n_cells, part.tag, dtype=np.int32)
         mesh.cell_data["FemoraPartKind"] = np.full(mesh.n_cells, part.kind_id, dtype=np.int16)
         return part
-    
 
-    def print_info(self):
-        '''
-        Print information about the current model on the console
+    def print_info(self) -> None:
+        """Print final-mesh point/cell counts, or 'No mesh found'.
 
-        Args:
-            None
-
-        Returns:
-            None
-        '''
+        This writes to stdout and returns None. It does not inspect convergence
+        or validate the physical model.
+        """
 
         if self.assembled_mesh is None:
             print("No mesh found")
@@ -280,38 +384,29 @@ class Model:
             numpoints = self.assembled_mesh.n_points
             numcells = self.assembled_mesh.n_cells
             print(f"Number of nodes: {numpoints}")
-            print(f"Number of elements: {numcells}")    
-        
-        
-    def get_max_ele_tag(self):
-        '''
-        Get the maximum element tag in the assembled mesh 
+            print(f"Number of elements: {numcells}")
 
-        Args:
-            None
+    def get_max_ele_tag(self) -> int:
+        """Compute the last sequential export element tag from the cell count.
 
         Returns:
-            positive int: maximum element tag
-            -1: if no mesh is assembled
-        '''
+            tag (int): Start tag plus cell count minus one, or -1 without assembly.
+                This does not inspect arbitrary imported cell tags.
+        """
 
         max_ele_tag = self.assembler.get_num_cells()
 
         if max_ele_tag < 0:
             return -1
         return max_ele_tag + self._start_ele_tag - 1
-    
-    def get_max_node_tag(self):
-        '''
-        Get the maximum node tag in the assembled mesh 
 
-        Args:
-            None
+    def get_max_node_tag(self) -> int:
+        """Compute the last sequential export node tag from the point count.
 
         Returns:
-            positive int: maximum node tag
-            -1: if no mesh is assembled
-        '''
+            tag (int): Start tag plus point count minus one, or -1 without assembly.
+                This is not the number of free solver equations.
+        """
 
         max_node_tag = self.assembler.get_num_points()
 
@@ -319,36 +414,35 @@ class Model:
             return -1
         return max_node_tag + self._start_nodetag - 1
 
-    def get_start_ele_tag(self):
-        """
-        Get the start element tag
-
-        Args:
-            None
+    def get_start_ele_tag(self) -> int:
+        """Return the first exported solver element tag.
 
         Returns:
-            int: start element tag
+            tag (int): Export origin, independent of element-definition registry tags.
         """
         return self._start_ele_tag
-    
 
-    def get_start_node_tag(self):
-        """
-        Get the start node tag
-
-        Args:
-            None
+    def get_start_node_tag(self) -> int:
+        """Return the first exported solver node tag.
 
         Returns:
-            int: start node tag
+            tag (int): Origin used when mapping zero-based assembled point indices.
         """
         return self._start_nodetag
 
-    def clear_model(self):
+    def clear_model(self) -> None:
         """
-        Clear the current model and reset all components to their initial state.
-        This method wipes the current mesh, materials, elements, constraints, and all other components,
-        allowing you to start fresh without needing to create a new Model instance.
+        Clear model definitions, assembled meshes, and ordered process steps.
+
+        Managers are retained but emptied, export tag starts reset to their
+        defaults, and built-in lifecycle subscriptions are re-established.
+        Custom event subscriptions are removed. Model name, model path, and the
+        results-folder setting are retained.
+
+        This is destructive to the in-memory model. It does not delete exported
+        files or results, stop a running solver, or emit a solver ``wipe``.
+        Previously held component references may be detached or stale; rebuild
+        definitions through the model's managers before assembling again.
         """
         self.model = None
         self.mass.unregister_events()

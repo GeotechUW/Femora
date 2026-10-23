@@ -9,6 +9,10 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Dict, Optional, Sequence
 
+if TYPE_CHECKING:
+    from femora.core.ground_motion_manager import GroundMotionManager
+    from femora.core.time_series_manager import TimeSeriesManager
+
 from femora.components.pattern.h5drm_pattern import H5DRMPattern
 from femora.components.pattern.multiple_support import MultipleSupportPattern
 from femora.components.pattern.plain_pattern import PlainPattern
@@ -26,14 +30,55 @@ class PatternManager:
 
     The manager is intentionally not a singleton. Each instance owns an
     independent pattern tag space for one model context.
+
+    Use ``model.pattern`` to register a loading definition, then add the pattern
+    to ``model.process`` at the point where it should become active in Tcl.
+    Registration alone does not schedule activation. Time-series and imposed
+    motion dependencies must belong to this Model.
+
+    Example:
+        ```python
+        from femora import Model
+
+        model = Model()
+        series = model.time_series.constant()
+        gravity = model.pattern.plain(series)
+        gravity.add_load.node(node_tag=1, values=[0.0, 0.0, -10.0])
+        model.process.add_step(gravity, "Apply gravity")
+        assert model.pattern.get(gravity.tag) is gravity
+        ```
+
+    This defines loading only, not a stable/solvable domain. Uniform excitation,
+    imposed support motions, and DRM have different physical conventions; do
+    not interchange their recorded acceleration interpretations. Consult each
+    concrete pattern and recorder before adding ground motion in postprocessing.
+
+    Removing/clearing a pattern edits Python registration, not the active solver.
+    Use an appropriate process action for solver-side load-pattern removal.
     """
+
+    __doc_controls__ = {
+        "summary": True,
+        "members": [
+            "plain",
+            "uniform_excitation",
+            "multiple_support",
+            "h5drm",
+            "add",
+            "get",
+            "get_all",
+            "remove",
+            "clear",
+            "set_tag_start",
+        ],
+    }
 
     def __init__(
         self,
         mesh_maker: Model,
-        time_series_manager=None,
-        ground_motion_manager=None,
-    ):
+        time_series_manager: "TimeSeriesManager | None" = None,
+        ground_motion_manager: "GroundMotionManager | None" = None,
+    ) -> None:
         """Create an empty manager with pattern tags starting at ``1``."""
         from femora.core.model import Model as ModelClass
 
@@ -154,7 +199,19 @@ class PatternManager:
         do_coordinate_transformation: int,
         transform_matrix: Optional[Sequence[float]] = None,
         origin: Optional[Sequence[float]] = None,
-        **kwargs,
+        *,
+        T00: float | None = None,
+        T01: float | None = None,
+        T02: float | None = None,
+        T10: float | None = None,
+        T11: float | None = None,
+        T12: float | None = None,
+        T20: float | None = None,
+        T21: float | None = None,
+        T22: float | None = None,
+        x00: float | None = None,
+        x01: float | None = None,
+        x02: float | None = None,
     ) -> H5DRMPattern:
         """Create and manage an ``H5DRMPattern``.
 
@@ -166,14 +223,43 @@ class PatternManager:
             do_coordinate_transformation: ``0`` or ``1`` flag for coordinate
                 transformation.
             transform_matrix: Optional 9-value transformation matrix. If not
-                provided, ``T00`` through ``T22`` can be supplied in ``kwargs``.
+                provided, use the named ``T00`` through ``T22`` parameters.
             origin: Optional 3-value transformed origin. If not provided,
-                ``x00`` through ``x02`` can be supplied in ``kwargs``.
-            **kwargs: Compatibility support for individual matrix/origin values.
+                use the named ``x00`` through ``x02`` parameters.
+            T00: Compatibility matrix entry, row 0 column 0.
+            T01: Compatibility matrix entry, row 0 column 1.
+            T02: Compatibility matrix entry, row 0 column 2.
+            T10: Compatibility matrix entry, row 1 column 0.
+            T11: Compatibility matrix entry, row 1 column 1.
+            T12: Compatibility matrix entry, row 1 column 2.
+            T20: Compatibility matrix entry, row 2 column 0.
+            T21: Compatibility matrix entry, row 2 column 1.
+            T22: Compatibility matrix entry, row 2 column 2.
+            x00: Compatibility transformed-origin x coordinate.
+            x01: Compatibility transformed-origin y coordinate.
+            x02: Compatibility transformed-origin z coordinate.
 
         Returns:
             Managed ``H5DRMPattern`` instance.
         """
+        entries = {
+            key: value
+            for key, value in {
+                "T00": T00,
+                "T01": T01,
+                "T02": T02,
+                "T10": T10,
+                "T11": T11,
+                "T12": T12,
+                "T20": T20,
+                "T21": T21,
+                "T22": T22,
+                "x00": x00,
+                "x01": x01,
+                "x02": x02,
+            }.items()
+            if value is not None
+        }
         return self.add(
             H5DRMPattern(
                 filepath=filepath,
@@ -183,7 +269,7 @@ class PatternManager:
                 do_coordinate_transformation=do_coordinate_transformation,
                 transform_matrix=transform_matrix,
                 origin=origin,
-                **kwargs,
+                **entries,
             )
         )  # type: ignore[return-value]
 

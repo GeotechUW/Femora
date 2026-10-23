@@ -13,7 +13,13 @@ from femora.core.analysis_component_base import AnalysisComponent
 
 
 class ConstraintHandler(AnalysisComponent):
-    """Base class for OpenSees constraint handlers."""
+    """Extension base for solver constraint-enforcement definitions.
+
+    This is not a domain SP/MP constraint. Subclasses implement the Tcl command
+    contract; ordinary scripts use ``model.analysis.constraint`` factories.
+    """
+
+    __doc_controls__ = {"summary": True, "members": ["register_handler"]}
 
     _handlers: Dict[str, Type["ConstraintHandler"]] = {}
 
@@ -23,6 +29,14 @@ class ConstraintHandler(AnalysisComponent):
 
     @staticmethod
     def register_handler(name: str, handler_class: Type["ConstraintHandler"]) -> None:
+        """Install a class-wide handler factory key, replacing an existing key.
+
+        Args:
+            name (str): Case-insensitive registry key.
+            handler_class (type[ConstraintHandler]): Concrete constructor.
+
+        Registration does not validate subclass compatibility or modify instances.
+        """
         ConstraintHandler._handlers[name.lower()] = handler_class
 
 

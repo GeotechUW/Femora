@@ -21,9 +21,44 @@ if TYPE_CHECKING:
 
 
 class TransformationManager:
-    """Local manager for geometric transformation lifecycle and tag assignment."""
+    """Define beam coordinate transformations through ``model.transformation``.
 
-    def __init__(self, mesh_maker: Model):
+    Factories return registered transformation objects for beam-column element
+    definitions. These are solver coordinate/kinematic definitions, not spatial
+    transformations that move mesh points. The latter belong to
+    ``model.spatial_transform``.
+
+    Example:
+        ```python
+        from femora import Model
+
+        model = Model()
+        transform = model.transformation.transformation3d("Linear", 0, 0, 1)
+        assert model.transformation.get(transform.tag) is transform
+        assert transform.dimension == 3
+        ```
+
+    Note:
+        Choose the 3D orientation vector with respect to the eventual beam axis;
+        it must not be parallel to that axis. Creating a transformation alone
+        cannot validate this against a beam mesh that does not yet exist.
+    """
+
+    __doc_controls__ = {
+        "summary": True,
+        "members": [
+            "transformation2d",
+            "transformation3d",
+            "add",
+            "get",
+            "get_all",
+            "remove",
+            "clear",
+            "set_tag_start",
+        ],
+    }
+
+    def __init__(self, mesh_maker: Model) -> None:
         """Create an empty transformation manager with tags starting at ``1``."""
         from femora.core.model import Model as ModelClass
 
@@ -73,7 +108,12 @@ class TransformationManager:
         return transformation
 
     def get(self, tag: int) -> Optional[GeometricTransformation]:
-        """Return the transformation with ``tag`` if it exists."""
+        """Look up an integer registry tag, returning None when absent.
+
+        Args:
+            tag (int): Current tag, converted through ``int(tag)``. Conversion
+                errors propagate; transformation names are not supported.
+        """
         return self._transformations.get(int(tag))
 
     def get_all(self) -> Dict[int, GeometricTransformation]:
@@ -81,7 +121,15 @@ class TransformationManager:
         return dict(self._transformations)
 
     def remove(self, tag: int) -> None:
-        """Remove a managed transformation and compact the remaining tags."""
+        """Detach a transformation and compact surviving registry tags.
+
+        Args:
+            tag (int): Current integer tag; absent tags are ignored.
+
+        Warning:
+            Elements referencing the detached object are not repaired or removed.
+            Cached integer tags can become stale after compaction.
+        """
         transformation = self._transformations.pop(int(tag), None)
         if transformation is not None:
             transformation.tag = None
@@ -89,14 +137,26 @@ class TransformationManager:
             self._reassign_tags()
 
     def clear(self) -> None:
-        """Remove all transformations and clear their assigned tags."""
+        """Detach all transformations and clear their tags, retaining elements.
+
+        This edits Python definitions only. It neither deletes files nor emits
+        solver commands. Rebuild dependent model definitions before exporting.
+        """
         for transformation in self._transformations.values():
             transformation.tag = None
             transformation._owner = None
         self._transformations.clear()
 
     def set_tag_start(self, start_tag: int) -> None:
-        """Set the first tag used by this manager and retag existing objects."""
+        """Set the positive registry origin and retag existing transformations.
+
+        Args:
+            start_tag (int): First tag validated by the tagging policy.
+
+        Raises:
+            ValueError: The origin is invalid. Existing object tags may change
+                on success; stored integer references are not updated for you.
+        """
         self._start_tag = self._tagging.validate_start_tag(start_tag)
         self._reassign_tags()
 
@@ -109,7 +169,20 @@ class TransformationManager:
         d_yj: float = 0.0,
         description: str = "",
     ) -> GeometricTransformation2D:
-        """Create and manage a 2D geometric transformation."""
+        """Create and register a planar beam coordinate transformation.
+
+        Args:
+            transf_type (str): Solver transformation type validated by the component.
+            d_xi (float): Global x joint offset at end i, in length units.
+            d_yi (float): Global y joint offset at end i.
+            d_xj (float): Global x joint offset at end j.
+            d_yj (float): Global y joint offset at end j.
+            description (str): Optional Tcl comment text.
+
+        Returns:
+            transformation (GeometricTransformation2D): Registered definition
+                ready for an appropriate beam element. Constructor errors propagate.
+        """
         return self.add(
             GeometricTransformation2D(
                 transf_type=transf_type,
@@ -135,7 +208,26 @@ class TransformationManager:
         d_zj: float | str = 0.0,
         description: str = "",
     ) -> GeometricTransformation3D:
-        """Create and manage a 3D geometric transformation."""
+        """Create and register a spatial beam coordinate transformation.
+
+        Args:
+            transf_type (str): Solver transformation type validated by the component.
+            vecxz_x (float | str): Global x component of the local x-z plane vector.
+            vecxz_y (float | str): Global y component of that vector.
+            vecxz_z (float | str): Global z component of that vector.
+            d_xi (float | str): Global x joint offset at end i, in length units.
+            d_yi (float | str): Global y joint offset at end i.
+            d_zi (float | str): Global z joint offset at end i.
+            d_xj (float | str): Global x joint offset at end j.
+            d_yj (float | str): Global y joint offset at end j.
+            d_zj (float | str): Global z joint offset at end j.
+            description (str): Optional Tcl comment text.
+
+        Returns:
+            transformation (GeometricTransformation3D): Registered definition.
+                Numeric and string forms follow the concrete component's rules;
+                this factory does not evaluate Tcl expressions or inspect mesh axes.
+        """
         return self.add(
             GeometricTransformation3D(
                 transf_type=transf_type,
@@ -159,6 +251,7 @@ class TransformationManager:
     def _reassign_tags(self) -> None:
         """Retag all managed transformations from ``_start_tag`` in tag order."""
         self._tagging.reassign_tags(self._transformations, self._start_tag)
+
 
 __all__ = [
     "TransformationManager",

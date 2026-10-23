@@ -13,7 +13,13 @@ from femora.core.analysis_component_base import AnalysisComponent
 
 
 class System(AnalysisComponent):
-    """Base class for OpenSees solver systems."""
+    """Extension base for linear equation-solver definitions.
+
+    Concrete subclasses render a system command; they do not install native
+    solver libraries. Ordinary construction uses ``model.analysis.system``.
+    """
+
+    __doc_controls__ = {"summary": True, "members": ["register_system"]}
 
     _systems: Dict[str, Type["System"]] = {}
 

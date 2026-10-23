@@ -1,6 +1,35 @@
 """Style curated API navigation without duplicating generated reference pages."""
 
 GROUP_ICONS = {
+    "core": "material/cog-outline",
+    "model": "material/cube-outline",
+    "materials": "material/layers-outline",
+    "sections": "material/vector-square",
+    "transformations": "material/rotate-3d-variant",
+    "elements": "material/vector-line",
+    "damping": "material/waveform",
+    "regions": "material/vector-selection",
+    "mesh parts": "material/grid",
+    "assembly": "material/puzzle-outline",
+    "interfaces": "material/connection",
+    "constraints": "material/lock-outline",
+    "mass": "material/weight",
+    "selections": "material/selection",
+    "time series": "material/chart-timeline-variant",
+    "ground motions": "material/waveform",
+    "loads": "material/arrow-down-bold-outline",
+    "patterns": "material/chart-line",
+    "recorders": "material/content-save-outline",
+    "actions": "material/gesture-tap-button",
+    "analysis": "material/calculator-variant-outline",
+    "process": "material/format-list-numbered",
+    "extension API": "material/puzzle-outline",
+    "algorithm": "material/function-variant",
+    "constraint handlers": "material/lock-outline",
+    "convergence tests": "material/check-circle-outline",
+    "integrator": "material/chart-timeline-variant",
+    "system": "material/server-outline",
+    "numberer": "material/format-list-numbered",
     "Results & Postprocessing": "material/chart-line",
     "Overview": "material/book-open-outline",
     "Reading Results": "material/folder-open-outline",
@@ -58,7 +87,7 @@ def on_page_context(context, **kwargs):
     def visit(items, in_results=False):
         for item in items:
             label = item.title.lower()
-            selected = in_results or item.title in {"results & postprocessing", "Results & Postprocessing", "jobs", "runtime"}
+            selected = in_results or item.title in {"results & postprocessing", "Results & Postprocessing", "jobs", "runtime", "core"}
             if selected:
                 if label in GROUP_ICONS or label in FUNCTION_LABELS:
                     item.title = label

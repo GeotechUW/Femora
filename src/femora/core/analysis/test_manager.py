@@ -7,6 +7,11 @@
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from femora.core.analysis_manager import AnalysisManager
+
 from femora.components.analysis.convergence_tests import (
     EnergyIncrTest,
     FixedNumIterTest,
@@ -24,125 +29,282 @@ from femora.core.tagged_component_manager import TaggedComponentManager
 
 
 class TestManager(TaggedComponentManager[Test]):
-    """Manager for convergence tests on the Analysis model."""
+    """Create iteration tests through ``model.analysis.test``.
 
-    def __init__(self, analysis_manager) -> None:
+    Factories return registered Test definitions; they do not evaluate a solution
+    in Python. Keyword options pass to the matching Components/analysis convergence
+    test constructor. Tolerances depend on units, equation scaling, and the chosen
+    norm; one tolerance value is not interchangeable across test families.
+
+    max_iter bounds solver iterations, not the number of analysis steps. Print
+    flags can change diagnostics and, for some tests, failure handling; consult
+    the concrete test before selecting them. A passed test alone does not prove
+    physical accuracy, and an explicit linear update may not use iteration tests.
+    """
+
+    __doc_controls__ = {
+        "summary": True,
+        "members": [
+            "normunbalance",
+            "normdispincr",
+            "energyincr",
+            "relativenormunbalance",
+            "relativenormdispincr",
+            "relativetotalnormdispincr",
+            "relativeenergyincr",
+            "fixednumiter",
+            "normdispandunbalance",
+            "normdisporunbalance",
+        ],
+    }
+
+    def __init__(self, analysis_manager: "AnalysisManager") -> None:
         """Initialize the TestManager.
 
         Args:
-            analysis_manager: The parent AnalysisManager instance.
+            analysis_manager (AnalysisManager): The parent AnalysisManager instance.
         """
         super().__init__(analysis_manager, Test, "_tests")
 
-    def normunbalance(self, **kwargs) -> Test:
-        """Add a NormUnbalanceTest convergence test.
+    def normunbalance(
+        self, *, tol: float, max_iter: int, print_flag: int = 0, norm_type: int = 2
+    ) -> NormUnbalanceTest:
+        """Create a NormUnbalance convergence test.
 
         Args:
-            **kwargs: Keyword arguments passed to NormUnbalanceTest.
+            tol: Tolerance criteria for convergence.
+            max_iter: Maximum number of iterations to perform before returning failure.
+            print_flag: Print control flag. 0 prints nothing, 1 prints norm info
+                each iteration, 2 prints norms and iterations at success, 4 prints
+                norms, displacement, and residual vectors, 5 prints warnings only.
+            norm_type: Mathematical norm type to use. 0 for Max-norm, 1 for 1-norm,
+                2 for 2-norm (default).
 
         Returns:
-            The convergence test instance.
+            component (NormUnbalanceTest): Registered definition. Creating it does not run OpenSees.
         """
-        return self.add(NormUnbalanceTest(**kwargs))
+        component = NormUnbalanceTest(
+            tol=tol, max_iter=max_iter, print_flag=print_flag, norm_type=norm_type
+        )
+        self.add(component)
+        return component
 
-    def normdispincr(self, **kwargs) -> Test:
-        """Add a NormDispIncrTest convergence test.
+    def normdispincr(
+        self, *, tol: float, max_iter: int, print_flag: int = 0, norm_type: int = 2
+    ) -> NormDispIncrTest:
+        """Create a NormDispIncr convergence test.
 
         Args:
-            **kwargs: Keyword arguments passed to NormDispIncrTest.
+            tol: Tolerance criteria for convergence.
+            max_iter: Maximum number of iterations to perform before returning failure.
+            print_flag: Print control flag. 0 prints nothing, 1 prints norm info
+                each iteration, 2 prints norms and iterations at success, 4 prints
+                norms, displacement, and residual vectors, 5 prints warnings only.
+            norm_type: Mathematical norm type to use. 0 for Max-norm, 1 for 1-norm,
+                2 for 2-norm (default).
 
         Returns:
-            The convergence test instance.
+            component (NormDispIncrTest): Registered definition. Creating it does not run OpenSees.
         """
-        return self.add(NormDispIncrTest(**kwargs))
+        component = NormDispIncrTest(
+            tol=tol, max_iter=max_iter, print_flag=print_flag, norm_type=norm_type
+        )
+        self.add(component)
+        return component
 
-    def energyincr(self, **kwargs) -> Test:
-        """Add an EnergyIncrTest convergence test.
+    def energyincr(self, *, tol: float, max_iter: int, print_flag: int = 0) -> EnergyIncrTest:
+        """Create an EnergyIncr convergence test.
 
         Args:
-            **kwargs: Keyword arguments passed to EnergyIncrTest.
+            tol: Tolerance criteria for convergence.
+            max_iter: Maximum number of iterations to perform before returning failure.
+            print_flag: Print control flag. 0 prints nothing, 1 prints norm info
+                each iteration, 2 prints norms and iterations at success, 4 prints
+                norms, displacement, and residual vectors, 5 prints warnings only.
 
         Returns:
-            The convergence test instance.
+            component (EnergyIncrTest): Registered definition. Creating it does not run OpenSees.
         """
-        return self.add(EnergyIncrTest(**kwargs))
+        component = EnergyIncrTest(tol=tol, max_iter=max_iter, print_flag=print_flag)
+        self.add(component)
+        return component
 
-    def relativenormunbalance(self, **kwargs) -> Test:
-        """Add a RelativeNormUnbalanceTest convergence test.
+    def relativenormunbalance(
+        self, *, tol: float, max_iter: int, print_flag: int = 0, norm_type: int = 2
+    ) -> RelativeNormUnbalanceTest:
+        """Create a RelativeNormUnbalance convergence test.
 
         Args:
-            **kwargs: Keyword arguments passed to RelativeNormUnbalanceTest.
+            tol: Tolerance criteria for convergence.
+            max_iter: Maximum number of iterations to perform before returning failure.
+            print_flag: Print control flag. 0 prints nothing, 1 prints norm info
+                each iteration, 2 prints norms and iterations at success, 4 prints
+                norms, displacement, and residual vectors, 5 prints warnings only.
+            norm_type: Mathematical norm type to use. 0 for Max-norm, 1 for 1-norm,
+                2 for 2-norm (default).
 
         Returns:
-            The convergence test instance.
+            component (RelativeNormUnbalanceTest): Registered definition. Creating it does not run OpenSees.
         """
-        return self.add(RelativeNormUnbalanceTest(**kwargs))
+        component = RelativeNormUnbalanceTest(
+            tol=tol, max_iter=max_iter, print_flag=print_flag, norm_type=norm_type
+        )
+        self.add(component)
+        return component
 
-    def relativenormdispincr(self, **kwargs) -> Test:
-        """Add a RelativeNormDispIncrTest convergence test.
+    def relativenormdispincr(
+        self, *, tol: float, max_iter: int, print_flag: int = 0, norm_type: int = 2
+    ) -> RelativeNormDispIncrTest:
+        """Create a RelativeNormDispIncr convergence test.
 
         Args:
-            **kwargs: Keyword arguments passed to RelativeNormDispIncrTest.
+            tol: Tolerance criteria for convergence.
+            max_iter: Maximum number of iterations to perform before returning failure.
+            print_flag: Print control flag. 0 prints nothing, 1 prints norm info
+                each iteration, 2 prints norms and iterations at success, 4 prints
+                norms, displacement, and residual vectors, 5 prints warnings only.
+            norm_type: Mathematical norm type to use. 0 for Max-norm, 1 for 1-norm,
+                2 for 2-norm (default).
 
         Returns:
-            The convergence test instance.
+            component (RelativeNormDispIncrTest): Registered definition. Creating it does not run OpenSees.
         """
-        return self.add(RelativeNormDispIncrTest(**kwargs))
+        component = RelativeNormDispIncrTest(
+            tol=tol, max_iter=max_iter, print_flag=print_flag, norm_type=norm_type
+        )
+        self.add(component)
+        return component
 
-    def relativetotalnormdispincr(self, **kwargs) -> Test:
-        """Add a RelativeTotalNormDispIncrTest convergence test.
+    def relativetotalnormdispincr(
+        self, *, tol: float, max_iter: int, print_flag: int = 0, norm_type: int = 2
+    ) -> RelativeTotalNormDispIncrTest:
+        """Create a RelativeTotalNormDispIncr convergence test.
 
         Args:
-            **kwargs: Keyword arguments passed to RelativeTotalNormDispIncrTest.
+            tol: Tolerance criteria for convergence.
+            max_iter: Maximum number of iterations to perform before returning failure.
+            print_flag: Print control flag. 0 prints nothing, 1 prints norm info
+                each iteration, 2 prints norms and iterations at success, 4 prints
+                norms, displacement, and residual vectors, 5 prints warnings only.
+            norm_type: Mathematical norm type to use. 0 for Max-norm, 1 for 1-norm,
+                2 for 2-norm (default).
 
         Returns:
-            The convergence test instance.
+            component (RelativeTotalNormDispIncrTest): Registered definition. Creating it does not run OpenSees.
         """
-        return self.add(RelativeTotalNormDispIncrTest(**kwargs))
+        component = RelativeTotalNormDispIncrTest(
+            tol=tol, max_iter=max_iter, print_flag=print_flag, norm_type=norm_type
+        )
+        self.add(component)
+        return component
 
-    def relativeenergyincr(self, **kwargs) -> Test:
-        """Add a RelativeEnergyIncrTest convergence test.
+    def relativeenergyincr(
+        self, *, tol: float, max_iter: int, print_flag: int = 0
+    ) -> RelativeEnergyIncrTest:
+        """Create a RelativeEnergyIncr convergence test.
 
         Args:
-            **kwargs: Keyword arguments passed to RelativeEnergyIncrTest.
+            tol: Tolerance criteria for convergence.
+            max_iter: Maximum number of iterations to perform before returning failure.
+            print_flag: Print control flag. 0 prints nothing, 1 prints norm info
+                each iteration, 2 prints norms and iterations at success, 4 prints
+                norms, displacement, and residual vectors, 5 prints warnings only.
 
         Returns:
-            The convergence test instance.
+            component (RelativeEnergyIncrTest): Registered definition. Creating it does not run OpenSees.
         """
-        return self.add(RelativeEnergyIncrTest(**kwargs))
+        component = RelativeEnergyIncrTest(tol=tol, max_iter=max_iter, print_flag=print_flag)
+        self.add(component)
+        return component
 
-    def fixednumiter(self, **kwargs) -> Test:
-        """Add a FixedNumIterTest convergence test.
+    def fixednumiter(self, *, num_iter: int) -> FixedNumIterTest:
+        """Create a FixedNumIter convergence test.
 
         Args:
-            **kwargs: Keyword arguments passed to FixedNumIterTest.
+            num_iter: Exact number of iterations to perform at each step.
 
         Returns:
-            The convergence test instance.
+            component (FixedNumIterTest): Registered definition. Creating it does not run OpenSees.
         """
-        return self.add(FixedNumIterTest(**kwargs))
+        component = FixedNumIterTest(num_iter=num_iter)
+        self.add(component)
+        return component
 
-    def normdispandunbalance(self, **kwargs) -> Test:
-        """Add a NormDispAndUnbalanceTest convergence test.
+    def normdispandunbalance(
+        self,
+        *,
+        tol_incr: float,
+        tol_r: float,
+        max_iter: int,
+        print_flag: int = 0,
+        norm_type: int = 2,
+        max_incr: int = -1,
+    ) -> NormDispAndUnbalanceTest:
+        """Create a NormDispAndUnbalance convergence test.
 
         Args:
-            **kwargs: Keyword arguments passed to NormDispAndUnbalanceTest.
+            tol_incr: Tolerance for displacement increment norm.
+            tol_r: Tolerance for unbalanced force residual norm.
+            max_iter: Maximum number of iterations to perform before returning failure.
+            print_flag: Print control flag. 0 prints nothing, 1 prints norm info
+                each iteration, 2 prints norms and iterations at success, 4 prints
+                norms, displacement, and residual vectors, 5 prints warnings only.
+            norm_type: Mathematical norm type to use. 0 for Max-norm, 1 for 1-norm,
+                2 for 2-norm (default).
+            max_incr: Maximum times the error can increase before giving up.
+                Use -1 for default.
 
         Returns:
-            The convergence test instance.
+            component (NormDispAndUnbalanceTest): Registered definition. Creating it does not run OpenSees.
         """
-        return self.add(NormDispAndUnbalanceTest(**kwargs))
+        component = NormDispAndUnbalanceTest(
+            tol_incr=tol_incr,
+            tol_r=tol_r,
+            max_iter=max_iter,
+            print_flag=print_flag,
+            norm_type=norm_type,
+            max_incr=max_incr,
+        )
+        self.add(component)
+        return component
 
-    def normdisporunbalance(self, **kwargs) -> Test:
-        """Add a NormDispOrUnbalanceTest convergence test.
+    def normdisporunbalance(
+        self,
+        *,
+        tol_incr: float,
+        tol_r: float,
+        max_iter: int,
+        print_flag: int = 0,
+        norm_type: int = 2,
+        max_incr: int = -1,
+    ) -> NormDispOrUnbalanceTest:
+        """Create a NormDispOrUnbalance convergence test.
 
         Args:
-            **kwargs: Keyword arguments passed to NormDispOrUnbalanceTest.
+            tol_incr: Tolerance for displacement increment norm.
+            tol_r: Tolerance for unbalanced force residual norm.
+            max_iter: Maximum number of iterations to perform before returning failure.
+            print_flag: Print control flag. 0 prints nothing, 1 prints norm info
+                each iteration, 2 prints norms and iterations at success, 4 prints
+                norms, displacement, and residual vectors, 5 prints warnings only.
+            norm_type: Mathematical norm type to use. 0 for Max-norm, 1 for 1-norm,
+                2 for 2-norm (default).
+            max_incr: Maximum times the error can increase before giving up.
+                Use -1 for default.
 
         Returns:
-            The convergence test instance.
+            component (NormDispOrUnbalanceTest): Registered definition. Creating it does not run OpenSees.
         """
-        return self.add(NormDispOrUnbalanceTest(**kwargs))
+        component = NormDispOrUnbalanceTest(
+            tol_incr=tol_incr,
+            tol_r=tol_r,
+            max_iter=max_iter,
+            print_flag=print_flag,
+            norm_type=norm_type,
+            max_incr=max_incr,
+        )
+        self.add(component)
+        return component
 
 
 __all__ = ["TestManager"]

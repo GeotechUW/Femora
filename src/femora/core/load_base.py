@@ -18,6 +18,8 @@ class Load(ABC):
     and lifecycle for a single model context.
     """
 
+    __doc_controls__ = {"summary": True, "members": ["to_tcl"]}
+
     def __init__(self) -> None:
         self.tag: Optional[int] = None
         self._owner: Optional[object] = None
@@ -25,6 +27,12 @@ class Load(ABC):
 
     @abstractmethod
     def to_tcl(self) -> str:
+        """Render a command intended for the containing Plain pattern block.
+
+        Returns:
+            command (str): Concrete load syntax. This abstract contract neither
+                supplies a time series nor opens a pattern or runs the solver.
+        """
         raise NotImplementedError
 
 

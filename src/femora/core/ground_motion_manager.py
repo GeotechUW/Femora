@@ -9,6 +9,9 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Dict, Iterator, List, Optional, Union
 
+if TYPE_CHECKING:
+    from femora.core.time_series_manager import TimeSeriesManager
+
 from femora.components.ground_motion.interpolated_ground_motion import InterpolatedGroundMotion
 from femora.components.ground_motion.plain_ground_motion import PlainGroundMotion
 from femora.core.ground_motion_base import GroundMotion
@@ -34,13 +37,19 @@ class GroundMotionManager:
     and ``interpolated(...)`` for normal use; use ``add(...)`` when an instance
     has already been constructed manually.
 
+    Use ``model.ground_motion``. Time-series dependencies must be registered
+    with the same Model; interpolated motions must reference motions owned by
+    this manager. A ground-motion object is not a UniformExcitation pattern:
+    use it with the imposed-motion operations of a MultipleSupport pattern.
+    Deleting dependencies or retagging them does not repair a running solver.
+
     Example:
         ```python
         from femora.core.model import Model
 
         model = Model()
-        accel = model.time_series.path(dt=0.01, filePath="support.acc")
-        disp = model.time_series.path(dt=0.01, filePath="support.disp")
+        accel = model.time_series.path(dt=0.01, values=[0.0, 1.0, 0.0])
+        disp = model.time_series.path(dt=0.01, values=[0.0, 0.001, 0.0])
 
         gm = model.ground_motion.plain(accel=accel, disp=disp)
         print(gm.tag)      # 1
@@ -48,7 +57,23 @@ class GroundMotionManager:
         ```
     """
 
-    def __init__(self, mesh_maker: Model, time_series_manager=None):
+    __doc_controls__ = {
+        "summary": True,
+        "members": [
+            "plain",
+            "interpolated",
+            "add",
+            "get",
+            "get_all",
+            "remove",
+            "clear",
+            "set_tag_start",
+        ],
+    }
+
+    def __init__(
+        self, mesh_maker: Model, time_series_manager: "TimeSeriesManager | None" = None
+    ) -> None:
         """Create an empty ground-motion manager with tags starting at 1."""
         from femora.core.model import Model as ModelClass
 

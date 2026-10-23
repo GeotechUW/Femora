@@ -32,9 +32,50 @@ class TimeSeriesManager:
     The manager is intentionally not a singleton. Each instance owns an
     independent tag space so future model or ``Model`` instances can keep
     their own time-series collections.
+
+    Access factories through ``model.time_series``. A time series defines a
+    scalar function of solver domain time; it is not an analysis time step,
+    recorder interval, or a command that advances the domain clock. Patterns
+    and ground motions reference these definitions to apply them to loading.
+
+    Example:
+        ```python
+        from femora import Model
+
+        model = Model()
+        history = model.time_series.path(dt=0.01, values=[0.0, 1.0, 0.0])
+        pattern = model.pattern.uniform_excitation(dof=1, time_series=history)
+        model.process.add_step(pattern, "Apply excitation")
+        assert model.time_series.get(history.tag) is history
+        ```
+
+    Use consistent time/amplitude units and stage file-backed histories where
+    the solver can read them. Creation does not resample a record, check solver
+    time-step stability, or ensure compatible duration. Removal/start-tag changes
+    can invalidate dependency tags; rebuild affected patterns/ground motions.
     """
 
-    def __init__(self, mesh_maker: Model):
+    __doc_controls__ = {
+        "summary": True,
+        "members": [
+            "constant",
+            "linear",
+            "trig",
+            "ramp",
+            "triangular",
+            "rectangular",
+            "pulse",
+            "path",
+            "add",
+            "get",
+            "get_all",
+            "remove",
+            "clear",
+            "set_tag_start",
+        ],
+    }
+
+    def __init__(self, mesh_maker: Model) -> None:
         """Create an empty manager with tags starting at ``1``."""
         from femora.core.model import Model as ModelClass
 
@@ -90,7 +131,6 @@ class TimeSeriesManager:
     __len__ = lambda self: len(self._time_series)
 
     __iter__ = lambda self: iter(self._time_series.values())
-
 
     def get_all(self) -> Dict[int, TimeSeries]:
         """Return a shallow copy of all managed time series keyed by tag."""

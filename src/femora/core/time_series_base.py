@@ -27,7 +27,9 @@ class TimeSeries(ABC):
         series_type: OpenSees time series type name used by concrete classes.
     """
 
-    def __init__(self, series_type: str):
+    __doc_controls__ = {"summary": True, "members": ["to_tcl"]}
+
+    def __init__(self, series_type: str) -> None:
         self.tag: Optional[int] = None
         self._owner: object | None = None
         self.series_type = series_type

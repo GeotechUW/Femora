@@ -19,6 +19,8 @@ class Test(AnalysisComponent):
     algorithms to determine if equilibrium has been reached at each iteration.
     """
 
+    __doc_controls__ = {"summary": True, "members": ["register_test"]}
+
     _tests: Dict[str, Type["Test"]] = {}
 
     def __init__(self, test_type: str) -> None:

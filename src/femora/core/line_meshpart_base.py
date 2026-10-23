@@ -17,7 +17,15 @@ from femora.core.meshpart_base import MeshPart
 
 
 class LineMeshPart(MeshPart):
-    """Shared framework behavior for concrete line meshpart components."""
+    """Extension base for concrete line mesh parts and line-mass bookkeeping.
+
+    Normal construction goes through ``model.meshpart.line``. Subclasses inherit
+    the MeshPart contract and share density resolution and rotational-mass
+    helpers. This base does not itself generate a line mesh. Density and
+    mass-per-length inputs are alternatives, not additive mass contributions.
+    """
+
+    __doc_controls__ = {"summary": True, "members": ["is_elemnt_compatible"]}
 
     _compatible_elements = ["DispBeamColumn", "ForceBeamColumn", "ElasticBeamColumn", "NonlinearBeamColumn"]
 
@@ -139,7 +147,15 @@ class LineMeshPart(MeshPart):
 
     @classmethod
     def is_elemnt_compatible(cls, element: str) -> bool:
-        """Check if the given element type name is compatible with line meshes."""
+        """Test a type name against the line family's case-insensitive allowlist.
+
+        Args:
+            element (str): Element formulation name, not an element object or tag.
+
+        Returns:
+            compatible (bool): Membership in the supported type-name list.
+                Material compatibility and geometric validity are not tested.
+        """
         return element.lower() in [elem.lower() for elem in cls._compatible_elements]
 
 

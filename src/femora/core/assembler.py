@@ -5,7 +5,12 @@
 # SPDX-License-Identifier: Apache-2.0
 # =============================================================================
 
-from typing import List, Optional, Dict, Any
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Callable, List, Optional, Dict, Any
+
+if TYPE_CHECKING:
+    from femora.core.model import Model
 import numpy as np
 import pyvista as pv
 import logging
@@ -24,20 +29,66 @@ from femora.constants import FEMORA_MAX_NDF
 
 class Assembler:
     """
-    Assembler manages assembly sections for a Model.
+    Combine and partition model mesh parts through ``model.assembler``.
 
-    Runtime API:
-    - ``create_section(...)``, ``get(...)``, ``get_all()``, ``remove(...)``, ``clear()``
-    - ``assemble(...)`` to build ``mesh_maker.assembled_mesh``
+    First create sections from registered mesh-part names. Section creation
+    builds a section mesh immediately. Then ``assemble`` combines those section
+    meshes, applies model lifecycle operations, and stores the final mesh on
+    ``model.assembled_mesh``. It does not export Tcl or run OpenSees.
+
+    Assembly sections are mesh/partition groups, not structural cross sections
+    from ``model.section``. Partitions describe the solver decomposition, not
+    a scheduler allocation or an automatic MPI launch.
+
+    Example:
+        ```python
+        from femora import Model
+
+        model = Model()
+        soil = model.material.nd.elastic_isotropic(user_name="soil", E=1e5, nu=0.3, rho=1.8)
+        brick = model.element.brick.std(ndof=3, material=soil)
+        model.meshpart.volume.uniform_rectangular_grid(
+            user_name="soil_block", element=brick,
+            x_min=0, x_max=4, y_min=0, y_max=4, z_min=-4, z_max=0,
+            nx=2, ny=2, nz=2,
+        )
+        section = model.assembler.create_section(meshparts=["soil_block"], num_partitions=1)
+        model.assembler.assemble(progress_callback=lambda *_: None)
+        assert model.assembled_mesh is not None
+        assert model.assembler.get(section.tag) is section
+        ```
+
+    Warning:
+        Point merging changes connectivity. Keep nodes distinct when interfaces
+        are intended to connect independent components. Reassembly replaces the
+        final mesh and is not transactional: a failure can leave no valid final mesh.
     """
 
-    def __init__(self, mesh_maker=None):
+    __doc_controls__ = {
+        "summary": True,
+        "members": [
+            "create_section",
+            "get",
+            "get_all",
+            "remove",
+            "clear",
+            "assemble",
+            "get_mesh",
+            "get_num_cells",
+            "get_num_points",
+            "delete_assembled_mesh",
+            "reset",
+            "plot",
+        ],
+    }
+
+    def __init__(self, mesh_maker: "Model | None" = None) -> None:
         from femora.core.model import Model as ModelClass
 
         if mesh_maker is not None and not isinstance(mesh_maker, ModelClass):
             raise TypeError("mesh_maker must be a Model instance")
         self._mesh_maker = mesh_maker
-        self._assembly_sections: Dict[int, 'AssemblySection'] = {}
+        self._assembly_sections: Dict[int, "AssemblySection"] = {}
 
     def _require_mesh_maker(self):
         if self._mesh_maker is None:
@@ -82,31 +133,29 @@ class Assembler:
         BOLD = "\033[1m"
         RESET = "\033[0m"
         border = "=" * 70
-        message = (
-            f"Femora assembly finished successfully.\n"
-            f"{BLUE}{border}{RESET}\n"
-        )
+        message = f"Femora assembly finished successfully.\n" f"{BLUE}{border}{RESET}\n"
         print(message)
 
     def create_section(
-        self, 
-        meshparts: List[str], 
-        num_partitions: int = 1, 
-        partition_algorithm: str = "kd-tree", 
+        self,
+        meshparts: List[str],
+        num_partitions: int = 1,
+        partition_algorithm: str = "kd-tree",
         partitioner: Optional[str] = None,
         merge_points: bool = True,
         merge_in_final: bool = True,
         mass_merging: str = "sum",
         tolerance: float = 1e-5,
-        **kwargs: Any
-    ) -> 'AssemblySection':
+        *,
+        progress_callback: Callable[..., None] | None = None,
+    ) -> "AssemblySection":
         """
         Create an AssemblySection directly through the Assembler.
-        
+
         This method creates a new AssemblySection from the specified mesh parts and
         automatically registers it with the Assembler. It handles initialization of
         the section, assigns a unique tag, and returns the created section.
-        
+
         Args:
             meshparts (List[str]): List of mesh part names to be assembled. These must be
                                   names of previously created MeshPart instances.
@@ -119,7 +168,7 @@ class Assembler:
             partitioner (str, optional): Mesh partitioner name (Femora terminology), e.g. "kd-tree",
                                          "morton", "geometric".
                                          If provided, it overrides ``partition_algorithm``.
-            merge_points (bool, optional): Whether to merge points that are within a 
+            merge_points (bool, optional): Whether to merge points that are within a
                                            tolerance distance when assembling mesh parts.
                                            Defaults to True.
             merge_in_final (bool, optional): If True, this section's points may be merged during
@@ -133,23 +182,23 @@ class Assembler:
                                            if "average", the mass is averaged across merged points.
             tolerance (float, optional): Spatial tolerance used when merging points within this
                                            assembly section. Defaults to 1e-5.
-            **kwargs: Additional keyword arguments to pass to AssemblySection constructor
-        
+            progress_callback: Optional section-construction progress callback.
+
         Returns:
             AssemblySection: The newly created and registered assembly section
-            
+
         Raises:
             ValueError: If any of the specified mesh parts don't exist or if the
                       partition algorithm is invalid
         """
-        
+
         if partitioner is not None:
             partition_algorithm = partitioner
 
         if self._mesh_maker is None:
             raise RuntimeError("Assembler is not bound to a Model")
 
-        # Create the AssemblySection 
+        # Create the AssemblySection
         assembly_section = AssemblySection(
             meshpart_manager=self._mesh_maker.meshpart,
             meshparts=meshparts,
@@ -159,41 +208,61 @@ class Assembler:
             merge_in_final=merge_in_final,
             mass_merging=mass_merging,
             tolerance=tolerance,
-            **kwargs
+            progress_callback=progress_callback,
         )
         self._add_assembly_section(assembly_section)
-        
+
         return assembly_section
 
-    def get(self, tag: int) -> 'AssemblySection':
-        """Return an assembly section by tag."""
+    def get(self, tag: int) -> "AssemblySection":
+        """Return the registered assembly section for an exact tag.
+
+        Args:
+            tag (int): Current section registry key.
+
+        Raises:
+            KeyError: No section has that tag. Unlike some component managers,
+                this lookup does not return None for missing entries.
+        """
         return self._assembly_sections[tag]
 
-    def get_all(self) -> Dict[int, 'AssemblySection']:
+    def get_all(self) -> Dict[int, "AssemblySection"]:
         """Return a copy of all assembly sections keyed by tag."""
         return self._assembly_sections.copy()
 
     def remove(self, tag: int) -> None:
-        """Remove an assembly section and retag remaining sections."""
+        """Remove an assembly section and retag the remaining sections.
+
+        Args:
+            tag (int): Current section key; an absent key raises KeyError.
+
+        Source mesh parts are not removed. The current final mesh is not
+        automatically rebuilt, so assemble again before export.
+        """
         _ = self.get(tag)
         del self._assembly_sections[tag]
         self._retag_sections()
 
     def clear(self) -> None:
-        """Clear all assembly sections."""
+        """Empty the section registry, retaining the current final mesh.
+
+        Source mesh parts remain registered. Use ``reset()`` to clear both
+        sections and the final mesh; this method alone does not prevent use of
+        a previously assembled mesh.
+        """
         self._assembly_sections.clear()
 
-    def _add_assembly_section(self, assembly_section: 'AssemblySection') -> int:
+    def _add_assembly_section(self, assembly_section: "AssemblySection") -> int:
         """
         Register an AssemblySection on this assembler and assign its tag.
 
         Called by ``create_section(...)`` after the section mesh is built.
         The assembler owns section registry lifecycle; sections do not register
         themselves.
-        
+
         Args:
             assembly_section (AssemblySection): The AssemblySection to add
-        
+
         Returns:
             int: Unique tag assigned to the added assembly section
         """
@@ -201,33 +270,33 @@ class Assembler:
         tag = 1
         while tag in self._assembly_sections:
             tag += 1
-        
+
         # Store the assembly section with its tag
         self._assembly_sections[tag] = assembly_section
         assembly_section._tag = tag
-        
+
         return tag
 
     def _retag_sections(self):
         """
         Retag all assembly sections to ensure continuous numbering from 1.
-        
+
         This internal method is called after removing a section to ensure that
         the remaining sections have sequential tags starting from 1. It creates
         a new dictionary with updated tags and updates each section's internal tag.
         """
         # Sort sections by their current tags
         sorted_sections = sorted(self._assembly_sections.items(), key=lambda x: x[0])
-        
+
         # Create a new dictionary with retagged sections
         new_assembly_sections = {}
         for new_tag, (_, section) in enumerate(sorted_sections, 1):
             new_assembly_sections[new_tag] = section
             section._tag = new_tag  # Update the section's tag
-        
+
         # Replace the old dictionary with the new one
         self._assembly_sections = new_assembly_sections
-    
+
     @staticmethod
     def _snap_points(points: np.ndarray, tol: float = 1e-5) -> np.ndarray:
         """
@@ -250,75 +319,79 @@ class Assembler:
             visited[cluster] = True
 
         return snapped
-    
+
     def get_num_cells(self) -> int:
         """
         return the total number of cells in the assembled mesh
 
-        Args:
-            None
         Returns:
-            positive int: total number of cells
-            negative int: if assembled mesh is None
+            count (int): Assembled cell count, or -1 if no final mesh exists.
         """
         assembled = self._model_assembled_mesh()
         if assembled is None:
             return -1
         return assembled.n_cells
-    
+
     def get_num_points(self) -> int:
         """
         return the total number of points in the assembled mesh
 
-        Args:
-            None
         Returns:
-            positive int: total number of points
-            negative int: if assembled mesh is None
+            count (int): Assembled point count, or -1 if no final mesh exists.
         """
         assembled = self._model_assembled_mesh()
         if assembled is None:
             return -1
         return assembled.n_points
 
-
-    
-    def assemble(self, 
-                 merge_points: bool = True, 
-                 mass_merging: str = "sum",
-                 tolerance: float = 1e-5,
-                 *, 
-                 progress_callback=None) -> None:
+    def assemble(
+        self,
+        merge_points: bool = True,
+        mass_merging: str = "sum",
+        tolerance: float = 1e-5,
+        *,
+        progress_callback: Callable[..., None] | None = None,
+    ) -> None:
         """
         Assemble all registered AssemblySections into a single unified mesh.
-        
+
         This method combines all assembly sections into a single PyVista
         UnstructuredGrid. It preserves important mesh data like element tags,
         material tags, and region information. It also handles partitioning by
         correctly updating the Core cell data to maintain distinct partition ids.
-        
+
         Args:
             merge_points (bool, optional): Whether to merge points during assembly.
                                          If True, points within a small tolerance will
                                          be combined, creating a continuous mesh.
                                          If False, all points are preserved.
                                          Defaults to True.
-                                         
+            mass_merging (str): Mass combination policy for merged nodes,
+                ``sum`` or ``average``. Choose consistently with how source
+                nodal masses represent shared physical contributions.
+            tolerance (float): Point-merging tolerance in model length units.
+            progress_callback (Callable | None): Receives progress value and
+                message. None uses Femora's default progress display.
+
+        Returns:
+            result (None): The result is stored on ``model.assembled_mesh``;
+                this method does not return the grid.
+
         Raises:
             ValueError: If no assembly sections have been created
             Exception: If any error occurs during the assembly process
         """
-        
+
         mesh_maker = self._require_mesh_maker()
         assembly_started_at = time.perf_counter()
         if mesh_maker.assembled_mesh is not None:
             mesh_maker.assembled_mesh = None
-        
+
         if not self._assembly_sections:
             raise ValueError("No assembly sections have been created")
 
         self._print_assembly_start_banner()
-        
+
         # Progress setup
         if progress_callback is None:
             progress_callback = lambda v, msg="": Progress.callback(v, msg, desc="Assembling")
@@ -327,16 +400,18 @@ class Assembler:
 
         # Notify subscribers that assembly is starting
         self._emit_model_event(FemoraEvent.PRE_ASSEMBLE)
-        
+
         sorted_sections = sorted(self._assembly_sections.items(), key=lambda x: x[0])
-        
+
         first_section = sorted_sections[0][1]
         first_mesh = first_section.mesh
         # assert first_mesh is not None, "AssemblySection mesh is None"
         if first_mesh is None:
-            raise ValueError("There is no mesh to assemble. Please create an AssemblySection first.")
-        
-        mesh_maker.assembled_mesh = pv.MultiBlock();
+            raise ValueError(
+                "There is no mesh to assemble. Please create an AssemblySection first."
+            )
+
+        mesh_maker.assembled_mesh = pv.MultiBlock()
         first_block = first_mesh.copy()
         first_block.point_data["MergeInFinal"] = np.full(
             first_block.n_points,
@@ -347,7 +422,7 @@ class Assembler:
         progress_callback(1 / len(sorted_sections) * 70, f"merged section 1/{len(sorted_sections)}")
         num_partitions = first_section.num_partitions
 
-        try :
+        try:
             for idx, (tag, section) in enumerate(sorted_sections[1:], start=2):
                 second_mesh = section.mesh.copy()  # type: ignore[attr-defined]
                 second_mesh.cell_data["Core"] = second_mesh.cell_data["Core"] + num_partitions
@@ -368,7 +443,9 @@ class Assembler:
                 number_of_points_before_cleaning = mesh_maker.assembled_mesh.n_points
 
                 # snap points within tolerance
-                mesh_maker.assembled_mesh.points = self._snap_points(mesh_maker.assembled_mesh.points, tolerance)
+                mesh_maker.assembled_mesh.points = self._snap_points(
+                    mesh_maker.assembled_mesh.points, tolerance
+                )
 
                 # Build a per-point merge key so some sections can be excluded from
                 # the final merge pass.
@@ -398,41 +475,52 @@ class Assembler:
                     progress_bar=False,
                 )
                 # make the ndf array uint16
-                mesh_maker.assembled_mesh.point_data["ndf"] = mesh_maker.assembled_mesh.point_data["ndf"].astype(np.uint16)
+                mesh_maker.assembled_mesh.point_data["ndf"] = mesh_maker.assembled_mesh.point_data[
+                    "ndf"
+                ].astype(np.uint16)
                 # make the MeshPartTag_pointdata array uint16
-                mesh_maker.assembled_mesh.point_data["MeshPartTag_pointdata"] = mesh_maker.assembled_mesh.point_data["MeshPartTag_pointdata"].astype(np.uint16)
-                
+                mesh_maker.assembled_mesh.point_data["MeshPartTag_pointdata"] = (
+                    mesh_maker.assembled_mesh.point_data["MeshPartTag_pointdata"].astype(np.uint16)
+                )
+
                 number_of_points_after_cleaning = mesh_maker.assembled_mesh.n_points
 
                 if mass_merging == "sum":
                     if number_of_points_before_cleaning != number_of_points_after_cleaning:
-                        Mass = np.zeros((number_of_points_after_cleaning, FEMORA_MAX_NDF), dtype=np.float32)
-                        for i in range(mesh_maker.assembled_mesh.field_data["PointMergeMap"].shape[0]):
-                            Mass[mesh_maker.assembled_mesh.field_data["PointMergeMap"][i],:] += mass[i,:]
-                
+                        Mass = np.zeros(
+                            (number_of_points_after_cleaning, FEMORA_MAX_NDF), dtype=np.float32
+                        )
+                        for i in range(
+                            mesh_maker.assembled_mesh.field_data["PointMergeMap"].shape[0]
+                        ):
+                            Mass[
+                                mesh_maker.assembled_mesh.field_data["PointMergeMap"][i], :
+                            ] += mass[i, :]
+
                         mesh_maker.assembled_mesh.point_data["Mass"] = Mass
 
                 del mesh_maker.assembled_mesh.field_data["PointMergeMap"]
 
-
         except Exception as e:
             raise e
-        
+
         # Notify any subscribers that the mesh has been assembled and partitioned
         progress_callback(70, "post-assemble")
         self._emit_model_event(FemoraEvent.POST_ASSEMBLE, assembled_mesh=mesh_maker.assembled_mesh)
         progress_callback(90, "resolving core conflicts")
-        self._emit_model_event(FemoraEvent.RESOLVE_CORE_CONFLICTS, assembled_mesh=mesh_maker.assembled_mesh)
+        self._emit_model_event(
+            FemoraEvent.RESOLVE_CORE_CONFLICTS, assembled_mesh=mesh_maker.assembled_mesh
+        )
 
         progress_callback(100, "done")
         # Announce the number of cores used for assembly
         self._announce_required_cores(elapsed_seconds=time.perf_counter() - assembly_started_at)
         self._print_assembly_complete_banner()
-        
+
     def delete_assembled_mesh(self) -> None:
         """
         Delete the assembled mesh.
-        
+
         Releases memory by deleting the assembled mesh, if it exists.
         This is useful when you want to clear resources or prepare for
         a new assembly operation without affecting the assembly sections.
@@ -482,7 +570,7 @@ class Assembler:
         above_color=None,
         annotations=None,
         pickable=True,
-        preference='point',
+        preference="point",
         log_scale=False,
         pbr=None,
         metallic=None,
@@ -497,18 +585,18 @@ class Assembler:
         edge_opacity=None,
         add_axes=True,
         add_bounding_box=False,
-        show_grid= False,
+        show_grid=False,
         explode=False,
         explode_factor=0.1,
         sperate_beams_solid=False,
-        opacity_beams=1.,
-        opacity_solids=.5,
+        opacity_beams=1.0,
+        opacity_solids=0.5,
         tube_radius=0.05,
-        show_cells_by_type = False,
+        show_cells_by_type=False,
         cells_to_show: Optional[List[int]] = None,
         off_screen: bool = False,
         screenshot: Optional[str] = None,
-        **kwargs
+        **kwargs,
     ) -> None:
         """
         Plot the assembled mesh using PyVista.
@@ -630,7 +718,7 @@ class Assembler:
         explode_factor : float, optional
             Factor to explode blocks apart when style="explode".
         sperate_beams_solid : bool, optional
-            Whether to render beams and solids seperately. 
+            Whether to render beams and solids seperately.
         opacity_beams : float, optional
             Opacity of beams when sperate_beams_solid=True.
         opacity_solids : float, optional
@@ -650,7 +738,7 @@ class Assembler:
         assembled_mesh = self._model_assembled_mesh()
         if assembled_mesh is None:
             raise ValueError("No assembled mesh exists to plot")
-        
+
         # remove the options that are not part of pyvista
         options = locals().copy()
         del options["self"]
@@ -685,19 +773,23 @@ class Assembler:
                 pl.show_grid()
             pl.show(screenshot=screenshot)
             return
-        
+
         # create a dict from all the inputs
         if sperate_beams_solid:
             mesh = assembled_mesh.copy()
             mesh = pv.UnstructuredGrid(mesh)
             beams = mesh.extract_cells_by_type([pv.CellType.LINE, pv.CellType.POLY_LINE])
-            mesh_solids = mesh.extract_cells_by_type([pv.CellType.TETRA, 
-                                                      pv.CellType.HEXAHEDRON,
-                                                      pv.CellType.QUAD, 
-                                                      pv.CellType.WEDGE, 
-                                                      pv.CellType.TRIANGLE, 
-                                                      pv.CellType.VOXEL, 
-                                                      pv.CellType.PIXEL])
+            mesh_solids = mesh.extract_cells_by_type(
+                [
+                    pv.CellType.TETRA,
+                    pv.CellType.HEXAHEDRON,
+                    pv.CellType.QUAD,
+                    pv.CellType.WEDGE,
+                    pv.CellType.TRIANGLE,
+                    pv.CellType.VOXEL,
+                    pv.CellType.PIXEL,
+                ]
+            )
 
             pl = pv.Plotter(off_screen=off_screen)
             del options["opacity"]
@@ -705,7 +797,11 @@ class Assembler:
                 op = options.copy()
                 op["show_edges"] = False
                 op["line_width"] = tube_radius
-                pl.add_mesh(beams, **op, opacity=opacity_beams, )
+                pl.add_mesh(
+                    beams,
+                    **op,
+                    opacity=opacity_beams,
+                )
                 del op
             if mesh_solids.n_cells > 0:
                 options["render_lines_as_tubes"] = False
@@ -719,9 +815,7 @@ class Assembler:
             pl.show(screenshot=screenshot)
             return
 
-        
-            
-        if scalars=="Core":
+        if scalars == "Core":
             scalars = None
             Mesh = assembled_mesh.copy()
 
@@ -731,11 +825,12 @@ class Assembler:
             cores = Mesh.cell_data["Core"]
             mesh = pv.MultiBlock()
             for core in np.unique(cores):
-                core_mesh = Mesh.extract_cells(cores==core)
+                core_mesh = Mesh.extract_cells(cores == core)
                 mesh.append(core_mesh)
 
             pl = pv.Plotter(off_screen=off_screen)
-            pl.add_mesh(mesh,
+            pl.add_mesh(
+                mesh,
                 color=color,
                 style=style,
                 scalars=scalars,
@@ -789,7 +884,8 @@ class Assembler:
                 backface_params=backface_params,
                 show_vertices=show_vertices,
                 edge_opacity=edge_opacity,
-                **kwargs)
+                **kwargs,
+            )
             if add_axes:
                 pl.add_axes()
             if add_bounding_box:
@@ -860,7 +956,7 @@ class Assembler:
                 backface_params=backface_params,
                 show_vertices=show_vertices,
                 edge_opacity=edge_opacity,
-                **kwargs
+                **kwargs,
             )
             if add_axes:
                 pl.add_axes()
@@ -870,32 +966,28 @@ class Assembler:
                 pl.show_grid()
             pl.show(screenshot=screenshot)
             pl.close()
-    
 
     def get_mesh(self) -> Optional[pv.UnstructuredGrid]:
         """
-        Get the assembled mesh.
-        
-        Returns the currently assembled mesh as a PyVista UnstructuredGrid.
-        If no mesh has been assembled yet, returns None.
-        
+        Return a copy of the final assembled mesh, not the live model mesh.
+
+        To intentionally access live mesh arrays, use ``model.assembled_mesh``.
+        A returned copy can be inspected or saved independently.
+
         Returns:
-            Optional[pv.UnstructuredGrid]: The assembled mesh, or None if not yet created
+            mesh (pv.UnstructuredGrid | None): Mesh copy, or None if absent.
         """
         assembled_mesh = self._model_assembled_mesh()
         if assembled_mesh is None:
             return None
-        return assembled_mesh.copy() 
-
+        return assembled_mesh.copy()
 
     # Big announcement box
     def _announce_required_cores(self, elapsed_seconds: Optional[float] = None):
         logging.basicConfig(
             level=logging.INFO,
             format="%(asctime)s [%(levelname)s] %(message)s",
-            handlers=[
-                logging.StreamHandler(sys.stdout)
-            ]
+            handlers=[logging.StreamHandler(sys.stdout)],
         )
         assembled_mesh = self._model_assembled_mesh()
         if assembled_mesh is None:
@@ -923,29 +1015,33 @@ class Assembler:
 
         print(full_message)
 
-    def reset(self):
-        """Clear the assembled mesh and all assembly sections."""
+    def reset(self) -> None:
+        """Clear the final mesh and all section registrations.
+
+        Source mesh parts and their element/material definitions are retained.
+        Recreate sections before assembling again. This does not delete files
+        or clear all model managers; use ``model.clear_model()`` for the latter.
+        """
         self.delete_assembled_mesh()
         self.clear()
-        
-            
+
 
 class AssemblySection:
     """
     A class representing a group of mesh parts combined into a single mesh.
-    
+
     The AssemblySection class takes multiple mesh parts, combines them into a single
     mesh, and optionally partitions the mesh for parallel computing. Section
     registration with the assembler is performed by ``Assembler.create_section(...)``,
     which assigns a unique tag for identification.
-    
+
     This class is responsible for:
     - Validating mesh parts before assembly
     - Merging mesh parts with appropriate metadata
     - Managing degrees of freedom consistency
     - Partitioning the mesh for parallel processing
     - Storing references to elements and materials
-    
+
     Attributes:
         meshparts_list (List[MeshPart]): List of MeshPart objects in this section
         num_partitions (int): Number of partitions for parallel processing
@@ -955,28 +1051,31 @@ class AssemblySection:
         elements (List[Element]): Elements used in this assembly section
         materials (List[Material]): Materials used in this assembly section
         actor: PyVista actor for visualization
-        _tag (int): Unique tag assigned by the Assembler
+        tag (int): Unique tag assigned by the Assembler
     """
+
+    __doc_controls__ = {"summary": True, "members": ["tag", "meshparts", "plot"]}
+
     def __init__(
-        self, 
+        self,
         meshpart_manager,
-        meshparts: List[str], 
-        num_partitions: int = 1, 
-        partition_algorithm: str = "kd-tree", 
+        meshparts: List[str],
+        num_partitions: int = 1,
+        partition_algorithm: str = "kd-tree",
         partitioner: Optional[str] = None,
         merge_points: bool = True,
         merge_in_final: bool = True,
         progress_callback=None,
         mass_merging: str = "sum",
-        tolerance: float = 1e-5,
-    ):
+        tolerance: float = 1e-05,
+    ) -> None:
         """
         Initialize an AssemblySection by combining multiple mesh parts.
-        
+
         This constructor takes a list of mesh part names, validates them, combines them
         into a single mesh, and optionally partitions the result. Registration with
         the assembler happens in ``Assembler.create_section(...)``.
-        
+
         If the partition algorithm is "kd-tree" and num_partitions is not a power of 2,
         it will be automatically rounded up to the next power of 2.
 
@@ -997,8 +1096,8 @@ class AssemblySection:
             merge_points (bool, optional): Whether to merge points that are within a
                                            tolerance distance when assembling mesh parts.
                                            Defaults to True.
-                                           
-        
+
+
         Raises:
             ValueError: If no valid mesh parts are provided, if the partition algorithm
                       is invalid, or if mesh assembly fails
@@ -1006,7 +1105,7 @@ class AssemblySection:
         # Validate and collect mesh parts
         self._meshpart_manager = meshpart_manager
         self.meshparts_list = self._validate_mesh_parts(meshparts)
-        
+
         # Configuration parameters
         self.num_partitions = num_partitions
         if partitioner is not None:
@@ -1015,25 +1114,27 @@ class AssemblySection:
         # Validate partitioner (Femora terminology: partitioner, not OpenSees algorithm)
         PartitionerRegistry.validate(self.partition_algorithm)
 
-        if self.partition_algorithm == "kd-tree" :
-            # If a non-power of two value is specified for 
-            # n_partitions, then the load balancing simply 
+        if self.partition_algorithm == "kd-tree":
+            # If a non-power of two value is specified for
+            # n_partitions, then the load balancing simply
             # uses the power-of-two greater than the requested value
             if self.num_partitions & (self.num_partitions - 1) != 0:
-                self.num_partitions = 2**self.num_partitions.bit_length()
+                self.num_partitions = 2 ** self.num_partitions.bit_length()
 
         # Initialize tag to None
         self._tag = None
         self.merge_points = merge_points
         self.merge_in_final = bool(merge_in_final)
         if mass_merging not in ["sum", "average"]:
-            raise ValueError(f"Invalid mass merging method: {mass_merging}. Must be 'sum' or 'average'.")
+            raise ValueError(
+                f"Invalid mass merging method: {mass_merging}. Must be 'sum' or 'average'."
+            )
         self.mass_merging = mass_merging
-        
+
         # Assembled mesh attributes
         self.mesh: Optional[pv.UnstructuredGrid] = None
-        self.elements : List[Element] = []
-        self.materials : List[Material] = []
+        self.elements: List[Element] = []
+        self.materials: List[Material] = []
         self.tolerance = tolerance
 
         # Assemble the mesh first
@@ -1049,26 +1150,26 @@ class AssemblySection:
     def tag(self) -> int:
         """
         Get the unique tag for this AssemblySection.
-        
+
         The tag is a unique identifier assigned by the assembler when the section
         is registered through ``Assembler.create_section(...)``. It can be used to
         retrieve the section from the assembler later.
-        
+
         Returns:
             int: Unique tag assigned by the Assembler
-        
+
         Raises:
             ValueError: If the section hasn't been successfully added to the Assembler
         """
         if self._tag is None:
             raise ValueError("AssemblySection has not been successfully created")
         return self._tag
-    
+
     def _validate_mesh_parts(self, meshpart_names: List[str]) -> List[MeshPart]:
         """
         Validate and retrieve mesh parts.
-        
-        This internal method checks that all specified mesh part names exist 
+
+        This internal method checks that all specified mesh part names exist
         in the MeshPart registry and retrieves the corresponding MeshPart objects.
         It also verifies that at least one valid mesh part is provided.
 
@@ -1087,13 +1188,11 @@ class AssemblySection:
             if meshpart is None:
                 raise ValueError(f"Mesh with name '{name}' does not exist")
             validated_meshparts.append(meshpart)
-        
+
         if not validated_meshparts:
             raise ValueError("No valid mesh parts were provided")
-        
-        return validated_meshparts
-    
 
+        return validated_meshparts
 
     @staticmethod
     def _snap_points(points, tol=1e-6):
@@ -1117,7 +1216,7 @@ class AssemblySection:
             visited[cluster] = True
 
         return snapped
-    
+
     def _ensure_ndf_array(self, mesh: pv.UnstructuredGrid, default_ndf: int):
         """
         Ensures the mesh has an 'ndf' point data array.
@@ -1126,9 +1225,9 @@ class AssemblySection:
         """
         if "ndf" in mesh.point_data:
             return
-            
+
         n_points = mesh.n_points
-        
+
         # If no ElementTag, we must use the default for all points
         if "ElementTag" not in mesh.cell_data:
             if "ndf" not in mesh.point_data:
@@ -1139,7 +1238,7 @@ class AssemblySection:
         ndf_values = np.full(n_points, default_ndf, dtype=np.uint16)
         element_tags = mesh.cell_data["ElementTag"]
         unique_tags = np.unique(element_tags)
-        
+
         mesh_maker = self._meshpart_manager._mesh_maker
         for tag in unique_tags:
             element = mesh_maker.element.get(tag)
@@ -1153,13 +1252,13 @@ class AssemblySection:
                         end = mesh.offset[cell_idx + 1]
                         pids = mesh.cell_connectivity[start:end]
                         ndf_values[pids] = ele_ndof
-        
+
         mesh.point_data["ndf"] = ndf_values
 
     def _assemble_mesh(self, progress_callback=None):
         """
         Assemble mesh parts into a single mesh.
-        
+
         This internal method performs the actual assembly of mesh parts into a single
         PyVista UnstructuredGrid. It:
         1. Validates degrees of freedom consistency
@@ -1167,7 +1266,7 @@ class AssemblySection:
         3. Adds metadata to the mesh (ElementTag, MaterialTag, Region, etc.)
         4. Merges subsequent mesh parts one by one
         5. Optionally partitions the resulting mesh for parallel processing
-        
+
         The assembled mesh is stored in the 'mesh' attribute, with cell data arrays
         for ElementTag, MaterialTag, Region, and Core (partition ID).
 
@@ -1185,12 +1284,10 @@ class AssemblySection:
                     desc=f"Assembly Section: {len(assembler._assembly_sections) + 1}",
                 )
 
-
-            
         # Start with the first mesh
         first_meshpart = self.meshparts_list[0]
         first_mesh = first_meshpart.mesh.copy()
-        
+
         # Collect elements and materials
         ndf = 0
         if first_meshpart.element:
@@ -1198,20 +1295,20 @@ class AssemblySection:
             matTag = first_meshpart.element.get_material_tag()
             EleTag = first_meshpart.element.tag
             sectionTag = first_meshpart.element.get_section_tag()
-        elif hasattr(first_meshpart, 'ndof'): # Handling CompositeMesh
+        elif hasattr(first_meshpart, "ndof"):  # Handling CompositeMesh
             ndf = first_meshpart.ndof
-            matTag = getattr(first_meshpart, 'material_tag', 0)
-            EleTag = getattr(first_meshpart, 'element_tag', 0)
-            sectionTag = getattr(first_meshpart, 'section_tag', 0)
+            matTag = getattr(first_meshpart, "material_tag", 0)
+            EleTag = getattr(first_meshpart, "element_tag", 0)
+            sectionTag = getattr(first_meshpart, "section_tag", 0)
         else:
-             ndf = FEMORA_MAX_NDF # Default fallback
-             matTag = getattr(first_meshpart, 'material_tag', 0)
-             EleTag = getattr(first_meshpart, 'element_tag', 0)
-             sectionTag = getattr(first_meshpart, 'section_tag', 0)
+            ndf = FEMORA_MAX_NDF  # Default fallback
+            matTag = getattr(first_meshpart, "material_tag", 0)
+            EleTag = getattr(first_meshpart, "element_tag", 0)
+            sectionTag = getattr(first_meshpart, "section_tag", 0)
 
         regionTag = first_meshpart.region.tag
-        meshTag  = first_meshpart.tag
-        
+        meshTag = first_meshpart.tag
+
         # Add initial metadata to the first mesh
         n_cells = first_mesh.n_cells
         n_points = first_mesh.n_points
@@ -1222,16 +1319,16 @@ class AssemblySection:
 
         # add cell and point data - ONLY IF NOT EXISTS
         if "ElementTag" not in first_mesh.cell_data:
-             first_mesh.cell_data["ElementTag"]  = np.full(n_cells, EleTag, dtype=np.uint16)
+            first_mesh.cell_data["ElementTag"] = np.full(n_cells, EleTag, dtype=np.uint16)
         if "MaterialTag" not in first_mesh.cell_data:
-             first_mesh.cell_data["MaterialTag"] = np.full(n_cells, matTag, dtype=np.uint16)
+            first_mesh.cell_data["MaterialTag"] = np.full(n_cells, matTag, dtype=np.uint16)
         if "SectionTag" not in first_mesh.cell_data:
-             first_mesh.cell_data["SectionTag"]  = np.full(n_cells, sectionTag, dtype=np.uint16)
-        
+            first_mesh.cell_data["SectionTag"] = np.full(n_cells, sectionTag, dtype=np.uint16)
+
         self._ensure_ndf_array(first_mesh, ndf)
 
-        first_mesh.cell_data["Region"]      = np.full(n_cells, regionTag, dtype=np.uint16)
-        first_mesh.cell_data["MeshPartTag_celldata"]   = np.full(n_cells, meshTag, dtype=np.uint16)
+        first_mesh.cell_data["Region"] = np.full(n_cells, regionTag, dtype=np.uint16)
+        first_mesh.cell_data["MeshPartTag_celldata"] = np.full(n_cells, meshTag, dtype=np.uint16)
         first_mesh.point_data["MeshPartTag_pointdata"] = np.full(n_points, meshTag, dtype=np.uint16)
         self._meshpart_manager._mesh_maker._assign_femora_part_data(
             first_mesh,
@@ -1246,45 +1343,57 @@ class AssemblySection:
         self.mesh = pv.MultiBlock([first_mesh])  # Start with the first mesh as a MultiBlock
         for idx, meshpart in enumerate(self.meshparts_list[1:], start=2):
             second_mesh = meshpart.mesh.copy()
-            
+
             ndf = 0
             if meshpart.element:
                 ndf = meshpart.element._ndof
                 matTag = meshpart.element.get_material_tag()
                 EleTag = meshpart.element.tag
                 sectionTag = meshpart.element.get_section_tag()
-            elif hasattr(meshpart, 'ndof'):
-                 ndf = meshpart.ndof
-                 matTag = getattr(meshpart, 'material_tag', 0)
-                 EleTag = getattr(meshpart, 'element_tag', 0)
-                 sectionTag = getattr(meshpart, 'section_tag', 0)
+            elif hasattr(meshpart, "ndof"):
+                ndf = meshpart.ndof
+                matTag = getattr(meshpart, "material_tag", 0)
+                EleTag = getattr(meshpart, "element_tag", 0)
+                sectionTag = getattr(meshpart, "section_tag", 0)
             else:
-                 ndf = FEMORA_MAX_NDF
-                 matTag = getattr(meshpart, 'material_tag', 0)
-                 EleTag = getattr(meshpart, 'element_tag', 0)
-                 sectionTag = getattr(meshpart, 'section_tag', 0)
+                ndf = FEMORA_MAX_NDF
+                matTag = getattr(meshpart, "material_tag", 0)
+                EleTag = getattr(meshpart, "element_tag", 0)
+                sectionTag = getattr(meshpart, "section_tag", 0)
 
             regionTag = meshpart.region.tag
-            meshTag  = meshpart.tag
-            n_cells_second  = second_mesh.n_cells
+            meshTag = meshpart.tag
+            n_cells_second = second_mesh.n_cells
             n_points_second = second_mesh.n_points
             if "Mass" not in second_mesh.point_data:
-                second_mesh.point_data["Mass"] = np.zeros((n_points_second, FEMORA_MAX_NDF), dtype=np.float32)
+                second_mesh.point_data["Mass"] = np.zeros(
+                    (n_points_second, FEMORA_MAX_NDF), dtype=np.float32
+                )
             # add cell and point data to the second mesh
             if "ElementTag" not in second_mesh.cell_data:
-                second_mesh.cell_data["ElementTag"]  = np.full(n_cells_second, EleTag, dtype=np.uint16)
+                second_mesh.cell_data["ElementTag"] = np.full(
+                    n_cells_second, EleTag, dtype=np.uint16
+                )
             if "MaterialTag" not in second_mesh.cell_data:
-                second_mesh.cell_data["MaterialTag"] = np.full(n_cells_second, matTag, dtype=np.uint16)
-            
+                second_mesh.cell_data["MaterialTag"] = np.full(
+                    n_cells_second, matTag, dtype=np.uint16
+                )
+
             if "SectionTag" not in second_mesh.cell_data:
-                second_mesh.cell_data["SectionTag"]  = np.full(n_cells_second, sectionTag, dtype=np.uint16)
-            
+                second_mesh.cell_data["SectionTag"] = np.full(
+                    n_cells_second, sectionTag, dtype=np.uint16
+                )
+
             self._ensure_ndf_array(second_mesh, ndf)
 
-            second_mesh.cell_data["Region"]      = np.full(n_cells_second, regionTag, dtype=np.uint16)
-            
-            second_mesh.cell_data["MeshPartTag_celldata"]   = np.full(n_cells_second, meshTag, dtype=np.uint16)
-            second_mesh.point_data["MeshPartTag_pointdata"] = np.full(n_points_second, meshTag, dtype=np.uint16)
+            second_mesh.cell_data["Region"] = np.full(n_cells_second, regionTag, dtype=np.uint16)
+
+            second_mesh.cell_data["MeshPartTag_celldata"] = np.full(
+                n_cells_second, meshTag, dtype=np.uint16
+            )
+            second_mesh.point_data["MeshPartTag_pointdata"] = np.full(
+                n_points_second, meshTag, dtype=np.uint16
+            )
             self._meshpart_manager._mesh_maker._assign_femora_part_data(
                 second_mesh,
                 kind="meshpart",
@@ -1296,10 +1405,9 @@ class AssemblySection:
             perc = idx / n_sections * 100
             progress_callback(perc, f"merged meshpart {idx}/{n_sections}")
 
-        
         self.mesh = self.mesh.combine(
-            merge_points = False,
-            tolerance = 1e-5,
+            merge_points=False,
+            tolerance=1e-5,
         )
         if self.merge_points:
             mass = None
@@ -1323,7 +1431,9 @@ class AssemblySection:
             # make the ndf array uint16
             self.mesh.point_data["ndf"] = self.mesh.point_data["ndf"].astype(np.uint16, copy=False)
             # make the MeshPartTag_pointdata array uint16
-            self.mesh.point_data["MeshPartTag_pointdata"] = self.mesh.point_data["MeshPartTag_pointdata"].astype(np.uint16, copy=False)
+            self.mesh.point_data["MeshPartTag_pointdata"] = self.mesh.point_data[
+                "MeshPartTag_pointdata"
+            ].astype(np.uint16, copy=False)
 
             if self.mass_merging == "sum":
                 merge_map = np.asarray(self.mesh.field_data["PointMergeMap"]).reshape(-1)
@@ -1337,7 +1447,6 @@ class AssemblySection:
                 self.mesh.point_data["Mass"] = Mass
 
             del self.mesh.field_data["PointMergeMap"]
-
 
         # partition the mesh
         self.mesh.cell_data["Core"] = np.zeros(self.mesh.n_cells, dtype=int)
@@ -1353,33 +1462,34 @@ class AssemblySection:
     def meshparts(self) -> List[str]:
         """
         Get the names of mesh parts in this AssemblySection.
-        
+
         This property returns a list of the user-friendly names of all mesh parts
         included in this assembly section. These are the names that were originally
         provided when creating the mesh parts.
-        
+
         Returns:
             List[str]: Names of mesh parts included in this assembly section
         """
         return [meshpart.user_name for meshpart in self.meshparts_list]
-    
-    def assign_actor(self, actor) -> None:
+
+    def assign_actor(self, actor: Any) -> None:
         """
         Assign a PyVista actor to the assembly section.
-        
+
         This method associates a visualization actor with the assembly section,
         which can be used for rendering the mesh in a visualization pipeline.
-        
+
         Args:
             actor: PyVista actor to assign to this assembly section for visualization
         """
         self.actor = actor
 
-    def plot(self, off_screen: bool = False, screenshot: Optional[str] = None, **kwargs) -> None:
-
+    def plot(
+        self, off_screen: bool = False, screenshot: Optional[str] = None, **kwargs: Any
+    ) -> None:
         """
         Plot the assembled mesh using PyVista.
-        
+
         This method visualizes the assembled mesh for the assembly section.
         It uses the PyVista plotting capabilities to render the mesh with
         optional parameters for customization.
@@ -1387,25 +1497,10 @@ class AssemblySection:
         Args:
             off_screen (bool): Render off-screen.
             screenshot (str): File path to save the screenshot.
-            **kwargs: Additional keyword arguments to customize the plot (e.g., color, opacity)
-        
+            **kwargs (Any): Additional keyword arguments to customize the plot (e.g., color, opacity)
+
         """
         if self.mesh is None:
             raise ValueError("Mesh has not been assembled yet")
         else:
             self.mesh.plot(off_screen=off_screen, screenshot=screenshot, **kwargs)
-        
-        
-
-
-
-
-
-
-
-
-
-
-
-
-

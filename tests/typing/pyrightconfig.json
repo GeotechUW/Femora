@@ -1,0 +1,7 @@
+{
+  "include": ["core_factories.py", "core_factories_invalid.py"],
+  "extraPaths": ["../../src"],
+  "pythonVersion": "3.11",
+  "typeCheckingMode": "basic",
+  "reportMissingTypeStubs": false
+}

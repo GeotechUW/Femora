@@ -12,7 +12,15 @@ from typing import Optional
 
 
 class AnalysisComponent(ABC):
-    """Base class for OpenSees analysis stack components."""
+    """Extension contract for an OpenSees solution-stack definition.
+
+    Concrete algorithms, handlers, systems, tests, and integrators render their
+    commands through to_tcl(). Prefer ``model.analysis`` factory namespaces for
+    ordinary construction. Component registry tags are Python bookkeeping, not
+    model node/cell IDs or proof of solver-build support.
+    """
+
+    __doc_controls__ = {"summary": True, "members": ["to_tcl"]}
 
     def __init__(self) -> None:
         self.tag: Optional[int] = None
@@ -20,6 +28,12 @@ class AnalysisComponent(ABC):
 
     @abstractmethod
     def to_tcl(self) -> str:
+        """Return the concrete solver configuration command without executing it.
+
+        Returns:
+            command (str): Tcl supplied by the subclass. This base does not
+                configure an active solver or perform an analysis step.
+        """
         raise NotImplementedError
 
 

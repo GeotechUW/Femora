@@ -19,9 +19,26 @@ if TYPE_CHECKING:
 
 
 class MaskManager:
-    """Model-owned post-assembly query service over the assembled mesh."""
+    """Query an assembled-mesh snapshot through ``model.mask``.
 
-    def __init__(self, mesh_maker: "Model"):
+    ``nodes`` and ``elements`` start fluent selections provided by the mask
+    components. Access requires assembly. The manager builds a cached index
+    from copied mesh data after assembly, or lazily on the first query.
+
+    The index stores mesh identifiers and export tag origins separately; use
+    the concrete mask's explicit conversion methods rather than assuming a
+    zero-based point/cell identifier is a solver tag.
+
+    Note:
+        Direct edits to the live assembled mesh or export tag origins do not
+        automatically refresh an existing snapshot. Call ``clear()`` and start
+        new queries to rebuild it; previously returned masks keep their snapshot.
+        Mask queries do not alter mesh connectivity or apply boundary conditions.
+    """
+
+    __doc_controls__ = {"summary": True, "members": ["nodes", "elements", "clear"]}
+
+    def __init__(self, mesh_maker: "Model") -> None:
         from femora.core.model import Model as ModelClass
 
         if not isinstance(mesh_maker, ModelClass):
@@ -31,19 +48,20 @@ class MaskManager:
         self._events_subscribed = False
 
     def register_events(self) -> None:
+        """Install the internal post-assembly index-refresh subscription.
+
+        Model manages this hook; it is not part of the ordinary query workflow.
+        """
         if self._events_subscribed:
             return
-        self._mesh_maker.events.subscribe(
-            FemoraEvent.POST_ASSEMBLE, self._handle_post_assemble
-        )
+        self._mesh_maker.events.subscribe(FemoraEvent.POST_ASSEMBLE, self._handle_post_assemble)
         self._events_subscribed = True
 
     def unregister_events(self) -> None:
+        """Release the internal index-refresh hook during model lifecycle cleanup."""
         if not self._events_subscribed:
             return
-        self._mesh_maker.events.unsubscribe(
-            FemoraEvent.POST_ASSEMBLE, self._handle_post_assemble
-        )
+        self._mesh_maker.events.unsubscribe(FemoraEvent.POST_ASSEMBLE, self._handle_post_assemble)
         self._events_subscribed = False
 
     def clear(self) -> None:
@@ -79,11 +97,27 @@ class MaskManager:
 
     @property
     def nodes(self) -> NodeMask:
+        """Start a NodeMask containing all nodes of the cached mesh snapshot.
+
+        Raises:
+            RuntimeError: No assembled mesh is available to build an index.
+
+        A new selection object is returned for each access, sharing the cached
+        index. Query methods are documented on the concrete NodeMask component.
+        """
         mesh = self._require_index()
         return NodeMask(mesh, mesh.node_ids)
 
     @property
     def elements(self) -> ElementMask:
+        """Start an ElementMask containing all elements of the cached snapshot.
+
+        Raises:
+            RuntimeError: No assembled mesh is available to build an index.
+
+        The returned selection shares the index, not the live mutable mesh.
+        Inspect ElementMask's identifier/tag conventions before exporting selections.
+        """
         mesh = self._require_index()
         return ElementMask(mesh, mesh.element_ids)
 
@@ -103,7 +137,9 @@ class MaskManager:
         ncells = int(grid.n_cells)
         elem_tags = grid.cell_data.get("ElementTag")
         element_ids = (
-            np.asarray(elem_tags, dtype=int) if elem_tags is not None else np.arange(ncells, dtype=int)
+            np.asarray(elem_tags, dtype=int)
+            if elem_tags is not None
+            else np.arange(ncells, dtype=int)
         )
 
         offsets = np.asarray(grid.offset)

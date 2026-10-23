@@ -27,7 +27,9 @@ class Pattern(ABC):
         pattern_type: OpenSees pattern type name used by concrete classes.
     """
 
-    def __init__(self, pattern_type: str):
+    __doc_controls__ = {"summary": True, "members": ["to_tcl"]}
+
+    def __init__(self, pattern_type: str) -> None:
         self.tag: Optional[int] = None
         self._owner: object | None = None
         self.pattern_type = pattern_type

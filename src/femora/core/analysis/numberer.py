@@ -18,6 +18,8 @@ class Numberer(AnalysisComponent):
     Numberers map structural node and equation definitions to solver system indices.
     """
 
+    __doc_controls__ = {"summary": True, "members": ["register_numberer", "get_available_types"]}
+
     _numberers: Dict[str, Type["Numberer"]] = {}
 
     def __init__(self) -> None:

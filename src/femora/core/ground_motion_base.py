@@ -33,7 +33,9 @@ class GroundMotion(ABC):
             ``"Interpolated"``.
     """
 
-    def __init__(self, motion_type: str):
+    __doc_controls__ = {"summary": True, "members": ["to_tcl"]}
+
+    def __init__(self, motion_type: str) -> None:
         """Initialize common ground-motion state.
 
         Args:

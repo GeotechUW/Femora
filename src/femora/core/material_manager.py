@@ -29,9 +29,42 @@ class MaterialManager:
 
     Raises:
         TypeError: If *mesh_maker* is not a :class:`Model` instance.
+
+    Attributes:
+        nd (NDMaterialManager): Factories available through ``model.material.nd``.
+        uniaxial (UniaxialMaterialManager): Factories through
+            ``model.material.uniaxial``. Both namespaces share this registry.
+
+    Example:
+        ```python
+        from femora import Model
+
+        model = Model()
+        steel = model.material.uniaxial.elastic(user_name="steel", E=200e6)
+        assert model.material.get(steel.tag) is steel
+        assert model.material.get_by_name("steel") is steel
+        ```
+
+    Warning:
+        Removal and start-tag changes can retag surviving objects. Do not
+        treat a cached integer tag as a persistent identifier across edits.
+        Use object references or unique names while constructing the model.
     """
 
-    def __init__(self, mesh_maker: Model):
+    __doc_controls__ = {
+        "summary": True,
+        "members": [
+            "add",
+            "get",
+            "get_by_name",
+            "get_all",
+            "remove",
+            "clear",
+            "set_tag_start",
+        ],
+    }
+
+    def __init__(self, mesh_maker: Model) -> None:
         from femora.core.model import Model as ModelClass
 
         if not isinstance(mesh_maker, ModelClass):
@@ -73,28 +106,47 @@ class MaterialManager:
             raise ValueError(f"Material user_name '{material.user_name}' already exists")
 
         try:
-            material.tag = self._tagging.assign_tag(
-                self._materials, material, self._start_tag
-            )
+            material.tag = self._tagging.assign_tag(self._materials, material, self._start_tag)
         except ValueError as exc:
-            raise ValueError(
-                f"Material tag {material.tag} already exists"
-            ) from exc
+            raise ValueError(f"Material tag {material.tag} already exists") from exc
 
         self._materials[material.tag] = material
         self._names[material.user_name] = material
         return material
 
     def get(self, tag: int) -> Optional[Material]:
-        """Return the material with *tag* if it exists, otherwise ``None``."""
+        """Look up a material by its current manager-assigned tag.
+
+        Args:
+            tag (int): Tag, converted with ``int(tag)`` before lookup.
+
+        Returns:
+            Material | None: Registered object, or None if the tag is absent.
+
+        Raises:
+            TypeError: The supplied value cannot be converted to an integer.
+            ValueError: Integer conversion fails for the supplied value.
+        """
         return self._materials.get(int(tag))
 
     def get_by_name(self, name: str) -> Optional[Material]:
-        """Return the material with *user_name* == *name*, or ``None``."""
+        """Look up a registered material by its exact user name.
+
+        Args:
+            name (str): Case-sensitive registered ``user_name``.
+
+        Returns:
+            Material | None: Matching object or None. No material is created.
+        """
         return self._names.get(name)
 
     def get_all(self) -> Dict[int, Material]:
-        """Return a shallow copy of all managed materials keyed by tag."""
+        """Return a shallow registry snapshot keyed by current integer tag.
+
+        Returns:
+            dict[int, Material]: New dictionary containing the original objects.
+            Editing its keys does not edit the manager; changing an object does.
+        """
         return dict(self._materials)
 
     def remove(self, tag: int) -> None:
@@ -111,7 +163,12 @@ class MaterialManager:
             self._reassign_tags()
 
     def clear(self) -> None:
-        """Remove all materials and clear their assigned tags."""
+        """Detach every material, clear its tag, and empty both lookup indices.
+
+        This does not remove elements or sections referring to those objects,
+        clear the whole Model, or execute an OpenSees command. Detached objects
+        must be registered again before rendering tag-dependent definitions.
+        """
         for material in list(self._materials.values()):
             material.tag = None
             material._owner = None

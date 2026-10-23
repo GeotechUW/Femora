@@ -20,7 +20,7 @@ def test_results_navigation_icons_are_scoped_and_preserve_metadata():
     leaf = SimpleNamespace(title="ResultSet", meta={"title": "ResultSet"}, children=None)
     reading = SimpleNamespace(title="Reading Results", children=[leaf])
     results = SimpleNamespace(title="Results & Postprocessing", children=[reading])
-    other = SimpleNamespace(title="core", children=[])
+    other = SimpleNamespace(title="io", children=[])
     context = {"nav": [other, results]}
     assert hook["on_page_context"](context) is context
     assert results.meta["icon"] == "material/chart-line"

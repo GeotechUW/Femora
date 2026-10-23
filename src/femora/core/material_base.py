@@ -26,10 +26,21 @@ class Material(ABC):
     Attributes:
         tag: Manager-assigned OpenSees material tag.  Remains ``None`` until
             this object is added to a :class:`~femora.core.material_manager.MaterialManager`.
-        _owner: Reference to the owning manager, or ``None`` when unmanaged.
+        user_name (str): Label used by the manager's name lookup.
+        params (dict[str, Any]): Concrete component parameter storage.
     """
 
-    def __init__(self, material_type: str, material_name: str, user_name: str):
+    __doc_controls__ = {
+        "summary": True,
+        "members": [
+            "to_tcl",
+            "updateMaterialStage",
+            "set_parameter",
+            "get_param",
+        ],
+    }
+
+    def __init__(self, material_type: str, material_name: str, user_name: str) -> None:
         self.tag: Optional[int] = None
         self._owner: object | None = None
         self.material_type = material_type
@@ -52,7 +63,15 @@ class Material(ABC):
 
     @abstractmethod
     def to_tcl(self) -> str:
-        """Render the OpenSees material definition command as a Tcl string."""
+        """Render a material definition without executing it.
+
+        Returns:
+            str: Concrete solver definition using the assigned material tag.
+
+        Note:
+            Subclasses implement this contract. Register the material before
+            rendering; concrete implementations commonly require a tag.
+        """
         raise NotImplementedError
 
     # ------------------------------------------------------------------
@@ -60,7 +79,15 @@ class Material(ABC):
     # ------------------------------------------------------------------
 
     def updateMaterialStage(self, state: str) -> str:
-        """Return an ``updateMaterialStage`` Tcl command, or empty string."""
+        """Optionally render a stage transition for a constitutive model.
+
+        Args:
+            state (str): Stage selector interpreted by the concrete material.
+
+        Returns:
+            str: Empty string in this base implementation. Stage-capable
+            subclasses override this hook; arbitrary materials are not converted.
+        """
         return ""
 
     def set_parameter(
@@ -69,11 +96,31 @@ class Material(ABC):
         new_value: Union[float, int, str, None] = None,
         element_tags: Optional[List[int]] = None,
     ) -> str:
-        """Return a ``setParameter`` Tcl command, or empty string."""
+        """Optionally render a material-specific parameter update.
+
+        Args:
+            parameter_name (str): Solver parameter name.
+            new_value (float | int | str | None): Optional new value.
+            element_tags (list[int] | None): Element targets for the command.
+
+        Returns:
+            str: Empty string in this base implementation. Concrete overrides
+            determine supported parameters and command syntax.
+        """
         return ""
 
     def get_param(self, key: str) -> Any:
-        """Return the value of a stored parameter by key."""
+        """Read a value from the concrete material's parameter dictionary.
+
+        Args:
+            key (str): Exact parameter key; no alias normalization is applied.
+
+        Returns:
+            Any: Stored value, without copying it.
+
+        Raises:
+            KeyError: The key is absent from ``params``.
+        """
         return self.params[key]
 
     # ------------------------------------------------------------------

@@ -45,13 +45,30 @@ class Section(ABC):
         _owner: Reference to the owning manager, or ``None`` when unmanaged.
     """
 
-    def __init__(self, section_type: str, section_name: str, user_name: str):
+    __doc_controls__ = {
+        "summary": True,
+        "members": [
+            "to_tcl",
+            "resolve_material",
+            "resolve_materials_dict",
+            "resolve_section",
+            "resolve_material_reference",
+            "get_materials",
+            "has_material",
+            "get_area",
+            "get_Iy",
+            "get_Iz",
+            "get_J",
+        ],
+    }
+
+    def __init__(self, section_type: str, section_name: str, user_name: str) -> None:
         self.tag: Optional[int] = None
         self._owner: Optional[Any] = None  # Should be SectionManager
         self.section_type = section_type
         self.section_name = section_name
         self.user_name = user_name
-        
+
         # Base class material placeholder
         self.material: Optional[Material] = None
 
@@ -77,8 +94,22 @@ class Section(ABC):
         """
         raise NotImplementedError
 
-    def resolve_material(self, material_input: Union[int, str, "Material", None]) -> Optional["Material"]:
-        """Resolve material using the owner manager when possible."""
+    def resolve_material(
+        self, material_input: Union[int, str, "Material", None]
+    ) -> Optional["Material"]:
+        """Resolve a material object, tag, or name in this section's context.
+
+        Args:
+            material_input (int | str | Material | None): Material reference.
+                Objects pass through unchanged and None remains None.
+
+        Returns:
+            material (Material | None): Resolved dependency without copying.
+
+        Raises:
+            ValueError: A name/tag cannot be resolved, or no owner is available
+                to perform the lookup. Direct objects do not require an owner.
+        """
         if material_input is None:
             return None
 
@@ -98,11 +129,34 @@ class Section(ABC):
     def resolve_materials_dict(
         self, materials_input: Dict[str, Union[int, str, "Material"]]
     ) -> Dict[str, "Material"]:
-        """Resolve a dictionary of material references."""
+        """Resolve each value of a dependency mapping, preserving its keys.
+
+        Args:
+            materials_input (dict[str, int | str | Material]): Named references
+                interpreted by ``resolve_material``.
+
+        Returns:
+            materials (dict[str, Material]): New mapping containing resolved
+                objects. Lookup failures propagate; input is not mutated.
+        """
         return {key: self.resolve_material(value) for key, value in materials_input.items()}
 
-    def resolve_section(self, section_input: Union[int, str, "Section", None]) -> Optional["Section"]:
-        """Resolve another section using the owner manager when possible."""
+    def resolve_section(
+        self, section_input: Union[int, str, "Section", None]
+    ) -> Optional["Section"]:
+        """Resolve a section object, integer tag, or user name.
+
+        Args:
+            section_input (int | str | Section | None): Dependency reference.
+
+        Returns:
+            section (Section | None): Direct object, looked-up section, or None
+                for None input. Existing objects are neither copied nor registered.
+
+        Raises:
+            ValueError: Lookup fails or an unmanaged section is asked to resolve
+                a name/tag without an owning manager.
+        """
         if section_input is None:
             return None
         if isinstance(section_input, Section):
@@ -117,9 +171,20 @@ class Section(ABC):
 
     @staticmethod
     def resolve_material_reference(
-        material_input: Union[int, str, "Material", None]
+        material_input: Union[int, str, "Material", None],
     ) -> Optional["Material"]:
-        """Resolve a material object passed directly to an unmanaged section."""
+        """Accept a direct material object without a manager lookup.
+
+        Args:
+            material_input (int | str | Material | None): Only Material objects
+                and None can be resolved by this context-free helper.
+
+        Returns:
+            material (Material | None): Original object, or None.
+
+        Raises:
+            ValueError: A name, tag, or other unsupported value is supplied.
+        """
         if material_input is None:
             return None
 
@@ -131,33 +196,61 @@ class Section(ABC):
         raise ValueError(_UNMANAGED_MATERIAL_MSG)
 
     def get_materials(self) -> List["Material"]:
-        """Return materials used by this section for dependency tracking."""
+        """Return this base section's direct material dependency as a new list.
+
+        The base returns ``[self.material]`` or an empty list. Composite/fiber
+        implementations override this hook to report their own dependencies.
+        Material objects are shared, not copied.
+        """
         if self.material is not None:
             return [self.material]
         return []
 
     def has_material(self) -> bool:
-        """Return True when this section depends on a material."""
+        """Report whether the base ``material`` attribute is non-None.
+
+        Concrete section families may override this hook. The base does not
+        search arbitrary nested sections or fiber collections.
+        """
         return self.material is not None
 
     def get_area(self) -> float:
-        """Return cross-sectional area when the section provides it."""
+        """Return section area in squared model length units.
+
+        The base returns 0.0 as a fallback, not an integrated geometric result.
+        Implementations with area information must override the hook.
+        """
         return 0.0
 
     def get_Iy(self) -> float:
-        """Return second moment of area about local y when available."""
+        """Return the local-y second moment in length-to-the-fourth units.
+
+        The base returns 0.0. A concrete section must override this method when
+        a consuming element requires its bending property.
+        """
         return 0.0
 
     def get_Iz(self) -> float:
-        """Return second moment of area about local z when available."""
+        """Return the local-z second moment in length-to-the-fourth units.
+
+        The base returns 0.0 rather than deriving geometry from materials or
+        discretized fibers. Concrete implementations supply the property.
+        """
         return 0.0
 
     def get_J(self) -> float:
-        """Return torsional constant when the section provides it."""
+        """Return the torsional constant in length-to-the-fourth units.
+
+        The base returns 0.0. This hook is not an automatic polar-inertia or
+        warping calculation; concrete section implementations determine it.
+        """
         return 0.0
 
     def __str__(self) -> str:
         tag = self.tag if self.tag is not None else "unmanaged"
-        material_info = f", Material: {self.material.user_name}" if self.material else ", No Material"
-        return (f"Section '{self.user_name}' (Tag: {tag}, Type: {self.section_name}"
-                f"{material_info})")
+        material_info = (
+            f", Material: {self.material.user_name}" if self.material else ", No Material"
+        )
+        return (
+            f"Section '{self.user_name}' (Tag: {tag}, Type: {self.section_name}" f"{material_info})"
+        )

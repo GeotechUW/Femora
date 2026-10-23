@@ -8,17 +8,30 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Dict, Iterable, Optional
+from typing import TYPE_CHECKING, Dict, Iterable, Optional, Sequence
 
 import numpy as np
+from numpy.typing import ArrayLike
 
 if TYPE_CHECKING:
     from femora.core.model import Model
+    from femora.core.meshpart_base import MeshPart
 
 
 @dataclass
 class Group:
-    """Named Femora selection owned by one model."""
+    """Common record for a named model selection.
+
+    Args:
+        name (str): Nonempty label. Registration can suffix it to avoid duplicates.
+
+    Attributes:
+        tag (int | None): Optional solver-region identity for element groups.
+            It is not a mesh point/cell index. Ordinary scripts create concrete
+            groups through ``model.group.element`` or ``model.group.node``.
+    """
+
+    __doc_controls__ = {"members": []}
 
     name: str
     tag: Optional[int] = field(default=None, init=False)
@@ -28,12 +41,27 @@ class Group:
             raise ValueError("Group name must not be empty")
 
     def assign_tag(self, tag: int) -> None:
+        """Store an integer-converted group tag for manager/export bookkeeping.
+
+        This does not register the object or detect conflicts with solver regions.
+        """
         self.tag = int(tag)
 
 
 @dataclass
 class ElementGroup(Group):
-    """Named selection of assembled mesh cells."""
+    """Named nonempty selection of zero-based assembled cell indices.
+
+    Args:
+        name (str): Group label.
+        cell_indices (ArrayLike): One-dimensional, nonempty, nonnegative indices.
+
+    Construction checks index shape/sign but cannot check bounds against a model.
+    Use the current export cell-tag mapping when converting to solver tags.
+    Rebuilding/reordering the mesh does not automatically update this selection.
+    """
+
+    __doc_controls__ = {"summary": True, "members": ["element_tags", "to_tcl"]}
 
     cell_indices: np.ndarray = None
 
@@ -48,6 +76,18 @@ class ElementGroup(Group):
             raise ValueError("ElementGroup cell_indices must be non-negative")
 
     def element_tags(self, export_element_tags: Iterable[int]) -> list[int]:
+        """Map selected cells through an explicitly supplied export-tag sequence.
+
+        Args:
+            export_element_tags (Iterable[int]): Solver tag per assembled cell,
+                in the same cell order used when creating this group.
+
+        Returns:
+            tags (list[int]): Solver tags in selection order, preserving duplicates.
+
+        Raises:
+            ValueError: A selected index exceeds the mapping length.
+        """
         tags = np.asarray(list(export_element_tags), dtype=np.int64)
         if np.any(self.cell_indices >= tags.size):
             raise ValueError(
@@ -56,6 +96,17 @@ class ElementGroup(Group):
         return [int(tag) for tag in tags[self.cell_indices]]
 
     def to_tcl(self, export_element_tags: Iterable[int]) -> str:
+        """Render this group as an OpenSees element region.
+
+        Args:
+            export_element_tags (Iterable[int]): Current solver tag per assembled cell.
+
+        Returns:
+            command (str): Region-definition Tcl, not an executed selection.
+
+        Raises:
+            ValueError: No group tag is assigned or a cell index is out of range.
+        """
         if self.tag is None:
             raise ValueError(f"ElementGroup '{self.name}' has no OpenSees region tag")
         elements = " ".join(str(tag) for tag in self.element_tags(export_element_tags))
@@ -64,7 +115,18 @@ class ElementGroup(Group):
 
 @dataclass
 class NodeGroup(Group):
-    """Named selection of assembled mesh point indices."""
+    """Named nonempty selection of zero-based assembled point indices.
+
+    Args:
+        name (str): Group label.
+        point_indices (ArrayLike): One-dimensional, nonempty, nonnegative indices.
+
+    These are not solver node tags. Bounds against a particular mesh are not
+    checked at construction. This class does not implement Tcl region rendering;
+    do not assume it has the same export capabilities as ElementGroup.
+    """
+
+    __doc_controls__ = {"members": []}
 
     point_indices: np.ndarray = None
 
@@ -80,29 +142,71 @@ class NodeGroup(Group):
 
 
 class ElementGroupNamespace:
-    def __init__(self, manager: GroupManager):
+    """Create/retrieve cell selections through ``model.group.element``."""
+
+    __doc_controls__ = {
+        "summary": True,
+        "members": ["from_cells", "from_meshparts", "add", "get", "get_all"],
+    }
+
+    def __init__(self, manager: GroupManager) -> None:
         self._manager = manager
 
     def add(self, group: ElementGroup) -> ElementGroup:
+        """Register a group, suffixing duplicate names and assigning a region tag.
+
+        Args:
+            group (ElementGroup): Selection record to retain. A preassigned tag
+                is retained; callers must not introduce region-tag conflicts.
+
+        Returns:
+            group (ElementGroup): Same object, possibly with a changed name.
+        """
         return self._manager._add_element_group(group)
 
     def get(self, name: str) -> Optional[ElementGroup]:
+        """Return an element group by exact registered name, or None when absent."""
         group = self._manager._element_groups.get(name)
         return group if isinstance(group, ElementGroup) else None
 
     def get_all(self) -> Dict[str, ElementGroup]:
+        """Return a shallow name-to-group snapshot with shared selection objects."""
         return dict(self._manager._element_groups)
 
-    def from_cells(self, name: str, cell_indices) -> ElementGroup:
+    def from_cells(self, name: str, cell_indices: ArrayLike) -> ElementGroup:
+        """Construct and register a group from zero-based assembled cell indices.
+
+        Args:
+            name (str): Preferred group label; duplicates receive numeric suffixes.
+            cell_indices (ArrayLike): Nonempty one-dimensional nonnegative indices.
+
+        Returns:
+            group (ElementGroup): Registered group. This factory does not verify
+                assembly existence or upper index bounds; rendering checks bounds.
+        """
         return self.add(ElementGroup(name=name, cell_indices=cell_indices))
 
     def from_meshparts(
         self,
         name: str,
-        meshparts,
+        meshparts: str | MeshPart | Sequence[str | MeshPart],
         *,
         line_cells_only: bool = False,
     ) -> ElementGroup:
+        """Select current assembled cells belonging to registered mesh parts.
+
+        Args:
+            name (str): Preferred group label.
+            meshparts (str | MeshPart | Sequence): Part names/objects or a collection.
+            line_cells_only (bool): Restrict matches to recognized line cell types.
+
+        Returns:
+            group (ElementGroup): Registered selection using current cell order.
+
+        Raises:
+            ValueError: Assembly, part, required metadata, or matching cells are absent.
+            TypeError: A part reference has an unsupported type.
+        """
         mesh = self._manager._mesh_maker.assembled_mesh
         if mesh is None:
             raise ValueError("Element group creation requires an assembled mesh")
@@ -124,27 +228,76 @@ class ElementGroupNamespace:
 
 
 class NodeGroupNamespace:
-    def __init__(self, manager: GroupManager):
+    """Create/retrieve point selections through ``model.group.node``."""
+
+    __doc_controls__ = {"summary": True, "members": ["from_points", "add", "get", "get_all"]}
+
+    def __init__(self, manager: GroupManager) -> None:
         self._manager = manager
 
     def add(self, group: NodeGroup) -> NodeGroup:
+        """Register a node selection, suffixing its name if already used.
+
+        Args:
+            group (NodeGroup): Selection object to retain.
+
+        Returns:
+            group (NodeGroup): Same object with its final registry name. No solver
+                node-region tag or Tcl definition is generated by this registration.
+        """
         return self._manager._add_node_group(group)
 
     def get(self, name: str) -> Optional[NodeGroup]:
+        """Return a node group by exact registered name, or None when absent."""
         group = self._manager._node_groups.get(name)
         return group if isinstance(group, NodeGroup) else None
 
     def get_all(self) -> Dict[str, NodeGroup]:
+        """Return a shallow name-to-group snapshot with shared selection objects."""
         return dict(self._manager._node_groups)
 
-    def from_points(self, name: str, point_indices) -> NodeGroup:
+    def from_points(self, name: str, point_indices: ArrayLike) -> NodeGroup:
+        """Construct and register a selection of assembled point indices.
+
+        Args:
+            name (str): Preferred label; duplicate labels receive numeric suffixes.
+            point_indices (ArrayLike): Nonempty nonnegative one-dimensional indices.
+
+        Returns:
+            group (NodeGroup): Stored selection. Assembly existence and upper
+                index bounds are not validated by this factory.
+        """
         return self.add(NodeGroup(name=name, point_indices=point_indices))
 
 
 class GroupManager:
-    """Owns named node and element selections for one model."""
+    """Own named selections through ``model.group``.
 
-    def __init__(self, mesh_maker: Model):
+    Attributes:
+        element (ElementGroupNamespace): Cell selections and exportable element groups.
+        node (NodeGroupNamespace): Point selection records.
+
+    Groups preserve explicit mesh indices; they are not live geometry queries.
+    Rebuild them if assembly changes cell/point order. The node and element
+    namespaces maintain independent names and do not provide identical Tcl support.
+
+    Example:
+        ```python
+        from femora import Model
+
+        model = Model()
+        group = model.group.element.from_cells("selected_cells", [0, 1])
+        assert group.element_tags([10, 11, 12]) == [10, 11]
+        assert model.group.element.get("selected_cells") is group
+        ```
+
+    This illustrates index-to-tag mapping, not validation of an actual mesh.
+    Prefer ``from_meshparts`` after assembly when selecting whole components.
+    """
+
+    __doc_controls__ = {"summary": True, "members": ["clear"]}
+
+    def __init__(self, mesh_maker: Model) -> None:
         from femora.core.model import Model as ModelClass
 
         if not isinstance(mesh_maker, ModelClass):
@@ -161,15 +314,18 @@ class GroupManager:
         self.node = NodeGroupNamespace(self)
 
     def clear(self) -> None:
+        """Empty both selection registries without modifying mesh geometry.
+
+        Previously held group objects keep their names/tags/indices. This method
+        does not remove solver regions from already exported or running models.
+        """
         self._element_groups.clear()
         self._node_groups.clear()
 
     def _next_element_group_tag(self) -> int:
         region_tags = [int(tag) for tag in self._mesh_maker.region.get_all().keys()]
         group_tags = [
-            int(group.tag)
-            for group in self._element_groups.values()
-            if group.tag is not None
+            int(group.tag) for group in self._element_groups.values() if group.tag is not None
         ]
         return max(region_tags + group_tags + [0]) + 1
 
@@ -214,7 +370,9 @@ class GroupManager:
                 if isinstance(mp, MeshPart):
                     resolved[mp.user_name] = mp
                 else:
-                    raise TypeError("meshparts entries must be MeshPart instances or user_name strings")
+                    raise TypeError(
+                        "meshparts entries must be MeshPart instances or user_name strings"
+                    )
         return resolved
 
     def _line_cell_mask(self, mesh) -> np.ndarray:

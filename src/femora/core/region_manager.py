@@ -16,32 +16,145 @@ from femora.core.tagging import CompactRetagPolicy
 
 if TYPE_CHECKING:
     from femora.core.model import Model
+    from femora.core.damping_base import Damping
+    from femora.components.region.regions import ElementRegion, NodeRegion, GlobalRegion
 
 
 class _ElementRegionFactory:
-    def __init__(self, manager: "RegionManager"):
+    """Callable exposed as ``model.region.element``; not constructed by users."""
+
+    def __init__(self, manager: "RegionManager") -> None:
         self._manager = manager
 
-    def __call__(self, user_name: str | None = None, damping=None, **kwargs):
+    def __call__(
+        self,
+        user_name: str | None = None,
+        damping: Damping | None = None,
+        *,
+        elements: list[int] | np.ndarray | None = None,
+        element_range: list[int] | np.ndarray | None = None,
+        element_only: bool = False,
+    ) -> ElementRegion:
+        """Create an ElementRegion and register it with the owning model.
+
+        Args:
+            user_name (str | None): Unique label or None for a generated name.
+            damping (Damping | None): Optional damping definition retained weakly.
+            elements: Explicit solver element tags.
+            element_range: Inclusive start/end solver element tags.
+            element_only: Restrict the region to its selected elements.
+
+        Returns:
+            region (RegionBase): Registered ElementRegion. Component/registry
+                validation errors propagate; no solver command executes here.
+        """
         from femora.components.region.regions import ElementRegion
 
-        return self._manager.add(ElementRegion(user_name=user_name, damping=damping, **kwargs))
+        selection = {}
+        if elements is not None:
+            selection["elements"] = elements
+        if element_range is not None:
+            selection["element_range"] = element_range
+        region = ElementRegion(
+            user_name=user_name,
+            damping=damping,
+            element_only=element_only,
+            **selection,
+        )
+        self._manager.add(region)
+        return region
 
 
 class _NodeRegionFactory:
-    def __init__(self, manager: "RegionManager"):
+    """Callable exposed as ``model.region.node``; not constructed by users."""
+
+    def __init__(self, manager: "RegionManager") -> None:
         self._manager = manager
 
-    def __call__(self, user_name: str | None = None, damping=None, **kwargs):
+    def __call__(
+        self,
+        user_name: str | None = None,
+        damping: Damping | None = None,
+        *,
+        nodes: list[int] | np.ndarray | None = None,
+        node_range: list[int] | np.ndarray | None = None,
+        node_only: bool = False,
+    ) -> NodeRegion:
+        """Create a NodeRegion and register it with the owning model.
+
+        Args:
+            user_name (str | None): Unique label or None for a generated name.
+            damping (Damping | None): Optional damping definition retained weakly.
+            nodes: Explicit solver node tags.
+            node_range: Inclusive start/end solver node tags.
+            node_only: Restrict the region to its selected nodes.
+
+        Returns:
+            region (RegionBase): Registered NodeRegion. Creation does not generate
+                a node group or add new nodes to the model.
+        """
         from femora.components.region.regions import NodeRegion
 
-        return self._manager.add(NodeRegion(user_name=user_name, damping=damping, **kwargs))
+        selection = {}
+        if nodes is not None:
+            selection["nodes"] = nodes
+        if node_range is not None:
+            selection["node_range"] = node_range
+        region = NodeRegion(
+            user_name=user_name,
+            damping=damping,
+            node_only=node_only,
+            **selection,
+        )
+        self._manager.add(region)
+        return region
 
 
 class RegionManager:
-    """Local manager for region lifecycle, lookup, and tag assignment."""
+    """Organize region definitions through ``model.region``.
 
-    def __init__(self, mesh_maker: Model):
+    The manager always includes a global region at tag zero. Mesh parts without
+    an explicit region receive that global region on registration. Non-global
+    regions have unique names and positive tags and can associate damping with
+    selected model components.
+
+    Attributes:
+        element: Typed callable factory returning a registered ElementRegion.
+            Select elements with ``elements`` or ``element_range``.
+        node: Typed callable factory returning a registered NodeRegion.
+            Select nodes with ``nodes`` or ``node_range``.
+
+    Example:
+        ```python
+        from femora import Model
+
+        model = Model()
+        damping = model.damping.frequency_rayleigh(damping_factor=0.03, f1=3, f2=15)
+        soil = model.region.element(user_name="soil", damping=damping)
+        assert model.region.get("soil") is soil
+        assert model.region.get(0) is model.region.global_region
+        ```
+
+    Warning:
+        Parts sharing a region share its damping association. Removing/replacing
+        regions does not repair dependent parts or refresh an assembled mesh.
+    """
+
+    __doc_controls__ = {
+        "summary": True,
+        "show_docstring_attributes": True,
+        "members": [
+            "global_region",
+            "add",
+            "get",
+            "get_all",
+            "remove",
+            "clear",
+            "set_tag_start",
+        ],
+    }
+
+    def __init__(self, mesh_maker: Model) -> None:
         from femora.core.model import Model as ModelClass
 
         if not isinstance(mesh_maker, ModelClass):
@@ -65,6 +178,19 @@ class RegionManager:
         self.node = _NodeRegionFactory(self)
 
     def add(self, region: RegionBase) -> RegionBase:
+        """Register a region, assigning a name and tag where needed.
+
+        Args:
+            region (RegionBase): Concrete region object.
+
+        Returns:
+            region (RegionBase): Original registered object. GlobalRegion uses
+                reserved tag zero; other regions use this manager's positive space.
+
+        Raises:
+            TypeError: Input is not a RegionBase.
+            ValueError: Foreign ownership, duplicate name, or tag conflict.
+        """
         from femora.components.region.regions import GlobalRegion
 
         if not isinstance(region, RegionBase):
@@ -90,14 +216,35 @@ class RegionManager:
         return region
 
     def get(self, identifier: Union[int, str]) -> Optional[RegionBase]:
+        """Look up a region by integer tag or exact name, returning None if absent.
+
+        Args:
+            identifier (int | str): Python/NumPy integers are tags. Other values
+                are converted to strings for name lookup; numeric strings are names.
+        """
         if isinstance(identifier, (int, np.integer)):
             return self._regions.get(int(identifier))
         return self._names.get(str(identifier))
 
     def get_all(self) -> Dict[int, RegionBase]:
+        """Return a shallow registry snapshot, including the global region.
+
+        Object values remain shared; editing dictionary membership does not
+        edit the owning manager.
+        """
         return dict(self._regions)
 
     def remove(self, identifier: Union[int, str]) -> None:
+        """Detach a non-global region and retag surviving non-global regions.
+
+        Args:
+            identifier (int | str): Tag or name; missing entries are ignored.
+
+        Raises:
+            ValueError: Attempt to remove the global region at tag zero.
+
+        Dependent parts and already assembled region arrays are not rewritten.
+        """
         region = self.get(identifier)
         if region is not None:
             if region.tag == 0:
@@ -109,6 +256,11 @@ class RegionManager:
             self._reassign_tags()
 
     def clear(self) -> None:
+        """Detach existing regions and create a new global region at tag zero.
+
+        Old region objects are not reused. Parts retaining those objects must be
+        rebuilt/reassigned; this is not a coordinated whole-model clear.
+        """
         from femora.components.region.regions import GlobalRegion
 
         for region in list(self._regions.values()):
@@ -120,6 +272,17 @@ class RegionManager:
         self.add(self._global_region)
 
     def set_tag_start(self, start_tag: int) -> None:
+        """Set the non-global tag origin and retag non-global definitions.
+
+        Args:
+            start_tag (int): Integer-convertible origin of at least one.
+
+        Raises:
+            ValueError: Converted origin is below one or conversion fails.
+            TypeError: Integer conversion is unsupported.
+
+        The global region remains at zero. Existing integer references can become stale.
+        """
         self._start_tag = int(start_tag)
         if self._start_tag < 1:
             raise ValueError("start_tag must be >= 1")
@@ -149,7 +312,12 @@ class RegionManager:
             index += 1
 
     @property
-    def global_region(self):
+    def global_region(self) -> GlobalRegion:
+        """Current global RegionBase object reserved at registry tag zero.
+
+        A new object is created by ``clear()``; do not assume a previously held
+        global-region reference remains registered after that operation.
+        """
         return self._global_region
 
     def __len__(self) -> int:

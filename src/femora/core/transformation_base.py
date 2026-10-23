@@ -28,9 +28,19 @@ class GeometricTransformation(ABC):
             until this object is added to a ``TransformationManager``.
     """
 
+    __doc_controls__ = {
+        "summary": True,
+        "members": [
+            "transformation_type",
+            "dimension",
+            "has_joint_offsets",
+            "to_tcl",
+        ],
+    }
+
     eps = 1e-12
 
-    def __init__(self, transf_type: str, dimension: int, description: str = ""):
+    def __init__(self, transf_type: str, dimension: int, description: str = "") -> None:
         if not isinstance(transf_type, str) or not transf_type.strip():
             raise ValueError("transf_type must be a non-empty string")
         dimension = int(dimension)
@@ -45,10 +55,18 @@ class GeometricTransformation(ABC):
 
     @property
     def transformation_type(self) -> str:
+        """Solver transformation name supplied at construction, such as Linear.
+
+        This read-only property describes beam kinematics, not a mesh transform.
+        """
         return self._transformation_type
 
     @property
     def dimension(self) -> int:
+        """Spatial dimension, either 2 or 3, validated during construction.
+
+        This is not the nodal degree-of-freedom count or the number of mesh nodes.
+        """
         return self._dimension
 
     def _require_tag(self) -> int:
@@ -59,12 +77,25 @@ class GeometricTransformation(ABC):
 
     @abstractmethod
     def has_joint_offsets(self) -> bool:
-        """Return whether the transformation has nonzero joint offsets."""
+        """Report whether the concrete transformation specifies joint offsets.
+
+        Returns:
+            present (bool): Offset presence according to the subclass's numeric
+                tolerance and string-expression handling.
+        """
         raise NotImplementedError
 
     @abstractmethod
     def to_tcl(self) -> str:
-        """Render the OpenSees ``geomTransf`` command."""
+        """Render the concrete ``geomTransf`` definition without executing it.
+
+        Returns:
+            command (str): Tcl using a manager-assigned transformation tag.
+
+        Note:
+            Subclasses supply syntax and normally require registration before
+            rendering. This base cannot create a complete solver command.
+        """
         raise NotImplementedError
 
     def __repr__(self) -> str:

@@ -18,7 +18,17 @@ class Recorder(ABC):
 
     Recorder instances do not self-register. A :class:`RecorderManager` owns tag
     assignment and lifecycle for a single model context.
+
+    Args:
+        recorder_type (str): Concrete recorder type label.
+        cores (int | list[int] | None): Optional MPI process IDs on which the
+            generated Tcl command is enabled. None emits it without a rank guard.
+
+    Subclasses implement ``_to_tcl_impl``. That hook renders recorder-specific
+    syntax; the public ``to_tcl`` method adds a rank guard where requested.
     """
+
+    __doc_controls__ = {"summary": True, "members": ["to_tcl"]}
 
     def __init__(
         self,
@@ -35,6 +45,15 @@ class Recorder(ABC):
         pass
 
     def to_tcl(self) -> str:
+        """Render the recorder command, optionally guarded by solver ``$pid``.
+
+        Returns:
+            command (str): Concrete Tcl, wrapped in a process-ID condition when
+                cores is supplied. The execution environment must define ``pid``.
+
+        Rendering does not open output files or allocate MPI ranks. Concrete
+        implementation errors, including unresolved selections, propagate.
+        """
         cmd = self._to_tcl_impl()
         if self.cores is not None:
             if isinstance(self.cores, int):

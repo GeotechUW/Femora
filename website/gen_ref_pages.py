@@ -503,8 +503,8 @@ MANUAL_PACKAGE_PAGES["femora.jobs"]["modules"] = {
 }
 MANUAL_PACKAGE_PAGES["femora"] = {
     "modules": {"runtime": {"nav": ("runtime", "overview"),
-        "slug_parts": ("runtime", "index.md"), "title": "runtime overview", "order": 0,
-        "options": {"members": ["setup", "run"], "show_root_heading": False}}},
+        "slug_parts": ("runtime", "index.md"), "title": "Runtime", "order": 0,
+        "options": {"members": ["setup", "run"], "summary": True, "show_root_heading": False}}},
     "classes": {name: {"nav": ("runtime", "errors", name) if name.endswith("Error")
                        else ("runtime", name),
         "slug_parts": ("runtime", name, "index.md"), "title": name, "order": 1}
@@ -580,7 +580,7 @@ def write_package_index(
         fd.write(f"# {title}\n\n")
         if description_body:
             fd.write(f"{description_body}\n\n")
-        if class_links and ident != "femora.results" and not ident.startswith("femora.jobs"):
+        if class_links and ident not in {"femora.results", "femora.core"} and not ident.startswith("femora.jobs"):
             if ident in GROUPED_PACKAGE_TITLES:
                 grouped: dict[str, list[tuple[str, str]]] = {}
                 for module_name, class_name, href in class_links:
@@ -656,6 +656,48 @@ def write_class_page(
                         fd.write(f"      {key}: []\n")
                 else:
                     fd.write(f"      {key}: {value}\n")
+        if ident in {"femora.core.analysis.algorithm_manager.AlgorithmManager",
+                     "femora.core.analysis.constraint_handler_manager.ConstraintHandlerManager",
+                     "femora.core.analysis.system_manager.SystemManager",
+                     "femora.core.analysis.test_manager.TestManager",
+                     "femora.core.analysis.integrator_manager.IntegratorManager"}:
+            fd.write("\n## Registry operations\n\n"
+                     "The following shared methods are available on this manager namespace. "
+                     "They manage definitions, not an active solver. See "
+                     "[shared registry operations](../registry-operations/index.md) for "
+                     "`add`, `create`, `get`, `get_all`, `remove`, `clear`, "
+                     "`set_tag_start`, and `get_available_types`.\n\n")
+        if ident == "femora.core.mass_manager.MassManager":
+            for label, helper in (("meshpart", "_MeshPartMassHelper"),
+                                  ("region", "_RegionMassHelper"),
+                                  ("global_", "_GlobalMassHelper")):
+                fd.write(f"\n## model.mass.{label}\n\n"
+                         f"::: femora.core.mass_manager.{helper}\n"
+                         "    options:\n      show_root_heading: false\n"
+                         "      filters: public\n      summary: true\n\n")
+        if ident == "femora.core.region_manager.RegionManager":
+            for label, helper in (("element", "_ElementRegionFactory"), ("node", "_NodeRegionFactory")):
+                fd.write(f"\n## model.region.{label}(...)\n\n"
+                         f"::: femora.core.region_manager.{helper}\n"
+                         "    options:\n      show_root_heading: false\n"
+                         "      members: [__call__]\n      summary: true\n\n")
+        if ident == "femora.core.interface_base.InterfaceManager":
+            fd.write("\n## model.interface.boundary\n\n"
+                     "::: femora.core.interface_base._BoundaryNamespace\n"
+                     "    options:\n      show_root_heading: false\n"
+                     "      members: [absorber]\n      summary: true\n\n")
+        if ident == "femora.core.section_manager.SectionManager":
+            fd.write("\n## Factory namespaces\n\n")
+            fd.write("These helper types are accessed through the owning manager's attributes; "
+                     "do not instantiate them directly. Expand a method to see its calling contract.\n\n")
+            for label, helper in (("beam", "_BeamSectionNamespace"),
+                                  ("composite", "_CompositeSectionNamespace"),
+                                  ("fiber", "_FiberSectionNamespace"),
+                                  ("shell", "_ShellSectionNamespace"),
+                                  ("special", "_SpecialSectionNamespace")):
+                fd.write(f"### model.section.{label}\n\n::: femora.core.section_manager.{helper}\n")
+                fd.write("    options:\n      show_root_heading: false\n      summary: true\n"
+                         "      filters: public\n\n")
     mkdocs_gen_files.set_edit_path(doc_path, edit_path)
 
 
@@ -689,6 +731,33 @@ def write_module_page(
     mkdocs_gen_files.set_edit_path(doc_path, edit_path)
 
 
+CORE_GROUPS = {
+    "model": ("model",),
+    "materials": ("material_manager", "nd_material_manager", "uniaxial_material_manager", "material_base"),
+    "sections": ("section_manager", "section_base"),
+    "transformations": ("transformation_manager", "transformation_base"),
+    "elements": ("element_manager", "beam_element_manager", "brick_element_manager", "quad_element_manager", "special_element_manager", "element_base"),
+    "damping": ("damping_manager", "damping_base"),
+    "regions": ("region_manager", "region_base"),
+    "mesh parts": ("meshpart_manager", "meshpart_base", "line_meshpart_base"),
+    "assembly": ("assembler",),
+    "interfaces": ("interface_base",),
+    "constraints": ("constraint_manager", "sp_constraint_manager", "mp_constraint_manager", "constraint_base"),
+    "mass": ("mass_manager",),
+    "selections": ("group", "mask_manager"),
+    "time series": ("time_series_manager", "time_series_base"),
+    "ground motions": ("ground_motion_manager", "ground_motion_base"),
+    "loads": ("load_manager", "load_base"),
+    "patterns": ("pattern_manager", "pattern_base"),
+    "recorders": ("recorder_manager", "recorder_base"),
+    "actions": ("action_manager", "action_base"),
+    "analysis": ("analysis_manager", "numberer_manager", "analysis_component_base"),
+    "process": ("process_manager",),
+    "advanced": ("event_bus",),
+}
+CORE_MODULE_GROUPS = {module: group for group, modules in CORE_GROUPS.items() for module in modules}
+CORE_HIDDEN_MODULES = {"part_registry", "tagging", "tagged_component_manager", "element_group"}
+
 files = sorted(src_root.rglob("*.py"))
 print(f"DEBUG: Found {len(files)} python files in {src_root}")
 
@@ -702,11 +771,25 @@ nav[("jobs", "command line")] = command_page.relative_to("reference").as_posix()
 write_module_page(command_page, "femora.jobs.__main__", src_root / "femora/jobs/__main__.py",
                   "command line", {"members": [], "show_root_heading": False})
 
+registry_page = Path("reference/core/analysis/registry-operations/index.md")
+nav[("core", "analysis", "registry operations")] = registry_page.relative_to("reference").as_posix()
+write_module_page(
+    registry_page,
+    "femora.core.tagged_component_manager.TaggedComponentManager",
+    src_root / "femora/core/tagged_component_manager.py",
+    "Registry Operations",
+    {"show_root_heading": False, "summary": True,
+     "members": ["add", "create", "get", "get_all", "remove", "clear", "set_tag_start", "get_available_types"]},
+)
+
 for path in files:
     module_path = path.relative_to(src_root).with_suffix("")
     parts = tuple(module_path.parts)
 
     if should_skip(parts):
+        continue
+
+    if parts[:2] == ("femora", "core") and parts[-1] in CORE_HIDDEN_MODULES:
         continue
 
     if parts[-1] == "__init__":
@@ -749,6 +832,23 @@ for path in files:
             (parts[-1], class_name) for class_name, _ in visible_class_entries
         )
         for class_name, doc_controls in visible_class_entries:
+            if parts[:2] == ("femora", "core"):
+                if class_name == "EventBus":
+                    continue
+                class_doc_path = Path("reference", *doc_parts(parts[:-1]), class_name, "index.md")
+                if parts[2:3] == ("analysis",):
+                    subgroup = parts[-1].removesuffix("_manager")
+                    subgroup = {"test": "convergence tests", "constraint_handler": "constraint handlers"}.get(subgroup, subgroup)
+                    extension = not parts[-1].endswith("_manager")
+                    core_nav = ("core", "analysis", subgroup) + (("extension API",) if extension else ()) + (class_name,)
+                else:
+                    group = CORE_MODULE_GROUPS.get(parts[-1], "advanced")
+                    extension = parts[-1].endswith("_base") and not class_name.endswith("Manager")
+                    core_nav = ("core", group) + (("extension API",) if extension else ()) + (class_name,)
+                nav[core_nav] = class_doc_path.relative_to("reference").as_posix()
+                write_class_page(class_doc_path, ".".join(parts) + "." + class_name,
+                                 path, {"summary": True, **doc_controls})
+                continue
             manual_package = MANUAL_PACKAGE_PAGES.get(package_ident)
             if manual_package and class_name in manual_package.get("classes", {}):
                 page_config = manual_package["classes"][class_name]
@@ -815,6 +915,10 @@ for nav_parts, path, description in sorted(package_infos, key=package_sort_key):
     landing_nav = display_parts(nav_parts)
     if nav_parts == ("femora", "results"):
         landing_nav += ("Overview",)
+    elif nav_parts == ("femora", "core"):
+        landing_nav += ("overview",)
+    elif nav_parts == ("femora", "core", "analysis"):
+        landing_nav = ("core", "analysis", "overview")
     elif nav_parts == ("femora", "jobs"):
         landing_nav += ("overview",)
     elif nav_parts == ("femora", "jobs", "platforms"):
@@ -933,16 +1037,45 @@ def order_jobs_navigation(source_nav):
 nav = order_jobs_navigation(nav)
 
 
+def order_core_navigation(source_nav):
+    """Keep Core groups in model-building order, managers before extension bases."""
+    entries, stack = [], []
+    for item in source_nav.items():
+        stack = stack[:item.level] + [item.title]
+        if item.filename is not None:
+            entries.append((tuple(stack), item.filename))
+    order = {name: index for index, name in enumerate(("overview", *CORE_GROUPS))}
+    core = [(keys, path) for keys, path in entries if keys[0] == "core"]
+    core.sort(key=lambda item: (
+        order.get(item[0][1], 99),
+        "extension API" in item[0],
+        0 if item[0][-1].endswith("Manager") or item[0][-1] in {"Model", "Assembler", "overview"}
+        else 1 if item[0][-1].endswith("Namespace") else 2,
+    ))
+    ordered, inserted = mkdocs_gen_files.Nav(), False
+    for keys, path in entries:
+        if keys[0] != "core":
+            ordered[keys] = path
+        elif not inserted:
+            for core_keys, core_path in core:
+                ordered[core_keys] = core_path
+            inserted = True
+    return ordered
+
+
+nav = order_core_navigation(nav)
+
+
 def order_reference_navigation(source_nav):
-    """Place execution APIs after modeling/support APIs and before results."""
+    """Keep results after tools, followed by workflow and execution APIs."""
     entries, stack = [], []
     for item in source_nav.items():
         stack = stack[:item.level] + [item.title]
         if item.filename is not None:
             entries.append((tuple(stack), item.filename))
     order = {name: index for index, name in enumerate((
-        "components", "core", "io", "tools", "jobs", "runtime",
-        TOP_LEVEL_LABELS["results"]))}
+        "components", "core", "io", "tools", TOP_LEVEL_LABELS["results"],
+        "jobs", "runtime"))}
     entries.sort(key=lambda item: order.get(item[0][0], len(order)))
     ordered = mkdocs_gen_files.Nav()
     for keys, path in entries:

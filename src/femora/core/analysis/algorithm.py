@@ -13,7 +13,13 @@ from femora.core.analysis_component_base import AnalysisComponent
 
 
 class Algorithm(AnalysisComponent):
-    """Base class for OpenSees solution algorithms."""
+    """Extension base for solution algorithms registered by AlgorithmManager.
+
+    Subclasses implement the AnalysisComponent Tcl contract. Ordinary scripts
+    select algorithms through ``model.analysis.algorithm``.
+    """
+
+    __doc_controls__ = {"summary": True, "members": ["register_algorithm"]}
 
     _algorithms: Dict[str, Type["Algorithm"]] = {}
 
@@ -23,6 +29,14 @@ class Algorithm(AnalysisComponent):
 
     @staticmethod
     def register_algorithm(name: str, algorithm_class: Type["Algorithm"]) -> None:
+        """Install a class-wide algorithm factory key, replacing an existing key.
+
+        Args:
+            name (str): Case-insensitive registry key.
+            algorithm_class (type[Algorithm]): Concrete constructor supporting to_tcl().
+
+        No subclass validation or update of existing instances is performed.
+        """
         Algorithm._algorithms[name.lower()] = algorithm_class
 
 

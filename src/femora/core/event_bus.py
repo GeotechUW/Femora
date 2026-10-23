@@ -29,6 +29,8 @@ class FemoraEvent(Enum):
     advanced exporters and interface-specific integrations.
     """
 
+    __doc_controls__ = {"members": []}
+
     PRE_ASSEMBLE = auto()
     POST_ASSEMBLE = auto()
     PRE_EXPORT = auto()
@@ -36,6 +38,7 @@ class FemoraEvent(Enum):
     RESOLVE_CORE_CONFLICTS = auto()
     EMBEDDED_BEAM_SOLID_TCL = auto()
     INTERFACE_ELEMENTS_TCL = auto()
+    EMBEDDED_BEAM_CONTACT_TCL = auto()
 
 
 class ModelEventBus:
@@ -65,6 +68,8 @@ class ModelEventBus:
         ```
     """
 
+    __doc_controls__ = {"summary": True, "members": ["subscribe", "unsubscribe", "clear"]}
+
     def __init__(self) -> None:
         """Initialize an empty per-model subscriber registry."""
         self._subscribers: Dict[FemoraEvent, List[Callable]] = defaultdict(list)
@@ -79,6 +84,10 @@ class ModelEventBus:
             event: Lifecycle event to listen for.
             callback: Callable invoked when `event` is emitted. The callback
                 receives keyword arguments from the emitter.
+
+        Callbacks execute synchronously in subscription order and are retained
+        strongly. Exceptions propagate to the emitter, potentially interrupting
+        assembly/export. Use flexible keyword payload handling when appropriate.
         """
         if callback not in self._subscribers[event]:
             self._subscribers[event].append(callback)
@@ -103,14 +112,19 @@ class ModelEventBus:
 
         Args:
             event: Lifecycle event being emitted.
-            **payload: Keyword arguments forwarded directly to each callback.
+            **payload (Any): Keyword arguments forwarded directly to each callback.
                 Emitters commonly provide objects such as `assembled_mesh`.
         """
         for callback in list(self._subscribers[event]):
             callback(**payload)
 
     def clear(self) -> None:
-        """Remove all subscribers from this bus instance."""
+        """Remove all subscribers, including model-internal lifecycle handlers.
+
+        Prefer unsubscribing a particular user callback instead of clearing an
+        active model's bus. Model.clear_model re-establishes its built-in hooks
+        as part of coordinated clearing; this method alone does not do that.
+        """
         self._subscribers.clear()
 
 
@@ -126,6 +140,8 @@ class EventBus:
     `ModelEventBus` instance while preserving compatibility with older code
     that mutates `_subscribers` directly.
     """
+
+    __doc_controls__ = {"members": []}
 
     _bus = ModelEventBus()
     _subscribers = _bus._subscribers

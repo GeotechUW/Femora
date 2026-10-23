@@ -85,6 +85,7 @@ def test_generated_jobs_routes_include_functions_and_hide_internal_ui(tmp_path, 
         assert private not in summary
     assert not (reference / "cli.md").exists()
     assert "- setup" in (reference / "runtime/index.md").read_text()
+    assert "summary: true" in (reference / "runtime/index.md").read_text()
     stack, paths = [], []
     for item in namespace["nav"].items():
         stack = stack[:item.level] + [item.title]
@@ -93,12 +94,35 @@ def test_generated_jobs_routes_include_functions_and_hide_internal_ui(tmp_path, 
         "overview", "tasks", "workflows", "execute workflows", "submit remotely",
         "track jobs", "bundles and replay", "command line", "advanced"]
     assert ("runtime", "errors", "RuntimeSetupError") in paths
+    assert ("core", "actions", "ActionManager") in paths
+    assert ("core", "actions", "extension API", "Action") in paths
+    assert ("core", "materials", "NDMaterialManager") in paths
+    assert ("core", "analysis", "algorithm", "AlgorithmManager") in paths
+    assert ("core", "process", "ProcessManager") in paths
+    for internal in ("EventBus", "FemoraPartRegistry", "FemoraPart", "TaggedComponentManager",
+                     "TaggedObject", "TaggingPolicy", "CompactRetagPolicy"):
+        assert all(path[-1] != internal for path in paths if path[0] == "core")
+    assert "Classes in this package:" not in (reference / "core/index.md").read_text()
+    section_page = (reference / "core/SectionManager/index.md").read_text()
+    for helper in ("_BeamSectionNamespace", "_CompositeSectionNamespace", "_FiberSectionNamespace",
+                   "_ShellSectionNamespace", "_SpecialSectionNamespace"):
+        assert f"::: femora.core.section_manager.{helper}" in section_page
+    for manager, helper in (("MassManager", "femora.core.mass_manager._GlobalMassHelper"),
+                            ("RegionManager", "femora.core.region_manager._ElementRegionFactory"),
+                            ("InterfaceManager", "femora.core.interface_base._BoundaryNamespace")):
+        assert f"::: {helper}" in (reference / f"core/{manager}/index.md").read_text()
+    core_groups = [path[1] for path in paths if len(path) == 2 and path[0] == "core"]
+    assert core_groups == ["overview", *namespace["CORE_GROUPS"]]
+    for group, manager in (("materials", "MaterialManager"), ("mesh parts", "MeshPartManager"),
+                           ("selections", "GroupManager")):
+        children = [path[-1] for path in paths if len(path) == 3 and path[:2] == ("core", group)]
+        assert children[0] == manager
     assert ("jobs", "submit remotely", "TACCPlatform") in paths
     assert ("jobs", "advanced", "platform interfaces", "Platform") in paths
     assert ("jobs", "tasks", "Python") in paths
     assert ("jobs", "workflows", "Workflow") in paths
     assert [path[0] for path in paths if len(path) == 1][:7] == [
-        "components", "core", "io", "tools", "jobs", "runtime", "Results & Postprocessing"]
+        "components", "core", "io", "tools", "Results & Postprocessing", "jobs", "runtime"]
 
 
 def test_jobs_icons_are_scoped_and_class_names_preserved():

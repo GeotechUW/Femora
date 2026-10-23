@@ -16,7 +16,7 @@
     const article = document.querySelector(".md-content__inner");
     if (!article || article.dataset.resultsEnhanced) return;
     const root = article.querySelector(
-      '.doc-heading[id^="femora.results."], .doc-heading[id^="femora.jobs."], .doc-heading[id^="femora.runtime."]'
+      '.doc-heading[id^="femora.results."], .doc-heading[id^="femora.jobs."], .doc-heading[id^="femora.runtime."], .doc-heading[id^="femora.core."]'
     );
     if (!root) return;
     article.dataset.resultsEnhanced = "true";

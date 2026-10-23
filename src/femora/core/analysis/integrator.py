@@ -13,7 +13,13 @@ from femora.core.analysis_component_base import AnalysisComponent
 
 
 class Integrator(AnalysisComponent):
-    """Base class for all OpenSees integrators."""
+    """Extension base for static and transient integration command definitions.
+
+    Concrete classes implement Tcl rendering and inherit the appropriate static
+    or transient family marker. Use ``model.analysis.integrator`` in model scripts.
+    """
+
+    __doc_controls__ = {"summary": True, "members": ["register_integrator"]}
 
     _integrators: Dict[str, Type["Integrator"]] = {}
 
@@ -40,7 +46,9 @@ class Integrator(AnalysisComponent):
 class StaticIntegrator(Integrator):
     """Base class for static integrators, used in static analysis."""
 
-    def __init__(self, integrator_type: str):
+    __doc_controls__ = {"summary": True, "members": ["get_static_types"]}
+
+    def __init__(self, integrator_type: str) -> None:
         """Create a StaticIntegrator base instance.
 
         Args:
@@ -56,16 +64,16 @@ class StaticIntegrator(Integrator):
             A list of registered static integrator names.
         """
         return [
-            t
-            for t, cls in Integrator._integrators.items()
-            if issubclass(cls, StaticIntegrator)
+            t for t, cls in Integrator._integrators.items() if issubclass(cls, StaticIntegrator)
         ]
 
 
 class TransientIntegrator(Integrator):
     """Base class for transient integrators, used in dynamic analysis."""
 
-    def __init__(self, integrator_type: str):
+    __doc_controls__ = {"summary": True, "members": ["get_transient_types"]}
+
+    def __init__(self, integrator_type: str) -> None:
         """Create a TransientIntegrator base instance.
 
         Args:
@@ -81,9 +89,7 @@ class TransientIntegrator(Integrator):
             A list of registered transient integrator names.
         """
         return [
-            t
-            for t, cls in Integrator._integrators.items()
-            if issubclass(cls, TransientIntegrator)
+            t for t, cls in Integrator._integrators.items() if issubclass(cls, TransientIntegrator)
         ]
 
 

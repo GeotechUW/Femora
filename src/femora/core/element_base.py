@@ -37,17 +37,41 @@ class Element(ABC):
         _transformation: Geometric transformation assigned to this element (for beam elements).
     """
 
-    def __init__(self, element_type: str,
-                 ndof: int,
-                 material: Union[Material, List[Material], None] = None,
-                 section: Section = None,
-                 transformation: GeometricTransformation = None,
-                 **element_params
-                 ):
+    __doc_controls__ = {
+        "summary": True,
+        "members": [
+            "assign_material",
+            "assign_section",
+            "assign_transformation",
+            "assign_ndof",
+            "get_material",
+            "get_materials",
+            "get_section",
+            "get_transformation",
+            "get_element_params",
+            "update_element_params",
+            "get_ndof",
+            "to_tcl",
+            "get_section_tag",
+            "get_material_tag",
+            "get_mass_per_length",
+            "get_density",
+        ],
+    }
+
+    def __init__(
+        self,
+        element_type: str,
+        ndof: int,
+        material: Union[Material, List[Material], None] = None,
+        section: Section = None,
+        transformation: GeometricTransformation = None,
+        **element_params,
+    ) -> None:
         """Initializes the Element with flexible dependency support."""
         self.tag: Optional[int] = None
         self._owner: object | None = None
-        
+
         self.element_type = element_type
         self._ndof = ndof
         self.element_params = element_params
@@ -73,8 +97,17 @@ class Element(ABC):
             )
         return self.tag
 
-    def assign_material(self, material: Union[Material, List[Material]]):
-        """Assigns a material to the element."""
+    def assign_material(self, material: Union[Material, List[Material]]) -> None:
+        """Replace this definition's material references without registration.
+
+        Args:
+            material (Material | list[Material]): Primary material or ordered
+                material list. An empty list clears the primary reference.
+
+        Note:
+            The base setter does not validate compatibility or register materials.
+            Changes affect the shared definition, not just one assembled cell.
+        """
         if isinstance(material, list):
             self._materials = material
             self._material = material[0] if material else None
@@ -82,49 +115,101 @@ class Element(ABC):
             self._material = material
             self._materials = [material] if material else []
 
-    def assign_section(self, section: Section):
-        """Assigns a section to the element."""
+    def assign_section(self, section: Section) -> None:
+        """Replace the section reference without compatibility validation.
+
+        Args:
+            section (Section): Section object; this setter does not resolve tags
+                or add the section to a manager.
+        """
         self._section = section
 
-    def assign_transformation(self, transformation: GeometricTransformation):
-        """Assigns a geometric transformation to the element."""
+    def assign_transformation(self, transformation: GeometricTransformation) -> None:
+        """Replace the transformation reference without registry lookup.
+
+        Args:
+            transformation (GeometricTransformation): Transformation object.
+                Ensure registration and formulation compatibility before export.
+        """
         self._transformation = transformation
 
-    def assign_ndof(self, ndof: int):
-        """Assigns the number of DOFs for the element."""
+    def assign_ndof(self, ndof: int) -> None:
+        """Store a new nodal DOF count on this definition.
+
+        Args:
+            ndof (int): Requested count. The base setter does not validate it,
+                rebuild a mesh, or update already assembled node metadata.
+        """
         self._ndof = ndof
 
     def get_material(self) -> Optional[Material]:
-        """Retrieves the primary assigned material."""
+        """Return the primary material reference, or None when absent.
+
+        For a material list, the primary material is its first entry. No object
+        is copied and no registry lookup is performed.
+        """
         return self._material
 
     def get_materials(self) -> List[Material]:
-        """Retrieves all assigned materials."""
+        """Return a shallow copy of the assigned material list.
+
+        Material objects are shared; editing list membership does not alter the
+        definition, but changing an individual material affects that object.
+        """
         return self._materials.copy()
 
     def get_section(self) -> Optional[Section]:
-        """Retrieves the assigned section."""
+        """Return the assigned section object, or None if absent.
+
+        This is the original reference, not a copy or newly resolved section.
+        """
         return self._section
 
     def get_transformation(self) -> Optional[GeometricTransformation]:
-        """Retrieves the assigned geometric transformation."""
+        """Return the assigned transformation object, or None if absent.
+
+        No copy is made. This method does not test whether it remains registered.
+        """
         return self._transformation
 
     def get_element_params(self) -> Dict[str, Any]:
-        """Retrieves element-specific parameters."""
+        """Return a shallow copy of the element parameter dictionary.
+
+        Editing top-level keys does not change this definition; nested mutable
+        values remain shared. Use ``update_element_params`` to replace entries.
+        """
         return self.element_params.copy()
 
-    def update_element_params(self, **new_params):
-        """Updates element-specific parameters."""
+    def update_element_params(self, **new_params: Any) -> None:
+        """Merge keyword entries into the element parameter dictionary.
+
+        Args:
+            **new_params (Any): Keys and replacement values. The base method
+                does not validate them, rerun the constructor, or reassemble meshes.
+        """
         self.element_params.update(new_params)
 
     def get_ndof(self) -> int:
-        """Gets the number of degrees of freedom for this element."""
+        """Return the stored nodal degree-of-freedom count.
+
+        This describes the reusable definition, not the total equation count
+        of a model or the number of nodes in a cell.
+        """
         return self._ndof
 
     @abstractmethod
     def to_tcl(self, tag: int, nodes: List[int]) -> str:
-        """Converts the element to a TCL command string for OpenSees."""
+        """Render one solver cell using explicit connectivity.
+
+        Args:
+            tag (int): Solver element tag for the particular cell, distinct from
+                the reusable definition's manager tag.
+            nodes (list[int]): Ordered solver node tags required by the formulation.
+
+        Returns:
+            command (str): Tcl supplied by a concrete implementation. This
+                abstract base does not implement cell rendering or execution.
+        """
         pass
 
     def __str__(self) -> str:
@@ -133,23 +218,41 @@ class Element(ABC):
 
     def __repr__(self) -> str:
         tag_str = self.tag if self.tag is not None else "None"
-        return f"Element(type='{self.element_type}', tag={tag_str}, ndof={self._ndof}, " \
-               f"material={'Yes' if self._material else 'No'}, " \
-               f"section={'Yes' if self._section else 'No'}, " \
-               f"transformation={'Yes' if self._transformation else 'No'})"
+        return (
+            f"Element(type='{self.element_type}', tag={tag_str}, ndof={self._ndof}, "
+            f"material={'Yes' if self._material else 'No'}, "
+            f"section={'Yes' if self._section else 'No'}, "
+            f"transformation={'Yes' if self._transformation else 'No'})"
+        )
 
     def get_section_tag(self) -> Optional[int]:
-        """Gets the tag of the assigned section."""
+        """Return the section's current tag, or zero if no section is assigned.
+
+        An assigned but unmanaged section can return None. This helper does not
+        register the section or guarantee that the tag is exportable.
+        """
         return self._section.tag if self._section else 0
 
     def get_material_tag(self) -> Optional[int]:
-        """Gets the tag of the primary assigned material."""
+        """Return the primary material's tag, or zero if there is no material.
+
+        An assigned unmanaged material can return None. The value is a material
+        definition tag, not a solver element tag.
+        """
         return self._material.tag if self._material else 0
 
     def get_mass_per_length(self) -> float:
-        """Gets the mass per length of the element."""
+        """Return mass per unit length as defined by the concrete formulation.
+
+        This base implementation returns 0.0. It does not integrate geometry or
+        add nodal masses; relevant subclasses override the hook.
+        """
         return 0.0
-    
+
     def get_density(self) -> float:
-        """Gets the density of the element."""
+        """Return the concrete formulation's density contribution.
+
+        This base implementation returns 0.0 rather than deriving a density
+        from its material. Concrete subclasses may supply a formulation-specific value.
+        """
         return 0.0
