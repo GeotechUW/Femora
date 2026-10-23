@@ -305,7 +305,7 @@ The generated API reference provides exact signatures, accepted arguments, retur
 
 </div>
 
-## The Concepts Path Is Complete
+## From One Model To A Larger Procedure
 
 You can now read a Femora model as one continuous workflow:
 
@@ -320,4 +320,12 @@ organize definitions
     -> export and run
 ```
 
-The Concepts section explains how these pieces fit together. Continue with the [Tutorial Gallery](../tutorials/index.md) to build complete models, browse the [Example Gallery](../examples/index.md) for focused modeling patterns, and use the [API Reference](../reference/index.md) when you need exact signatures and implementation-level detail.
+The model's process describes the simulation inside its exported Tcl file.
+Continue to [Workflows](workflows.md) to organize the operations around
+that model: preparing inputs, exporting cases, running solvers, and comparing
+results. This is a different scale from the process timeline. Then read
+[Jobs](jobs.md) to submit and track that procedure remotely.
+
+For complete models, browse the [Tutorial Gallery](../tutorials/index.md) and
+[Example Gallery](../examples/index.md). Use the [API Reference](../reference/index.md)
+for exact signatures and implementation-level detail.

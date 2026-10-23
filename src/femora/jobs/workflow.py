@@ -17,7 +17,25 @@ class _Stage:
 
 
 class Workflow:
-    """A sequence of stages; tasks in a parallel stage start together."""
+    """Define ordered stages without executing their tasks.
+
+    Args:
+        name (str): Nonempty workflow name used in the run manifest.
+
+    Example:
+        ```python
+        from femora.jobs import Workflow, tasks
+        workflow = Workflow("analysis")
+        workflow.add("solve", tasks=[tasks.OpenSees("model", "model.tcl")])
+        workflow.outputs("solve/model/*.log")
+        ```
+
+    Note:
+        All tasks in one stage finish before the next stage starts. No automatic
+        task retry or resume is provided. Use a fresh workspace for each run.
+    """
+
+    __doc_controls__ = {"summary": True, "members": ["stages", "output_patterns", "add", "outputs"]}
 
     def __init__(self, name: str = "workflow") -> None:
         if not name or not name.strip():
@@ -28,16 +46,35 @@ class Workflow:
 
     @property
     def stages(self) -> tuple[_Stage, ...]:
+        """Ordered stage definitions as an immutable tuple; inspect, do not modify."""
         return tuple(self._stages)
 
     @property
     def output_patterns(self) -> tuple[str, ...]:
+        """Workspace-relative artifact glob patterns selected by ``outputs()``."""
         return tuple(self._outputs)
 
     def add(
         self, name: str, *, tasks: Sequence[Task], parallel: bool = False
     ) -> Workflow:
-        """Append a stage after all existing stages."""
+        """Append a named stage after all existing stages.
+
+        Args:
+            name (str): Unique directory-safe stage name.
+            tasks (Sequence[Task]): Nonempty sequence of Python, Command, or OpenSees tasks.
+            parallel (bool): Start all tasks together rather than sequentially.
+
+        Returns:
+            workflow (Workflow): This workflow, for chained calls.
+
+        Raises:
+            ValueError: Stage/task names are invalid or duplicated, or tasks is empty.
+            TypeError: A task type or the parallel flag is invalid.
+
+        Note:
+            A parallel stage must fit its combined core reservations inside the
+            execution capacity. Dependencies belong in separate ordered stages.
+        """
         if not name or not name.strip() or name in {".", ".."}:
             raise ValueError("stage name must be a nonempty directory name")
         if "/" in name or "\\" in name:
@@ -60,7 +97,23 @@ class Workflow:
         return self
 
     def outputs(self, *patterns: str) -> Workflow:
-        """Select artifacts by glob, relative to the job workspace."""
+        """Select artifacts by glob, relative to the job workspace.
+
+        Args:
+            *patterns (str): Relative glob patterns without parent traversal or backslashes.
+
+        Returns:
+            workflow (Workflow): This workflow, for chained calls.
+
+        Raises:
+            ValueError: A pattern can escape the workspace or is empty.
+
+        Example:
+            ```python
+            from femora.jobs import Workflow
+            workflow = Workflow().outputs("postprocess/**/*.csv", "**/*.log")
+            ```
+        """
         for pattern in patterns:
             path = PurePath(pattern)
             if (

@@ -1,4 +1,26 @@
-"""Execution of ordered workflow stages locally or inside a TACC allocation."""
+"""Execute ordered workflow stages locally or inside an existing allocation.
+
+Use execute() after defining a Workflow. It checks capacity, starts task
+processes, and writes manifest.json in the workspace. A Python task returns its
+callback value; command and solver tasks return ProcessResult objects containing
+their log paths. Selected output files appear separately in RunResult.artifacts.
+
+```python
+from femora.jobs import execute, WorkflowExecutionError
+
+def run_locally(workflow):
+    try:
+        run = execute(workflow, workspace="new-run", cores=1)
+    except WorkflowExecutionError as error:
+        print("Inspect the partial manifest:", error.run.manifest)
+        raise
+    return run
+```
+
+Call the wrapper from a main-guarded Python script. The runner does not submit
+a scheduler job, install a solver, or automatically retry failed tasks. Use a
+fresh workspace to avoid confusing old files with new results.
+"""
 
 from __future__ import annotations
 
@@ -18,7 +40,16 @@ from .backends import TACC
 
 
 class WorkflowExecutionError(RuntimeError):
-    """A workflow task failed; the run manifest remains in the workspace."""
+    """Execution failed; inspect ``run.manifest`` for recorded task outcomes.
+
+    Attributes:
+        run (RunResult): Partial run state retained when the error was raised.
+
+    Note:
+        Failure does not roll back files written by tasks or resume the workflow.
+    """
+
+    __doc_controls__ = {"members": []}
 
     def __init__(self, message: str, run: RunResult) -> None:
         super().__init__(message)
@@ -27,17 +58,56 @@ class WorkflowExecutionError(RuntimeError):
 
 @dataclass(frozen=True)
 class RunResult:
+    """Completed or partial execution state returned by the workflow runner.
+
+    Attributes:
+        workspace (Path): Resolved root directory for the run.
+        results (Mapping[str, Mapping[str, Any]]): Task return values grouped by stage.
+        artifacts (tuple[Path, ...]): Files matching the workflow output patterns.
+        manifest (Path): JSON execution record; not a serialized copy of callback values.
+
+    Note:
+        The runner constructs this object. Use result() to inspect callback
+        returns or ProcessResult objects without confusing them with output files.
+    """
+
+    __doc_controls__ = {"summary": True, "members": ["result"]}
     workspace: Path
     results: Mapping[str, Mapping[str, Any]]
     artifacts: tuple[Path, ...]
     manifest: Path
 
     def result(self, stage: str, task: str) -> Any:
+        """Return the recorded value for a completed task.
+
+        Args:
+            stage (str): Stage name.
+            task (str): Task name within the stage.
+
+        Returns:
+            value (Any): Python callback value or ProcessResult.
+
+        Raises:
+            KeyError: The task has no result, including tasks not reached after failure.
+        """
         return self.results[stage][task]
 
 
 @dataclass(frozen=True)
 class ProcessResult:
+    """External command or solver outcome, not a parsed engineering result.
+
+    Attributes:
+        output_dir (Path): Task working directory.
+        log (Path): Combined stdout/stderr log file.
+        returncode (int): External process exit status.
+
+    Note:
+        Read recorder files with femora.results for engineering responses.
+        A successful process exit alone is not a validation of numerical accuracy.
+    """
+
+    __doc_controls__ = {"members": []}
     output_dir: Path
     log: Path
     returncode: int
@@ -160,6 +230,27 @@ def execute(
     the sum of task core reservations exceeds ``cores``. Local OpenSees tasks
     are serial. Pass ``backend=jobs.backends.TACC()`` inside a Slurm allocation
     to launch MPI tasks with ibrun. This does not submit a scheduler job.
+
+    Args:
+        workflow (Workflow): Ordered stages to execute.
+        workspace (str | Path): Run directory; prefer a new directory per run.
+        inputs (Mapping[str, Any] | None): Shared inputs supplied to Python task contexts.
+        cores (int | None): Capacity for task reservations; defaults to local CPU
+            count or the current allocation capacity.
+        backend (TACC | None): Allocation execution policy, or None for local execution.
+
+    Returns:
+        run (RunResult): Task values, selected artifacts, workspace, and manifest.
+
+    Raises:
+        TypeError: Workflow or backend has an unsupported type.
+        ValueError: Capacity or allocation configuration is invalid.
+        WorkflowExecutionError: A stage cannot fit the capacity or a task fails.
+
+    Note:
+        Task failures stop later stages. The exception's run attribute retains
+        the partial manifest. No remote submission or automatic retry occurs.
+        Python callbacks need importable functions and a main-guarded entry point.
     """
     if not isinstance(workflow, Workflow):
         raise TypeError("workflow must be an fm.Workflow")

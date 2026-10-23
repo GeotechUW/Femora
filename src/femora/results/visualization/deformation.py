@@ -21,7 +21,42 @@ from ..exceptions import UnsupportedResultOperation
 
 
 class DeformationRenderer:
-    """Configure and write deformation movies from a result set."""
+    """Render recorded translations as a deformed-mesh MP4 movie.
+
+    Obtain this object with ResultSet.deformation_renderer() and keep its result
+    set open until write() finishes. Configuration methods return this renderer,
+    so they can be called separately or chained. They do not write files.
+
+    Args:
+        results (ResultSet): Open results providing meshes and point-response frames.
+
+    Raises:
+        UnsupportedResultOperation: Any reader lacks mesh or point-frame access.
+
+    Example:
+        ```python
+        from femora.results import open_results
+
+        with open_results("results/building_response*.vtkhdf") as results:
+            movie = results.deformation_renderer()
+            movie.deform_by("displacement", scale=20)
+            movie.color_by("displacement", reduction="magnitude", cmap="viridis")
+            movie.style_mesh(show_edges=True, line_width=3)
+            movie.set_view(background="white")
+            movie.write("building.mp4", stride=2, frame_rate=25)
+        ```
+
+    Note:
+        All partition meshes are shown together, without merging shared nodes.
+        Members are drawn using mesh connectivity, not reconstructed curved
+        beam shapes from nodal rotations. No clipping/cutaway is performed.
+        Movie creation requires off-screen VTK/OpenGL support and an
+        imageio/FFmpeg writer; this class does not install either dependency.
+    """
+
+    __doc_controls__ = {"summary": True, "members": [
+        "deform_by", "color_by", "style_mesh", "set_view", "write",
+    ]}
 
     def __init__(self, results) -> None:
         if not results.supports(MESH) or not results.supports(POINT_FRAME):
@@ -47,7 +82,23 @@ class DeformationRenderer:
         *,
         scale: float = 1.0,
     ) -> "DeformationRenderer":
-        """Choose the vector response and visual deformation scale."""
+        """Choose the vector added to the undeformed mesh coordinates.
+
+        Args:
+            response: Point-vector field name; normally ``"displacement"``.
+            scale: Positive visual multiplier; 1 means true model-unit deformation.
+
+        Returns:
+            This renderer for further configuration.
+
+        Raises:
+            ValueError: Scale is not positive.
+
+        Note:
+            Coordinates are original XYZ + scale * response XYZ. Additional
+            components such as rotations are ignored. Gravity displacement is
+            not subtracted. Using velocity here is not a displacement movie.
+        """
         if scale <= 0.0:
             raise ValueError("scale must be positive")
         self.response = response
@@ -62,7 +113,30 @@ class DeformationRenderer:
         reduction: Optional[Union[str, int]] = None,
         **options: Any,
     ) -> "DeformationRenderer":
-        """Color by a transient response or an existing static mesh array."""
+        """Color the movie by a recorded field or a static mesh array.
+
+        Args:
+            field: Available response name, or a static array in every mesh.
+            location: ``"point"`` or ``"cell"``.
+            reduction: None to pass values through; ``"magnitude"`` for vector
+                norms; 0, 1, or 2 for a component. Color values are not multiplied
+                by the deformation scale. Reduction applies to transient fields;
+                static mesh arrays are passed through unchanged.
+            **options: PyVista coloring options, such as cmap, clim, or
+                scalar_bar_args. Use a fixed clim to choose a common color range.
+
+        Returns:
+            This renderer.
+
+        Raises:
+            ValueError: Location or reduction is unsupported. Missing arrays
+                are detected when write() is called.
+
+        Example:
+            ```python
+            movie.color_by("acceleration", reduction=0, cmap="coolwarm", clim=(-2, 2))
+            ```
+        """
         normalized = location.lower()
         if normalized not in {"point", "cell"}:
             raise ValueError("location must be 'point' or 'cell'")
@@ -75,7 +149,16 @@ class DeformationRenderer:
         return self
 
     def style_mesh(self, **options: Any) -> "DeformationRenderer":
-        """Set options forwarded to ``pyvista.Plotter.add_mesh``."""
+        """Set appearance options for every partition's mesh actor.
+
+        Args:
+            **options: Options passed to PyVista Plotter.add_mesh(), for example
+                show_edges, color, opacity, line_width, and lighting. Coloring
+                configured by color_by() takes precedence for scalar options.
+
+        Returns:
+            This renderer. Existing style options are updated, not cleared.
+        """
         self._mesh_options.update(options)
         return self
 
@@ -87,7 +170,18 @@ class DeformationRenderer:
         zoom: Optional[float] = None,
         background: Any = None,
     ) -> "DeformationRenderer":
-        """Configure the shared camera and background."""
+        """Configure one camera for all displayed partitions.
+
+        Args:
+            camera_position: PyVista camera preset or (position, focal_point,
+                view_up) tuple. None leaves the default automatic view.
+            parallel_projection: Use orthographic rather than perspective view.
+            zoom: Optional PyVista camera zoom factor.
+            background: Optional PyVista color, for example ``"white"``.
+
+        Returns:
+            This renderer. Settings are applied when write() creates the plotter.
+        """
         self._camera_position = camera_position
         self._parallel_projection = parallel_projection
         self._zoom = zoom
@@ -104,7 +198,34 @@ class DeformationRenderer:
         progress: bool = True,
         window_size: tuple[int, int] = (960, 544),
     ) -> Path:
-        """Render the configured result sequence to an MP4 file."""
+        """Write selected recorded samples as an off-screen MP4 movie.
+
+        Args:
+            filename: Movie path; its parent directory is created if necessary.
+                Existing output may be overwritten by the movie writer.
+            stride: Positive sample interval. 1 renders every recorded sample;
+                5 renders indices 0, 5, 10, and so on.
+            frame_rate: Positive output frames per second; not the solver time step.
+            quality: Quality forwarded to PyVista/imageio, normally 0-10.
+            progress: Display a tqdm progress bar if True.
+            window_size: Output width and height in pixels.
+
+        Returns:
+            pathlib.Path to the written movie.
+
+        Raises:
+            ValueError: Stride/frame rate is not positive or deformation is not
+                a usable vector field.
+            KeyError: The deformation or coloring field is unavailable.
+
+        Note:
+            For uniform recorder spacing dt_record, physical-speed playback
+            uses frame_rate = 1 / (stride * dt_record). Frames have equal video
+            duration even if recorder timestamps are irregular. Lower stride
+            alone does not improve analysis accuracy. Geometry is loaded for
+            every partition, while response fields are read one frame at a time.
+            Rendering/encoder failures are propagated, not silently ignored.
+        """
         if stride <= 0:
             raise ValueError("stride must be positive")
         if frame_rate <= 0:

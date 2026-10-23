@@ -20,7 +20,28 @@ ReaderFactory = Callable[..., ResultReader]
 
 
 class ResultReaderRegistry:
-    """Map file suffixes to result-reader factories."""
+    """Advanced dispatch table mapping format names and suffixes to readers.
+
+    The shared reader_registry already contains VTKHDF. Create a separate
+    instance only when a tool needs its own format registrations; pass it as
+    open_results(registry=...) to avoid modifying shared dispatch behavior.
+
+    Example:
+        ```python
+        from femora.results.registry import ResultReaderRegistry
+        from femora.results.readers import VTKHDFResultReader
+        from femora.results import open_results
+
+        registry = ResultReaderRegistry()
+        registry.register("vtkhdf", VTKHDFResultReader, suffixes=".vtkhdf")
+        with open_results("results/response0.vtkhdf", registry=registry) as results:
+            print(results.number_of_steps)
+        ```
+    """
+
+    __doc_controls__ = {"members": [
+        "register", "create", "registered_formats", "registered_suffixes",
+    ]}
 
     def __init__(self) -> None:
         self._named_factories: Dict[str, ReaderFactory] = {}
@@ -34,7 +55,18 @@ class ResultReaderRegistry:
         suffixes: Union[str, Iterable[str]] = (),
         replace: bool = False,
     ) -> None:
-        """Register a named reader and any unambiguous file suffixes."""
+        """Register a factory without opening or converting a file.
+
+        Args:
+            name: Case-insensitive format name used by explicit format dispatch.
+            factory: Callable accepting a path and any reader-specific options,
+                returning a ResultReader.
+            suffixes: Suffix string or iterable. A missing leading dot is added.
+            replace: Permit replacing conflicting names and suffix mappings.
+
+        Raises:
+            ValueError: Name/suffix conflicts exist and replace is False.
+        """
         normalized_name = name.lower()
         if isinstance(suffixes, str):
             suffixes = [suffixes]
@@ -66,7 +98,19 @@ class ResultReaderRegistry:
         format: Optional[str] = None,
         **options: Any,
     ) -> ResultReader:
-        """Create the registered reader for a result file."""
+        """Instantiate a reader by explicit format name or file suffix.
+
+        Args:
+            path: Recorder path; concrete readers check file existence/layout.
+            format: Registered name, or None to dispatch by the path suffix.
+            **options: Keyword options forwarded unchanged to the factory.
+
+        Returns:
+            ResultReader: New instance. The caller owns its resources and must close it.
+
+        Raises:
+            ResultFormatError: No matching reader factory is registered.
+        """
         resolved = Path(path)
         factory = (
             self._named_factories.get(format.lower())

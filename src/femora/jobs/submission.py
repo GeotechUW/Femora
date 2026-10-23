@@ -1,4 +1,15 @@
-"""Provider-neutral entry point for remote workflow submission."""
+"""Submit a staged workflow without building or running its model locally.
+
+Use submit() with a source file, top-level factory function, or trusted existing
+bundle. Source packaging happens locally; the remote runner imports the factory
+and executes the tasks in the configured environment. Keep submission under a
+main guard so remote imports cannot submit recursively.
+
+The call returns a job handle, not completed engineering results. Follow it
+with status checks or use the tracking API to reconnect later. The TACC adapter
+validates resource settings before remote writes, but software, input access,
+memory, and actual staged task capacity can remain unverified until execution.
+"""
 
 from pathlib import Path
 import inspect
@@ -25,6 +36,47 @@ def submit(*, platform: Platform[S] | str, settings: S | Mapping[str, Any], sour
     Use platform="tacc" with a settings dictionary for interactive login, or
     supply an authenticated Platform and its settings object. Provider adapters
     own validation, staging, and submission. Never store passwords in settings.
+
+    Args:
+        platform (Platform | str): Authenticated adapter, or "tacc" for interactive resolution.
+        settings (Any): Provider settings object or dictionary accepted by the adapter resolver.
+        source (str | Path | None): Workflow source file; mutually exclusive with bundle/function.
+        bundle (str | Path | None): Trusted existing workflow ZIP.
+        inputs (Mapping[str, Any] | None): JSON-serializable factory/task inputs for source packaging.
+        files (Sequence | Mapping): Declared data paths or workspace-destination to source mapping.
+        entrypoint (str): Factory name in source, default build_workflow.
+        function (Callable | None): Top-level factory defined in a Python file, not a notebook or closure.
+
+    Returns:
+        job (JobHandle): Provider handle with id, status, cancel, and download operations.
+
+    Raises:
+        ValueError: Source selection or packaging options are inconsistent.
+        FileNotFoundError: An existing bundle is missing.
+        SubmissionValidationError: TACC preflight found known resource errors.
+        RemoteSubmissionError: TACC submission outcome is uncertain; inspect before retrying.
+
+    Example:
+        In an existing workflow file, replace the local execute block with:
+
+        ```python
+        from femora import jobs
+        if __name__ == "__main__":
+            job = jobs.submit(
+                source=__file__, platform="tacc",
+                settings={"system": "stampede3", "queue": "YOUR_QUEUE",
+                          "allocation": "YOUR_PROJECT", "nodes": 1,
+                          "cores_per_node": 1, "minutes": 10,
+                          "app_id": "YOUR_REGISTERED_FEMORA_APP"},
+            )
+            print(job.id)
+        ```
+
+    Warning:
+        This call authenticates, stages files, and submits real remote work.
+        Replace placeholders using your deployment. Bundles do not include
+        installed dependencies or OpenSees. A submission handle does not mean
+        the analysis succeeded. Do not automatically retry uncertain submissions.
     """
     if sum(value is not None for value in (source, bundle, function)) != 1:
         raise ValueError("Supply exactly one of source, bundle, or function")

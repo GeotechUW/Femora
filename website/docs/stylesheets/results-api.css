@@ -1,0 +1,41 @@
+/* Native disclosure controls, scoped to the Results reference enhancement. */
+.md-typeset details.results-api-member {
+  border: 1px solid var(--md-default-fg-color--lightest);
+  border-radius: .3rem;
+  box-shadow: none;
+  margin: .65rem 0;
+  padding: 0;
+  font-size: inherit;
+}
+.md-typeset .results-api-member > summary {
+  display: list-item;
+  padding: .65rem .9rem;
+  margin: 0;
+  background: var(--md-code-bg-color);
+  cursor: pointer;
+  list-style: disclosure-closed inside;
+}
+.md-typeset .results-api-member[open] > summary { list-style-type: disclosure-open; }
+.md-typeset .results-api-member > summary::before,
+.md-typeset .results-api-member > summary::after { display: none; }
+.md-typeset .results-api-member > summary > .doc-heading {
+  display: inline;
+  margin: 0;
+  font-size: .85rem;
+  overflow-wrap: anywhere;
+}
+.md-typeset .results-api-member > .doc-object { padding: .2rem .9rem .8rem; }
+.results-api-controls { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; margin: 1rem 0; }
+.results-api-controls span { flex-basis: 100%; color: var(--md-default-fg-color--light); font-size: .7rem; }
+.results-api-controls button {
+  border: 1px solid var(--md-default-fg-color--lightest);
+  border-radius: .25rem;
+  padding: .35rem .65rem;
+  font: inherit;
+  font-size: .7rem;
+  cursor: pointer;
+}
+.results-api-controls button:hover { color: var(--md-accent-fg-color); }
+.results-api-controls button:focus-visible,
+.results-api-member > summary:focus-visible { outline: 2px solid var(--md-accent-fg-color); outline-offset: 2px; }
+@media print { .results-api-controls { display: none; } }

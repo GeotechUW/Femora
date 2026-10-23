@@ -22,6 +22,7 @@ TOP_LEVEL_LABELS = {
     "core": "core",
     "tools": "tools",
     "io": "io",
+    "results": "Results & Postprocessing",
 }
 
 COMPONENT_PACKAGE_ORDER = [
@@ -61,6 +62,13 @@ def display_parts(parts: tuple[str, ...]) -> tuple[str, ...]:
         parts = parts[1:]
     if not parts:
         return parts
+    if parts[0] == "results" and len(parts) > 1:
+        if parts[1] == "readers":
+            parts = (parts[0], "Advanced", "File Readers") + parts[2:]
+        elif parts[1] == "visualization":
+            parts = (parts[0], "Visualization") + parts[2:]
+    if parts[:2] == ("jobs", "platforms"):
+        parts = ("jobs",) + parts[2:]
     head = TOP_LEVEL_LABELS.get(parts[0], parts[0])
     return (head,) + parts[1:]
 
@@ -87,6 +95,9 @@ def package_sort_key(item: tuple[tuple[str, ...], Path, str]) -> tuple:
 
 def should_skip(parts: tuple[str, ...]) -> bool:
     """Return True when a module path should not appear in the docs."""
+    if parts in {("femora", "cli"), ("femora", "jobs", "tracker_ui"),
+                 ("femora", "jobs", "platforms", "resolve")}:
+        return True
     if parts and parts[-1] in SKIP_MODULE_NAMES:
         return True
     if set(parts).intersection(SKIP_FOLDERS):
@@ -101,7 +112,7 @@ def should_skip(parts: tuple[str, ...]) -> bool:
 def parse_public_classes(path: Path) -> list[tuple[str, dict]]:
     """Return top-level public class names and doc controls from a module."""
     try:
-        source = path.read_text(encoding="utf-8")
+        source = path.read_text(encoding="utf-8-sig")
         tree = ast.parse(source)
     except Exception as exc:
         print(f"WARNING: Could not parse {path}: {exc}")
@@ -132,7 +143,7 @@ def parse_public_classes(path: Path) -> list[tuple[str, dict]]:
 def parse_module_docstring(path: Path) -> str:
     """Return the top-level module docstring, or an empty string."""
     try:
-        source = path.read_text(encoding="utf-8")
+        source = path.read_text(encoding="utf-8-sig")
         tree = ast.parse(source)
     except Exception as exc:
         print(f"WARNING: Could not parse docstring from {path}: {exc}")
@@ -322,6 +333,78 @@ of lifecycle work an advanced component performs.
 }
 
 MANUAL_PACKAGE_PAGES: dict[str, dict] = {
+    "femora.results": {
+        "modules": {
+            "result_set": {
+                "nav": ("Reading Results", "Open Result Files"),
+                "slug_parts": ("open-results", "index.md"),
+                "title": "Open Result Files",
+                "order": 0,
+                "options": {"members": ["open_results"], "show_root_heading": False},
+            },
+        },
+        "functions": {
+            "register_reader": {
+                "nav": ("Advanced", "Reader Extensions", "Register A Reader"),
+                "slug_parts": ("register-reader", "index.md"),
+                "title": "Register A Reader",
+                "order": 9,
+            },
+        },
+        "classes": {
+            "ResultSet": {
+                "nav": ("Reading Results", "ResultSet"),
+                "slug_parts": ("ResultSet", "index.md"),
+                "title": "ResultSet", "order": 1,
+            },
+            "PointSelection": {
+                "nav": ("Reading Results", "PointSelection"),
+                "slug_parts": ("PointSelection", "index.md"),
+                "title": "PointSelection", "order": 2,
+            },
+            "BuildingResults": {
+                "nav": ("Building Responses", "BuildingResults"),
+                "slug_parts": ("BuildingResults", "index.md"),
+                "title": "BuildingResults", "order": 3,
+            },
+            "ResultReader": {
+                "nav": ("Advanced", "Reader Extensions", "ResultReader"),
+                "slug_parts": ("ResultReader", "index.md"),
+                "title": "ResultReader", "order": 7,
+            },
+            "ResultReaderRegistry": {
+                "nav": ("Advanced", "Reader Extensions", "ResultReaderRegistry"),
+                "slug_parts": ("ResultReaderRegistry", "index.md"),
+                "title": "ResultReaderRegistry", "order": 8,
+            },
+            **{name: {
+                "nav": ("Advanced", "Errors", name), "slug_parts": (name, "index.md"),
+                "title": name, "order": 10 + index,
+            } for index, (name, label) in enumerate([
+                ("ResultError", "Result Error"),
+                ("ResultFormatError", "Invalid Result Data"),
+                ("UnsupportedResultOperation", "Unsupported Operation"),
+            ])},
+        },
+    },
+    "femora.results.visualization": {
+        "classes": {
+            "DeformationRenderer": {
+                "nav": ("DeformationRenderer",),
+                "slug_parts": ("DeformationRenderer", "index.md"),
+                "title": "DeformationRenderer", "order": 0,
+            },
+        },
+    },
+    "femora.results.readers": {
+        "classes": {
+            "VTKHDFResultReader": {
+                "nav": ("VTKHDFResultReader",),
+                "slug_parts": ("VTKHDFResultReader", "index.md"),
+                "title": "VTKHDFResultReader", "order": 0,
+            },
+        },
+    },
     "femora.components.event": {
         "guide": {
             "nav": ("guide",),
@@ -369,6 +452,65 @@ MANUAL_PACKAGE_PAGES: dict[str, dict] = {
     },
 }
 
+# Curated routes retain source-generated content and stable class-page paths.
+JOB_CLASS_ROUTES = {
+    "Workflow": ("workflows", "Workflow"),
+    "Python": ("tasks", "Python"),
+    "Command": ("tasks", "Command"),
+    "OpenSees": ("tasks", "OpenSees"),
+    "TaskContext": ("tasks", "TaskContext"),
+    "RunResult": ("execute workflows", "RunResult"),
+    "ProcessResult": ("execute workflows", "ProcessResult"),
+    "TACC": ("execute workflows", "allocation backends", "TACC"),
+    "TrackedJob": ("track jobs", "TrackedJob"),
+    "JobRecord": ("track jobs", "JobRecord"),
+    "JobRegistry": ("advanced", "tracking registry", "JobRegistry"),
+    "WorkflowExecutionError": ("advanced", "errors", "WorkflowExecutionError"),
+}
+PLATFORM_CLASS_ROUTES = {
+    "TACCPlatform": ("submit remotely", "TACCPlatform"),
+    "TACCSettings": ("submit remotely", "TACCSettings"),
+    "TACCValidator": ("submit remotely", "resource validation", "TACCValidator"),
+    "QueueLimits": ("submit remotely", "resource validation", "QueueLimits"),
+    "ValidationIssue": ("submit remotely", "resource validation", "ValidationIssue"),
+    "ValidationReport": ("submit remotely", "resource validation", "ValidationReport"),
+    "JobStatus": ("track jobs", "JobStatus"),
+    "TACCJob": ("track jobs", "TACCJob"),
+    "JobCleanupPlan": ("track jobs", "JobCleanupPlan"),
+    "JobSummary": ("track jobs", "JobSummary"),
+    **{name: ("advanced", "platform interfaces", name) for name in
+       ("Platform", "PlatformValidator", "JobHandle", "JobDiscovery", "TACCSubmitter")},
+    **{name: ("advanced", "errors", name) for name in
+       ("SubmissionValidationError", "RemoteSubmissionError")},
+}
+for package, routes in (("femora.jobs", JOB_CLASS_ROUTES),
+                        ("femora.jobs.platforms", PLATFORM_CLASS_ROUTES)):
+    MANUAL_PACKAGE_PAGES[package] = {"classes": {
+        name: {"nav": route, "slug_parts": (name, "index.md"),
+               "title": name, "order": index}
+        for index, (name, route) in enumerate(routes.items())
+    }}
+MANUAL_PACKAGE_PAGES["femora.jobs"]["modules"] = {
+    name: {"nav": route, "slug_parts": (slug, "index.md"), "title": route[-1],
+           "order": -10 + index, "options": {"members": members, "show_root_heading": False}}
+    for index, (name, route, slug, members) in enumerate([
+        ("runner", ("execute workflows", "run workflows"), "execute", ["execute"]),
+        ("submission", ("submit remotely", "submit workflows"), "submit", ["submit"]),
+        ("tracking", ("track jobs", "discover and reconnect"), "tracking",
+         ["list_jobs", "add", "sync", "connect"]),
+        ("bundle", ("bundles and replay",), "bundle", ["bundle", "replay"]),
+    ])
+}
+MANUAL_PACKAGE_PAGES["femora"] = {
+    "modules": {"runtime": {"nav": ("runtime", "overview"),
+        "slug_parts": ("runtime", "index.md"), "title": "runtime overview", "order": 0,
+        "options": {"members": ["setup", "run"], "show_root_heading": False}}},
+    "classes": {name: {"nav": ("runtime", "errors", name) if name.endswith("Error")
+                       else ("runtime", name),
+        "slug_parts": ("runtime", name, "index.md"), "title": name, "order": 1}
+        for name in ("RuntimeInfo", "RuntimeSetupError", "RuntimeExecutionError")},
+}
+
 
 def is_hidden_package_class(package_ident: str, class_name: str) -> bool:
     """Return whether a class should be omitted from generated package docs."""
@@ -393,7 +535,7 @@ def parse_element_manager_groups() -> dict[str, str]:
 
     for group_name, path in manager_files.items():
         try:
-            source = path.read_text(encoding="utf-8")
+            source = path.read_text(encoding="utf-8-sig")
             tree = ast.parse(source)
         except Exception as exc:
             print(f"WARNING: Could not parse {path} for element grouping: {exc}")
@@ -431,10 +573,14 @@ def write_package_index(
         front_matter, description_body = split_front_matter(description)
         if front_matter:
             fd.write(f"{front_matter}\n\n")
+        if front_matter and ident.startswith(("femora.results", "femora.jobs")):
+            for line in front_matter.splitlines():
+                if line.startswith("title:"):
+                    title = line.partition(":")[2].strip()
         fd.write(f"# {title}\n\n")
         if description_body:
             fd.write(f"{description_body}\n\n")
-        if class_links:
+        if class_links and ident != "femora.results" and not ident.startswith("femora.jobs"):
             if ident in GROUPED_PACKAGE_TITLES:
                 grouped: dict[str, list[tuple[str, str]]] = {}
                 for module_name, class_name, href in class_links:
@@ -502,9 +648,12 @@ def write_class_page(
                     rendered = "true" if value else "false"
                     fd.write(f"      {key}: {rendered}\n")
                 elif isinstance(value, list):
-                    fd.write(f"      {key}:\n")
-                    for item in value:
-                        fd.write(f"        - {item}\n")
+                    if value:
+                        fd.write(f"      {key}:\n")
+                        for item in value:
+                            fd.write(f"        - {item}\n")
+                    else:
+                        fd.write(f"      {key}: []\n")
                 else:
                     fd.write(f"      {key}: {value}\n")
     mkdocs_gen_files.set_edit_path(doc_path, edit_path)
@@ -529,9 +678,12 @@ def write_module_page(
                     rendered = "true" if value else "false"
                     fd.write(f"      {key}: {rendered}\n")
                 elif isinstance(value, list):
-                    fd.write(f"      {key}:\n")
-                    for item in value:
-                        fd.write(f"        - {item}\n")
+                    if value:
+                        fd.write(f"      {key}:\n")
+                        for item in value:
+                            fd.write(f"        - {item}\n")
+                    else:
+                        fd.write(f"      {key}: []\n")
                 else:
                     fd.write(f"      {key}: {value}\n")
     mkdocs_gen_files.set_edit_path(doc_path, edit_path)
@@ -544,6 +696,11 @@ package_infos: list[tuple[tuple[str, ...], Path, str]] = []
 package_classes: dict[tuple[str, ...], list[tuple[str, str]]] = {}
 manual_package_nav_entries: dict[str, list[tuple[int, tuple[str, ...], str]]] = {}
 grouped_package_nav_entries: dict[str, list[tuple[int, tuple[str, ...], str]]] = {}
+
+command_page = Path("reference/jobs/command-line/index.md")
+nav[("jobs", "command line")] = command_page.relative_to("reference").as_posix()
+write_module_page(command_page, "femora.jobs.__main__", src_root / "femora/jobs/__main__.py",
+                  "command line", {"members": [], "show_root_heading": False})
 
 for path in files:
     module_path = path.relative_to(src_root).with_suffix("")
@@ -562,6 +719,22 @@ for path in files:
         continue
 
     class_entries = parse_public_classes(path)
+
+    # Explicit module pages can coexist with class pages (e.g. open_results
+    # beside ResultSet). Previously the class branch silently skipped them.
+    package_ident = ".".join(parts[:-1])
+    manual_package = MANUAL_PACKAGE_PAGES.get(package_ident)
+    mixed_module_page = bool(class_entries and manual_package
+                             and parts[-1] in manual_package.get("modules", {}))
+    if mixed_module_page:
+        page_config = manual_package["modules"][parts[-1]]
+        doc_path = Path("reference", *doc_parts(parts[:-1]), *page_config["slug_parts"])
+        manual_package_nav_entries.setdefault(package_ident, []).append((
+            page_config["order"], display_parts(parts[:-1]) + page_config["nav"],
+            doc_path.relative_to("reference").as_posix(),
+        ))
+        write_module_page(doc_path, ".".join(parts), path,
+                          page_config["title"], page_config.get("options"))
 
     # Keep the older class-page style, but flatten the navigation so packages
     # list classes directly instead of showing a file name before the class.
@@ -639,12 +812,27 @@ for path in files:
 
 for nav_parts, path, description in sorted(package_infos, key=package_sort_key):
     doc_path = Path("reference", *doc_parts(nav_parts), "index.md")
-    nav[display_parts(nav_parts)] = doc_path.relative_to("reference").as_posix()
+    landing_nav = display_parts(nav_parts)
+    if nav_parts == ("femora", "results"):
+        landing_nav += ("Overview",)
+    elif nav_parts == ("femora", "jobs"):
+        landing_nav += ("overview",)
+    elif nav_parts == ("femora", "jobs", "platforms"):
+        landing_nav = ("jobs", "advanced", "platform interfaces", "overview")
+    nav[landing_nav] = doc_path.relative_to("reference").as_posix()
     class_links = [
         (module_name, class_name, f"{class_name}/")
         for module_name, class_name in package_classes.get(nav_parts, [])
     ]
     package_ident = ".".join(nav_parts)
+    for function_name, page_config in MANUAL_PACKAGE_PAGES.get(package_ident, {}).get("functions", {}).items():
+        function_path = Path("reference", *doc_parts(nav_parts), *page_config["slug_parts"])
+        manual_package_nav_entries.setdefault(package_ident, []).append((
+            page_config["order"], display_parts(nav_parts) + page_config["nav"],
+            function_path.relative_to("reference").as_posix(),
+        ))
+        write_module_page(function_path, f"{package_ident}.{function_name}", path,
+                          page_config["title"])
     if package_ident == "femora.components.event":
         write_manual_event_index(doc_path, description, path)
     else:
@@ -686,6 +874,83 @@ for package_ident, entries in grouped_package_nav_entries.items():
     for _order, nav_parts, rel_path in sorted(entries, key=lambda item: (item[0], item[1])):
         nav[nav_parts] = rel_path
 
+def order_results_navigation(source_nav):
+    """Order Results by user task, keeping other API navigation unchanged."""
+    entries = []
+    stack = []
+    for item in source_nav.items():
+        stack = stack[:item.level] + [item.title]
+        if item.filename is not None:
+            entries.append((tuple(stack), item.filename))
+    heading = TOP_LEVEL_LABELS["results"]
+    results = [(keys, path) for keys, path in entries if keys[0] == heading]
+    order = {"Overview": 0, "Reading Results": 1, "Building Responses": 2,
+             "Visualization": 3, "Advanced": 4}
+    advanced_order = {"File Readers": 0, "Reader Extensions": 1, "Errors": 2}
+    results.sort(key=lambda item: (
+        order.get(item[0][1], 99),
+        advanced_order.get(item[0][2], 99)
+        if len(item[0]) > 2 and item[0][1] == "Advanced" else 0,
+    ))
+    ordered = mkdocs_gen_files.Nav()
+    inserted = False
+    for keys, path in entries:
+        if keys[0] != heading:
+            ordered[keys] = path
+        elif not inserted:
+            for result_keys, result_path in results:
+                ordered[result_keys] = result_path
+            inserted = True
+    return ordered
+
+
+nav = order_results_navigation(nav)
+
+
+def order_jobs_navigation(source_nav):
+    """Keep the Jobs lifecycle readable without changing other reference sections."""
+    entries, stack = [], []
+    for item in source_nav.items():
+        stack = stack[:item.level] + [item.title]
+        if item.filename is not None:
+            entries.append((tuple(stack), item.filename))
+    order = {name: index for index, name in enumerate((
+        "overview", "tasks", "workflows", "execute workflows", "submit remotely",
+        "track jobs", "bundles and replay", "command line", "advanced"))}
+    jobs = [(keys, path) for keys, path in entries if keys[0] == "jobs"]
+    jobs.sort(key=lambda entry: order.get(entry[0][1], 99))
+    ordered, inserted = mkdocs_gen_files.Nav(), False
+    for keys, path in entries:
+        if keys[0] != "jobs":
+            ordered[keys] = path
+        elif not inserted:
+            for job_keys, job_path in jobs:
+                ordered[job_keys] = job_path
+            inserted = True
+    return ordered
+
+
+nav = order_jobs_navigation(nav)
+
+
+def order_reference_navigation(source_nav):
+    """Place execution APIs after modeling/support APIs and before results."""
+    entries, stack = [], []
+    for item in source_nav.items():
+        stack = stack[:item.level] + [item.title]
+        if item.filename is not None:
+            entries.append((tuple(stack), item.filename))
+    order = {name: index for index, name in enumerate((
+        "components", "core", "io", "tools", "jobs", "runtime",
+        TOP_LEVEL_LABELS["results"]))}
+    entries.sort(key=lambda item: order.get(item[0][0], len(order)))
+    ordered = mkdocs_gen_files.Nav()
+    for keys, path in entries:
+        ordered[keys] = path
+    return ordered
+
+
+nav = order_reference_navigation(nav)
 with mkdocs_gen_files.open("reference/SUMMARY.md", "w") as nav_file:
     nav_file.write("- [Overview](index.md)\n")
     nav_file.writelines(nav.build_literate_nav())

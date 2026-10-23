@@ -5,9 +5,10 @@ icon: material/book-open-page-variant-outline
 
 # API Reference
 
-The Femora API is organized into four reference areas: `components`, `core`,
-`tools`, and `io`. They are related, but they do not serve the same purpose.
-Understanding that boundary makes the rest of the reference much easier to use.
+The Femora API covers modeling, analysis workflows, and recorded results.
+`components`, `core`, `tools`, and `io` support model construction and data
+exchange. Jobs, runtime, and command-line APIs support execution; Results &
+Postprocessing covers reading and interpreting completed recorder output.
 
 In most cases, users begin with `components`, which is the concrete modeling
 surface of Femora. The `core` layer sits underneath it and explains how those
@@ -32,6 +33,30 @@ runtime surface.
 ## Where To Go
 
 <div class="grid cards" markdown>
+
+-   [:material-sitemap-outline: **jobs**](jobs/index.md)
+    ---
+    *Define workflows, run tasks, and manage remote jobs.*
+
+    Build ordered stages for model construction, solver execution, and
+    postprocessing. Execute locally or submit remotely, then discover jobs,
+    inspect status, and retrieve output archives. Terminal commands are
+    documented alongside the Jobs API.
+
+-   [:material-cog-play-outline: **runtime**](runtime/index.md)
+    ---
+    *Configure and invoke the external solver.*
+
+    Resolve a supported OpenSees runtime and run an exported Tcl model.
+    These utilities are separate from workflow scheduling and remote submission.
+
+-   [:material-chart-line: **Results & Postprocessing**](results/index.md)
+    ---
+    *Read, interpret, and visualize recorder output.*
+
+    Open serial or partitioned VTKHDF files, extract point histories and
+    building responses, export CSV summaries, or animate deformation. Start
+    here after an analysis has finished; no model reconstruction is required.
 
 -   [:material-puzzle-outline: **components**](components/)
     ---

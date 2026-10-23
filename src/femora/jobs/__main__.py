@@ -1,4 +1,62 @@
-"""Replay workflows and discover or track submitted jobs from the terminal."""
+"""Use ``femora jobs`` from a terminal, or ``python -m femora.jobs`` when the
+console entry point is unavailable. These commands share the Python Jobs API;
+they do not introduce another workflow format.
+
+## Inspect Cached Jobs
+
+```bash
+femora jobs list
+femora jobs list --json
+```
+
+These read the local registry without logging in or refreshing remote status.
+Use remote discovery to update it; this prompts for authentication:
+
+```bash
+femora jobs list --remote
+femora jobs list --remote --app-id YOUR_REGISTERED_FEMORA_APP
+```
+
+## Reconnect And Track
+
+```bash
+femora jobs add YOUR_JOB_UUID --name my-analysis --username YOUR_USERNAME
+femora jobs status YOUR_JOB_UUID
+femora jobs track
+```
+
+``add`` only records an identity locally. ``status`` fetches live remote status
+for a cached job and may prompt for login. ``track`` opens the interactive
+terminal interface for discovery, status, downloads, cancellation, and cleanup.
+It requires an interactive input/output terminal. Its default polling interval
+is 30 seconds; ``--poll-interval`` must be at least 10 seconds.
+
+Cancellation and cleanup affect real remote jobs/files. Download outputs before
+cleanup; hiding a cached entry is not remote deletion. Downloads save ZIP files
+without extracting them. Never resubmit merely to refresh a job's status.
+
+## Replay A Trusted Bundle
+
+```bash
+femora jobs replay workflow.zip --workspace new-run --cores 1
+```
+
+The workspace must be empty. Replay executes bundled Python and tasks; only
+use trusted bundles. Dependencies and the solver must already be installed.
+``--backend tacc`` is for execution inside an existing compatible Slurm
+allocation, not scheduler submission.
+
+## Command Help
+
+```bash
+femora jobs --help
+femora jobs replay --help
+femora jobs track --help
+```
+
+For programmatic remote submission use [submit()][femora.jobs.submission.submit].
+For API examples see the [jobs overview](../index.md).
+"""
 
 from __future__ import annotations
 

@@ -5,7 +5,19 @@
 # SPDX-License-Identifier: Apache-2.0
 # =============================================================================
 
-"""Configure external solver runtimes used by Femora."""
+"""Configure and invoke an external OpenSees runtime.
+
+Use [setup()][femora.runtime.setup] to resolve or prepare a supported runtime,
+then [run()][femora.runtime.run] to invoke an existing Tcl analysis. These are
+solver-runtime utilities, not remote scheduler submission or staged workflows.
+See [jobs](../jobs/index.md) for workflow orchestration.
+
+[RuntimeInfo][femora.runtime.RuntimeInfo] describes the resolved configuration;
+[RuntimeSetupError][femora.runtime.RuntimeSetupError] and
+[RuntimeExecutionError][femora.runtime.RuntimeExecutionError] distinguish setup
+and execution failures. Review setup() for environment-specific downloads and
+run() for solver execution options before invoking them.
+"""
 
 from __future__ import annotations
 
@@ -35,9 +47,13 @@ _RUNTIME_MARKER = "FEMORA_OPENSEES_RUNTIME_OK"
 class RuntimeSetupError(RuntimeError):
     """Raised when Femora cannot configure or validate an OpenSees runtime."""
 
+    __doc_controls__ = {"members": []}
+
 
 class RuntimeExecutionError(RuntimeError):
     """Raised when an OpenSees process or managed analysis fails."""
+
+    __doc_controls__ = {"members": []}
 
 
 @dataclass(frozen=True)
@@ -53,6 +69,8 @@ class RuntimeInfo:
             ``None``.
         installed: Whether this call downloaded and installed the runtime.
     """
+
+    __doc_controls__ = {"members": []}
 
     environment: str
     executable: Path

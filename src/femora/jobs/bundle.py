@@ -1,4 +1,16 @@
-"""Package a workflow source and inputs for execution in another workspace."""
+"""Package a workflow source and inputs for execution in another workspace.
+
+bundle() writes an archive without importing or running the workflow. replay()
+unpacks it into an empty workspace, verifies declared file checksums, imports
+the factory, and executes its tasks. A bundle includes one workflow source file,
+JSON inputs, and declared data files, not an entire Python environment.
+
+Use this layer when transferring or inspecting workflow inputs explicitly.
+For ordinary remote submission, jobs.submit(source=...) creates a temporary
+bundle for you. Source imports, dependencies, and the solver must be available
+where replay runs. Only replay trusted archives: their contents are executable
+code, and checksum validation is not an authenticity or safety check.
+"""
 
 from __future__ import annotations
 
@@ -64,6 +76,33 @@ def bundle(
     paths (relative to the workflow source or absolute). Only declared files are
     uploaded; mapping destinations must still stay inside the remote workspace.
     The bundle does not include Python packages or the OpenSees executable.
+
+    Args:
+        source (str | Path): Python workflow file defining the factory at module scope.
+        destination (str | Path): ZIP path to create.
+        inputs (Mapping[str, Any]): JSON-serializable values; nonfinite numbers are rejected.
+        files (Sequence | Mapping): Relative source files, or destination-to-source mapping.
+        entrypoint (str): Factory function name in the source file.
+        overwrite (bool): Permit replacing an existing destination ZIP.
+
+    Returns:
+        archive (Path): Absolute path to the created bundle.
+
+    Raises:
+        ValueError: Source, entrypoint, file mapping, or JSON values are invalid.
+        TypeError: Inputs are not a mapping or contain non-JSON values.
+        FileExistsError: Destination exists and overwrite is False.
+
+    Example:
+        ```python
+        from femora.jobs import bundle
+        archive = bundle(source="workflow.py", destination="workflow.zip",
+                         inputs={"site": 1}, files=["inputs/motion.txt"])
+        ```
+
+    Note:
+        Packaging does not import or execute the workflow. It includes only the
+        one source file and declared data, not imported helper modules automatically.
     """
     script = Path(source).expanduser().resolve()
     if not script.is_file() or script.suffix != ".py":
@@ -119,6 +158,32 @@ def replay(
 
     Bundle source is executable Python. Do not replay bundles from untrusted
     origins. This operation does not install dependencies or configure OpenSees.
+
+    Args:
+        package (str | Path): Trusted workflow ZIP created by bundle().
+        workspace (str | Path): Empty directory or new directory for the run.
+        cores (int | None): Execution capacity passed to execute().
+        backend (TACC | None): Existing-allocation backend, or None for local execution.
+
+    Returns:
+        run (RunResult): Task return values, manifest, and selected artifact paths.
+
+    Raises:
+        FileExistsError: Workspace is not empty or extraction would overwrite data.
+        ValueError: Bundle metadata, paths, checksums, or factory are invalid.
+        WorkflowExecutionError: Workflow execution fails.
+
+    Example:
+        ```python
+        from femora.jobs import replay
+        if __name__ == "__main__":
+            run = replay("workflow.zip", workspace="new-run", cores=1)
+            print(run.manifest)
+        ```
+
+    Warning:
+        This executes bundled Python code and external commands. Checksums detect
+        inconsistencies, not whether a bundle is safe or from a trusted author.
     """
     root = Path(workspace).expanduser().resolve()
     if root.exists() and any(root.iterdir()):

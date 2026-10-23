@@ -32,7 +32,42 @@ _COMPONENTS = {"x": 0, "y": 1, "z": 2}
 
 
 class VTKHDFResultReader(ResultReader):
-    """Read one VTKHDF result file without eagerly loading transient fields."""
+    """Read one OpenSees VTKHDF partition using lazy HDF5 history access.
+
+    Prefer open_results() for ordinary use and for multiple MPI partitions.
+    Direct access is useful for extracting a field at one recorded sample.
+
+    Args:
+        path: Existing VTKHDF file containing VTKHDF/Points and Steps/Values.
+
+    Raises:
+        FileNotFoundError: The file does not exist.
+        ResultFormatError: Required VTKHDF layout entries are missing.
+        OSError: HDF5 cannot open the file. Wait for the solver to close it;
+            do not bypass file locks to read an active recorder.
+
+    Example:
+        ```python
+        from femora.results.readers import VTKHDFResultReader
+
+        with VTKHDFResultReader("results/response0.vtkhdf") as reader:
+            displacement = reader.point_frame("displacement", step=-1)
+            geometry = reader.mesh
+        ```
+
+    Note:
+        Names are the stored field names: displacement, velocity, acceleration,
+        force3D, and localForce3D are typical OpenSees outputs. No alias rewriting,
+        unit conversion, acceleration conversion, or force interpretation occurs.
+        Only fields present in both data and per-step offsets are advertised.
+        Unsupported element responses may be stored as zeros by the solver.
+    """
+
+    __doc_controls__ = {"members": [
+        "capabilities", "times", "number_of_steps", "number_of_points",
+        "number_of_cells", "available_point_responses", "available_cell_responses",
+        "mesh", "point_history", "cell_history", "point_frame", "cell_frame", "close",
+    ]}
 
     def __init__(self, path: Union[str, Path]) -> None:
         super().__init__(path)
@@ -44,6 +79,7 @@ class VTKHDFResultReader(ResultReader):
 
     @property
     def capabilities(self) -> FrozenSet[str]:
+        """Available mesh, history, and frame operations based on stored fields."""
         capabilities = {MESH}
         if self.available_point_responses:
             capabilities.update({POINT_HISTORY, POINT_FRAME})
@@ -76,18 +112,22 @@ class VTKHDFResultReader(ResultReader):
 
     @property
     def times(self) -> np.ndarray:
+        """Recorded Steps/Values array; static samples may be pseudo-time."""
         return self._vtkhdf["Steps"]["Values"][()]
 
     @property
     def number_of_steps(self) -> int:
+        """Number of stored samples, not necessarily the solver step count."""
         return int(self._vtkhdf["Steps"]["Values"].shape[0])
 
     @property
     def available_point_responses(self) -> tuple[str, ...]:
+        """Names with both point data and per-step offsets in this file."""
         return self._available_responses("PointData")
 
     @property
     def available_cell_responses(self) -> tuple[str, ...]:
+        """Names with both cell data and per-step offsets in this file."""
         return self._available_responses("CellData")
 
     def _available_responses(self, location: str) -> tuple[str, ...]:
@@ -101,18 +141,21 @@ class VTKHDFResultReader(ResultReader):
 
     @property
     def mesh(self) -> pv.UnstructuredGrid:
+        """Cached PyVista mesh; copy it before modifying coordinates or arrays."""
         if self._mesh is None:
             self._mesh = pv.UnstructuredGrid(pv.read(self.path))
         return self._mesh
 
     @property
     def number_of_points(self) -> int:
+        """Point count for the first mesh, excluding repeated transient counts."""
         if "NumberOfPoints" in self._vtkhdf:
             return self._first_mesh_count("NumberOfPoints")
         return int(self._vtkhdf["Points"].shape[0])
 
     @property
     def number_of_cells(self) -> int:
+        """Cell count for the first mesh, excluding repeated transient counts."""
         if "NumberOfCells" in self._vtkhdf:
             return self._first_mesh_count("NumberOfCells")
         return int(self.mesh.n_cells)
@@ -133,6 +176,21 @@ class VTKHDFResultReader(ResultReader):
         point_index: int,
         component: Component = None,
     ) -> np.ndarray:
+        """Read one local point over all samples.
+
+        Args:
+            response: Stored point field name.
+            point_index: Zero-based mesh-point index, not a node tag.
+            component: None for all components, an integer, or x/y/z.
+
+        Returns:
+            NumPy array of samples, with a component dimension unless selected
+            explicitly or the stored field is scalar.
+
+        Raises:
+            KeyError: Field data or its per-step offsets are absent.
+            IndexError: Point or component index is outside the stored array.
+        """
         return self._history("PointData", response, point_index, component)
 
     def cell_history(
@@ -141,6 +199,20 @@ class VTKHDFResultReader(ResultReader):
         cell_index: int,
         component: Component = None,
     ) -> np.ndarray:
+        """Read one local cell's recorded history.
+
+        Args:
+            response: Stored cell field name, such as force3D.
+            cell_index: Zero-based mesh-cell index, not an element tag.
+            component: None for all components, or an integer component index.
+
+        Returns:
+            NumPy array of samples and, when applicable, components.
+
+        Raises:
+            KeyError: Field data or offsets are absent.
+            IndexError: Cell or component index is out of range.
+        """
         return self._history("CellData", response, cell_index, component)
 
     def point_frame(
@@ -149,6 +221,21 @@ class VTKHDFResultReader(ResultReader):
         step: int,
         component: Component = None,
     ) -> np.ndarray:
+        """Read all points at one recorded sample, without deforming the mesh.
+
+        Args:
+            response: Stored point field name.
+            step: Zero-based sample index; -1 selects the last sample.
+            component: None for every component, an integer, or x/y/z.
+
+        Returns:
+            Array shaped (points, components), or (points,) for a scalar/selected
+            component. Translational/rotational components are not separated.
+
+        Raises:
+            KeyError: Requested field is unavailable.
+            IndexError: Sample index is out of range.
+        """
         return self._frame("PointData", response, step, component)
 
     def cell_frame(
@@ -157,6 +244,20 @@ class VTKHDFResultReader(ResultReader):
         step: int,
         component: Component = None,
     ) -> np.ndarray:
+        """Read all cells at one recorded sample.
+
+        Args:
+            response: Stored cell field name, such as force3D.
+            step: Zero-based sample index; negative indices count from the end.
+            component: None for all components, or an integer component index.
+
+        Returns:
+            Array shaped (cells, components), or (cells,) for scalar/selected data.
+
+        Raises:
+            KeyError: Requested field is unavailable.
+            IndexError: Sample index is out of range.
+        """
         return self._frame("CellData", response, step, component)
 
     def _history(
@@ -243,6 +344,7 @@ class VTKHDFResultReader(ResultReader):
         return values[:, index]
 
     def close(self) -> None:
+        """Close the HDF5 handle; context-manager exit calls this automatically."""
         if self._file is not None:
             self._file.close()
             self._file = None

@@ -8,16 +8,16 @@ import femora as fm
 
 
 # --8<-- [start:input]
-def create_input(context):
-    path = context.output_dir / "number.txt"
-    path.write_text(str(context.inputs["number"]), encoding="utf-8")
+def write_base_value(context):
+    path = context.output_dir / "base_value.txt"
+    path.write_text(str(context.inputs["base_value"]), encoding="utf-8")
     return path
 # --8<-- [end:input]
 
 
 # --8<-- [start:calculate]
 def calculate(context, factor):
-    input_file = context.result("input", "number")
+    input_file = context.result("prepare", "write_base_value")
     number = float(input_file.read_text(encoding="utf-8"))
     value = number * factor
     path = context.output_dir / "value.txt"
@@ -41,7 +41,7 @@ def write_report(context):
 # --8<-- [start:workflow]
 def build_workflow():
     workflow = fm.Workflow("workflow-basics")
-    workflow.add("input", tasks=[fm.tasks.Python("number", create_input)])
+    workflow.add("prepare", tasks=[fm.tasks.Python("write_base_value", write_base_value)])
     workflow.add(
         "calculate",
         tasks=[
@@ -49,8 +49,8 @@ def build_workflow():
             fm.tasks.Python("triple", calculate, kwargs={"factor": 3}),
         ],
     )
-    workflow.add("report", tasks=[fm.tasks.Python("summary", write_report)])
-    workflow.outputs("report/summary/summary.txt", "calculate/*/value.txt")
+    workflow.add("report", tasks=[fm.tasks.Python("write_summary", write_report)])
+    workflow.outputs("report/write_summary/summary.txt", "calculate/*/value.txt")
     return workflow
 # --8<-- [end:workflow]
 
@@ -60,8 +60,8 @@ if __name__ == "__main__":
     run = fm.execute(
         build_workflow(),
         workspace="example_outputs/workflow_basics",
-        inputs={"number": 4},
+        inputs={"base_value": 4},
         cores=1,
     )
-    print(run.result("report", "summary").read_text(encoding="utf-8"))
+    print(run.result("report", "write_summary").read_text(encoding="utf-8"))
 # --8<-- [end:execute]

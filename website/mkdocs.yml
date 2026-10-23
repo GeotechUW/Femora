@@ -67,6 +67,7 @@ markdown_extensions:
       emoji_generator: !!python/name:material.extensions.emoji.to_svg
 
 extra_javascript:
+  - javascripts/results-api.js
   - javascripts/mathjax.js
   - javascripts/example-gallery.js
   - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
@@ -74,8 +75,12 @@ extra_javascript:
 # --- END Math Config ---
 
 extra_css:
+  - stylesheets/results-api.css
   - stylesheets/workflows.css
   - stylesheets/extra.css
+
+hooks:
+  - results_api_hook.py
 
 plugins:
   - search
@@ -136,7 +141,8 @@ nav:
       - 'Recorders and Actions': concepts/recorders-and-actions.md
       - Analysis: concepts/analysis.md
       - Process: concepts/process.md
-      - 'Workflows and Remote Jobs': concepts/workflows.md
+      - Workflows: concepts/workflows.md
+      - Jobs: concepts/jobs.md
   - 'Tutorials & Examples':
       - Overview: tutorials-and-examples/index.md
       - Tutorials:

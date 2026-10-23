@@ -64,7 +64,18 @@ class BuildingResults:
         not an inertia-based estimate. Global-end moments and force lever arms
         are included in overturning moments. Units are supplied by the caller's
         metadata; the reader performs no unit conversion.
+
+        Floor quantities are arithmetic averages of structural-joint translations,
+        not mass-weighted center-of-mass values. In SSI, relative-to-base motion
+        removes translation only, not foundation rocking. No failure criterion
+        is inferred from member forces or drift.
     """
+
+    __doc_controls__ = {"summary": True, "members": [
+        "open", "members", "floor_displacement", "floor_acceleration",
+        "interstory_drift", "member_forces", "story_shear", "base_shear",
+        "overturning_moment", "summary", "export_csv", "close",
+    ]}
 
     def __init__(self, raw, metadata):
         self.raw = raw
@@ -104,7 +115,17 @@ class BuildingResults:
         Returns:
             BuildingResults: Owns its underlying readers. Close it or use it
                 as a context manager. No building reconstruction is needed.
-        """
+
+        Raises:
+            FileNotFoundError: Recorder or metadata files cannot be found.
+            ResultFormatError: Metadata schema, node identities, connectivity,
+                floor assignments, or partition timestamps are inconsistent.
+
+        Note:
+            Metadata and recorder files must come from the same assembled model.
+            Include every partition containing building members. Coincident
+            nodes/elements require unambiguous recorded nodeTags/eleTags.
+    """
         if isinstance(metadata, (str, Path)):
             metadata = read_building_metadata(metadata)
         raw = open_results(source)
@@ -211,7 +232,20 @@ class BuildingResults:
             for nodes in self.metadata["floor_nodes"]])
 
     def members(self):
-        """Return physical-member roles, stories, sections, and element lists."""
+        """Inspect physical-member identities before selecting force histories.
+
+        Returns:
+            table (pandas.DataFrame): Physical-member index and metadata columns,
+                such as kind, story, section, and element tags. A subdivided
+                beam is one physical member with several finite elements.
+
+        Example:
+            ```python
+            catalogue = results.members()
+            braces = catalogue[catalogue["kind"] == "brace"]
+            forces = results.member_forces(member_ids=braces.index.tolist())
+            ```
+        """
         import pandas as pd
         return pd.DataFrame(self.metadata["members"]).set_index("member")
 
@@ -220,6 +254,28 @@ class BuildingResults:
 
         ``relative_to_base=True`` subtracts the recorded base translation at
         each sample. Gravity offsets are not silently removed.
+
+        Args:
+            direction (str): Global ``"x"``, ``"y"``, or ``"z"``.
+            relative_to_base (bool): Subtract the mean translation of floor 0. This
+                does not remove the displacement caused by foundation rotation.
+            include_base (bool): Include floor 0; otherwise return floors 1 through N.
+
+        Returns:
+            table (pandas.DataFrame): Recorder-sample index, integer floor columns, and
+                metadata length units in attrs. The base-relative floor-0
+                column is zero if both options are enabled.
+
+        Raises:
+            ValueError: Direction is unsupported.
+            UnsupportedResultOperation: Displacement was not recorded.
+            ResultFormatError: A history is nonfinite or partition copies conflict.
+
+        Example:
+            ```python
+            floors = results.floor_displacement("x", relative_to_base=True)
+            roof = floors.iloc[:, -1]
+            ```
         """
         values = self._floors("displacement", direction)
         if relative_to_base:
@@ -237,6 +293,38 @@ class BuildingResults:
         x/y/z columns. Its times must cover all recorder times, including any
         free-vibration tail, and its acceleration units must match the results.
         No motion is guessed from a filename and no scaling is applied.
+
+        Args:
+            direction (str): Global ``"x"``, ``"y"``, or ``"z"``.
+            basis (str): ``"recorded"`` (default), ``"absolute"``, or ``"relative"``.
+                If the requested basis already matches metadata, no conversion occurs.
+            ground_motion (tuple | pandas.DataFrame | None): Motion for basis conversion;
+                see the accepted forms above. Components are in global axes.
+            include_base (bool): Include the base-floor mean acceleration if True.
+
+        Returns:
+            table (pandas.DataFrame): Floor columns, recorder-sample index, and
+                acceleration units and resulting basis in attrs.
+
+        Raises:
+            UnsupportedResultOperation: Acceleration is absent, or conversion
+                lacks a declared recorded basis and explicit ground motion.
+            ValueError: Basis, direction, or supplied motion samples are invalid.
+
+        Examples:
+            DRM output already declared absolute needs no added ground motion:
+
+            ```python
+            acceleration = results.floor_acceleration("x", basis="absolute")
+            ```
+
+            For metadata declared relative under uniform excitation:
+
+            ```python
+            acceleration = results.floor_acceleration(
+                "x", basis="absolute", ground_motion=(motion_time, ground_ax),
+            )
+            ```
         """
         values = self._floors("acceleration", direction)
         recorded = self.metadata.get("acceleration_basis", "unspecified")
@@ -264,7 +352,32 @@ class BuildingResults:
                            basis=recorded if basis == "recorded" else basis)
 
     def interstory_drift(self, direction="x"):
-        """Return signed mean-floor displacement differences divided by story height."""
+        """Calculate signed translation-based drift ratios for every story.
+
+        Args:
+            direction (str): Global ``"x"``, ``"y"``, or ``"z"``. Horizontal x/y
+                components are normally used for lateral interstory drift.
+
+        Returns:
+            table (pandas.DataFrame): Story columns 1 through N. Each value is
+                (upper mean translation - lower mean translation) / story height.
+                Values are dimensionless ratios, not percentages; multiply by 100
+                for percent. Story 1 uses the recorded base as its lower floor.
+
+        Raises:
+            UnsupportedResultOperation: Displacement was not recorded.
+
+        Note:
+            Neither foundation rocking nor floor torsional variation is removed.
+            These mean-floor ratios are not maximum corner drifts or a design
+            acceptance check.
+
+        Example:
+            ```python
+            drift_percent = 100 * results.interstory_drift("x")
+            peak_by_story = drift_percent.abs().max()
+            ```
+        """
         values = np.diff(self._floors("displacement", direction), axis=1)/np.diff(self.metadata["floor_elevations"])
         return self._frame(values, list(range(1, values.shape[1]+1)), units="ratio", basis="relative_floor_motion")
 
@@ -276,6 +389,31 @@ class BuildingResults:
         units. This is not a yield or failure assessment.
         Use ``story`` or ``member_ids`` to restrict large queries without
         loading histories for unrelated members.
+
+        Args:
+            kind (str): ``"beam"``, ``"column"``, ``"brace"``, or ``"all"``.
+            coordinate_system (str): ``"global"`` requests force3D; ``"local"``
+                requests localForce3D. Local axes follow the exported element.
+            end (str): ``"i"``, ``"j"``, or ``"both"``; connectivity defines end order.
+            story (int | None): One story number, or None for every story.
+            member_ids (Iterable[int] | None): Physical IDs from members(), or None for all.
+
+        Returns:
+            table (pandas.DataFrame): Four-level columns: member, element, end, component.
+                Components are Fx, Fy, Fz, Mx, My, Mz. Empty selections return zero
+                columns. Force and moment units are in attrs.
+
+        Raises:
+            ValueError: Kind, coordinate system, or end is invalid.
+            UnsupportedResultOperation: The selected force field was not recorded.
+            ResultFormatError: End-force fields do not contain 12 components.
+
+        Example:
+            ```python
+            brace_forces = results.member_forces(
+                kind="brace", story=1, coordinate_system="local", end="i",
+            )
+            ```
         """
         import pandas as pd
         if coordinate_system not in {"global", "local"} or end not in {"i", "j", "both"}:
@@ -330,6 +468,22 @@ class BuildingResults:
         All structural members crossing the cut contribute, including braces.
         Subdivided physical members contribute only the segment crossing it.
         These are resisting-force resultants, not sums of nodal inertia.
+
+        Args:
+            direction (str): Global ``"x"``, ``"y"``, or ``"z"`` force component.
+
+        Returns:
+            table (pandas.DataFrame): Story columns 1 through N, in metadata force units.
+                A cut is placed at each story's lower-floor elevation.
+
+        Raises:
+            UnsupportedResultOperation: Global force3D is unavailable or no
+                structural members cross a requested cut.
+            ResultFormatError: Force arrays have an invalid component count.
+
+        Note:
+            A positive result is the negative sum of lower-end actions in the
+            selected global direction. It is not a support-reaction sum.
         """
         component = self._direction(direction)
         values = [self._cut(z, np.asarray(self.metadata["moment_reference"]))[:, component]
@@ -337,7 +491,24 @@ class BuildingResults:
         return self._frame(np.column_stack(values), list(range(1, len(values)+1)), units=self.metadata["units"]["force"])
 
     def base_shear(self, direction="x"):
-        """Return the first-story cut resultant with the same sign convention."""
+        """Read the first-story force-cut resultant at the building base.
+
+        Args:
+            direction (str): Global ``"x"``, ``"y"``, or ``"z"`` force component.
+
+        Returns:
+            table (pandas.DataFrame): One column, ``"base"``, using the same force units
+                and sign convention as story_shear().
+
+        Raises:
+            UnsupportedResultOperation: Required global end forces are missing
+                or no building members cross the base cut.
+
+        Note:
+            In SSI this is the building's base cut, not the soil boundary reaction
+            or total foundation/pile force. Unsupported solver force responses
+            can contain zeros; zeros alone do not demonstrate zero demand.
+        """
         frame = self.story_shear(direction).iloc[:, :1].copy()
         frame.columns = ["base"]
         return frame
@@ -347,6 +518,19 @@ class BuildingResults:
 
         Reference defaults to the plan center at base elevation. Supply a
         global XYZ point to choose a different moment reference.
+
+        Args:
+            axis (str): Global moment axis, ``"x"``, ``"y"``, or ``"z"``. About y
+                is the default; this differs from a lateral-load direction.
+            reference (Sequence[float] | None): Global XYZ reference in model length units.
+
+        Returns:
+            table (pandas.DataFrame): One ``"base"`` column in metadata moment units.
+                Includes both end moments and r cross F contributions.
+
+        Raises:
+            ValueError: Reference point or axis is invalid.
+            UnsupportedResultOperation: Required force histories are absent.
         """
         component = self._direction(axis)+3
         point = np.asarray(self.metadata["moment_reference"] if reference is None else reference, dtype=float)
@@ -361,6 +545,31 @@ class BuildingResults:
         Defaults summarize displacement and drift, plus acceleration if present.
         Request force-derived responses explicitly; absent force fields raise
         an error rather than producing a misleading zero-demand summary.
+
+        Args:
+            responses (Iterable[str] | None): Names selected from floor_displacement,
+                floor_acceleration, interstory_drift, story_shear, base_shear,
+                overturning_moment, and member_forces. None uses the defaults above.
+            direction (str): Global component for floor/drift/shear queries; moment
+                axis for overturning_moment. Member forces retain all components.
+
+        Returns:
+            table (pandas.DataFrame): Response, entity, direction, peak_abs, signed_value,
+                sample, units, and basis columns. Sample is the recorded coordinate
+                at the absolute peak, not necessarily seconds. Tied peaks use
+                the first sample.
+
+        Example:
+            ```python
+            peaks = results.summary(
+                responses=["interstory_drift", "base_shear"], direction="x",
+            )
+            peaks.to_csv("peaks_x.csv", index=False)
+            ```
+
+        Note:
+            Summary floor displacement uses recorded motion, not automatically
+            base-relative motion. No threshold or pass/fail assessment is applied.
         """
         import pandas as pd
         if responses is None:
@@ -397,6 +606,39 @@ class BuildingResults:
 
         Files are named response_direction.csv. No response files are written
         by construction, get_results(), or individual response queries.
+
+        Args:
+            directory (str | Path): Output directory; created if missing. Existing files
+                with matching response/direction names are overwritten.
+            responses (Iterable[str]): Response names accepted by summary(). All
+                requested tables are evaluated before any output is written.
+            direction (str): Global component, or moment axis for overturning_moment.
+                Member forces use their default all-member/global/both-end query.
+
+        Returns:
+            paths (list[Path]): Written files. Each CSV includes the recorded sample
+                index and uses the method's default response options.
+
+        Raises:
+            ValueError: An unknown response or direction is requested.
+            UnsupportedResultOperation: A required field is missing.
+            OSError: Output paths cannot be created or written.
+
+        Note:
+            CSV does not preserve DataFrame attrs. To export custom options such
+            as base-relative translation, call that method and use to_csv() on
+            its returned table instead.
+
+        Example:
+            ```python
+            results.export_csv(
+                "processed", responses=["interstory_drift", "base_shear"],
+                direction="x",
+            )
+            results.floor_displacement("x", relative_to_base=True).to_csv(
+                "processed/base_relative_x.csv",
+            )
+            ```
         """
         # Evaluate first so a missing response cannot leave a partial export.
         frames = {name: self._response(name, direction) for name in responses}

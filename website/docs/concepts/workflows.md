@@ -1,9 +1,9 @@
 ---
-title: Workflows and Remote Jobs
-icon: material/server-network
+title: Workflows
+icon: material/source-branch
 ---
 
-# Workflows and Remote Jobs
+# Workflows
 
 A model describes **what you want to simulate**. A workflow describes **the work
 needed to create, run, and process it**. You can use the same workflow idea for
@@ -18,9 +18,19 @@ Think about the work in order:
   <li><span>04 / Compare</span><strong>Process results</strong><small>Produce plots, tables, and movies.</small></li>
 </ol>
 
-Each group is a **stage**. Each piece of work inside a stage is a **task**.
+One operation, such as writing a file or starting a solver, is a **task**.
+A **stage** groups tasks at one point in the procedure: for example, build all
+models before starting their analyses. A **workflow** is the ordered collection
+of those stages. Each box above represents a stage and can contain several tasks.
+
 Stages run in the order you add them. Tasks within a stage can run one after
 another or in parallel. The next stage waits until the current stage finishes.
+
+A task can represent work done in Python, a model solved by OpenSees, or an
+external program started with a command. These are examples of operations,
+not different levels of the workflow. Browse the **tasks** group in the
+[API reference](../reference/jobs/index.md) for available task definitions and
+their options. We will introduce the task objects as the example needs them.
 
 This guide starts with a tiny calculation so you can understand the folders and
 return values without building a finite element model. The complete runnable
@@ -41,8 +51,11 @@ import femora as fm
 workflow = fm.Workflow("workflow-basics")
 ```
 
-`"workflow-basics"` is a descriptive name. It does **not** choose a folder and
-does not start any work. We will add the tasks first and execute them later.
+Think of the workflow as a **container for an ordered procedure**. It starts
+empty; we will add stages and their tasks to it as we work through the example.
+The name `"workflow-basics"` identifies the procedure, not its output directory.
+Nothing runs until we execute the workflow. See
+[Workflow](../reference/jobs/Workflow/index.md) for its complete interface.
 
 Our small example will do three things:
 
@@ -57,18 +70,20 @@ The **workspace** is the root folder for one workflow run. It is not a Femora
 Locally, you choose it when calling `fm.execute`. For a remote job, the app
 chooses a workspace inside that job's execution directory.
 
-To make paths concrete, imagine the workspace is `/scratch/my-run/results`.
-Femora gives each task a folder inside it:
+Our first stage will be called `prepare` because it prepares the shared data.
+Its task will be called `write_base_value` because it writes the value used by
+the calculations. These are names we choose, not reserved Femora keywords.
+For a run whose root is represented below as `workspace/`, their folders are:
 
 <section class="workspace-view" aria-label="How task folder paths are constructed">
   <header class="workspace-heading"><span class="workspace-kicker">Read the path from outside to inside</span><strong>Workspace / stage / task</strong></header>
   <div class="workspace-body">
-    <div class="workspace-tree"><code>/scratch/my-run/results/</code><span class="workspace-tag">workspace</span>
-      <ul><li><code>input/</code><span class="workspace-tag">stage</span>
-        <ul><li><code>number/</code><span class="workspace-tag">task</span></li></ul>
+    <div class="workspace-tree"><code>workspace/</code><span class="workspace-tag">workspace</span>
+      <ul><li><code>prepare/</code><span class="workspace-tag">stage</span>
+        <ul><li><code>write_base_value/</code><span class="workspace-tag">task</span></li></ul>
       </li></ul>
     </div>
-    <div class="workspace-context"><strong>One shared root, one folder per task</strong><p><code>context.workspace</code><br>/scratch/my-run/results</p><p><code>context.output_dir</code><br>/scratch/my-run/results/input/number</p></div>
+    <div class="workspace-context"><strong>One shared root, one folder per task</strong><p><code>context.workspace</code><br>workspace/</p><p><code>context.output_dir</code><br>workspace/prepare/write_base_value/</p></div>
   </div>
 </section>
 
@@ -79,28 +94,23 @@ When a Python task starts, Femora creates a **context object** and passes it as
 the first argument to your function. The object tells your function where it is
 working and what earlier tasks returned.
 
-```python
-def create_input(context):
-    ...
-```
-
-`context` is just the parameter name we chose. You could name it `ctx` instead:
-
-```python
-def create_input(ctx):
-    ...
-```
-
-Neither `ctx` nor `context` is a special Python keyword. You do not create this
-object yourself or import a variable called `ctx`. **The runner supplies it.**
+The runner supplies a [TaskContext](../reference/jobs/TaskContext/index.md).
+We do not construct it when defining the callback. Its role is to connect the
+function to this particular execution:
 
 | Expression | Meaning | Example for this task |
 | --- | --- | --- |
-| `context.workspace` | Shared root folder for this run | `/scratch/my-run/results` |
-| `context.output_dir` | This task's own folder | `/scratch/my-run/results/input/number` |
-| `context.inputs` | Values passed to the workflow run | `{"number": 4}` |
+| `context.workspace` | Shared root folder for this run | `workspace/` |
+| `context.output_dir` | This task's own folder | `workspace/prepare/write_base_value/` |
+| `context.inputs` | Values passed to the workflow run | `{"base_value": 4}` |
 | `context.results` | Available task return values, grouped by stage and task | Initially no completed task results |
-| `context.result("input", "number")` | Look up what that named task returned | Available after the input task completes |
+| `context.result("prepare", "write_base_value")` | Look up what that named task returned | A file path, available to later work after preparation completes |
+
+`context.inputs["base_value"]` is **configuration supplied for the run**.
+`context.result("prepare", "write_base_value")` is **output returned by completed
+work**. They are not two ways of asking for the same thing. In this example,
+the configuration is the number `4`; the preparation task turns it into a file
+and returns that file's path.
 
 Every task receives a separate context object. They share the same workspace
 path and input values, but each has a different `output_dir`. Inputs are copied
@@ -113,7 +123,7 @@ to another task. Use return values or files instead.
     does create `output_dir` before calling your function. External `Command`
     and `OpenSees` programs run with that folder as their working directory.
 
-## 3. Create The Input Task
+## 3. Add A Preparation Stage And Its Task
 
 Define a normal Python function at the top level of your file:
 
@@ -123,51 +133,56 @@ Define a normal Python function at the top level of your file:
 
 Read it line by line:
 
-1. `context.output_dir / "number.txt"` means a file named `number.txt` inside
-   this task's folder. Here `/` joins paths; it is not division.
-2. `context.inputs["number"]` gets the value under the dictionary key `"number"`.
-   We will pass `{"number": 4}` when running or submitting the workflow.
-3. `write_text(...)` creates the file.
-4. `return path` gives the path back to Femora so another task can find it.
+1. `context.output_dir` locates this task's own directory, so it writes
+   `base_value.txt` without conflicting with other tasks.
+2. `context.inputs["base_value"]` reads the run configuration. We will supply
+   `inputs={"base_value": 4}` at execution time.
+3. `write_text(...)` stores that value in the file.
+4. `return path` makes the file path available to later work through
+   `context.result(...)`.
 
 Now add it to the workflow:
 
 ```python
-workflow.add("input", tasks=[fm.tasks.Python("number", create_input)])
+workflow.add("prepare", tasks=[fm.tasks.Python("write_base_value", write_base_value)])
 ```
 
 | Part | Meaning |
 | --- | --- |
-| `"input"` | Stage name; also the stage folder name |
+| `"prepare"` | Stage name; also the stage folder name |
 | `tasks=[...]` | The list of tasks belonging to this stage |
 | `fm.tasks.Python(...)` | A task that calls a Python function |
-| `"number"` | Task name; also its folder name within the stage |
-| `create_input` | The function to call later |
+| `"write_base_value"` | Task name; also its folder name within the stage |
+| `write_base_value` | The function to call later |
 
-Notice `create_input` has **no parentheses** here. We are handing the function
+Notice `write_base_value` has **no parentheses** here. We are handing the function
 to Femora, not calling it while defining the workflow. Later, the runner calls
-`create_input(context)`.
+`write_base_value(context)`.
 
-<section class="workspace-view" aria-label="Workspace after the input stage">
-  <header class="workspace-heading"><span class="workspace-kicker">Snapshot 1 / Input finished</span><strong>One task creates one input file</strong><small>Highlighted entries were created in this step.</small></header>
+This line also introduces the first **stage boundary**. The stage is named
+`prepare`, and its task is named `write_base_value`. Everything in a later stage waits for
+this stage to finish. There is no separate stage object to construct here;
+`workflow.add()` records the named group of tasks.
+
+<section class="workspace-view" aria-label="Workspace after preparation">
+  <header class="workspace-heading"><span class="workspace-kicker">Snapshot 1 / Preparation finished</span><strong>One task creates the shared data file</strong><small>Highlighted entries were created in this step.</small></header>
   <div class="workspace-body">
     <div class="workspace-tree"><code>workspace/</code>
-      <ul><li class="workspace-new"><code>input/</code>
-        <ul><li class="workspace-new"><code>number/</code>
-          <ul><li class="workspace-new"><code>number.txt</code><span class="workspace-tag">4</span></li></ul>
+      <ul><li class="workspace-new"><code>prepare/</code>
+        <ul><li class="workspace-new"><code>write_base_value/</code>
+          <ul><li class="workspace-new"><code>base_value.txt</code><span class="workspace-tag">4</span></li></ul>
         </li></ul>
       </li><li><code>manifest.json</code><span class="workspace-tag">runner status</span></li></ul>
     </div>
-    <div class="workspace-context"><strong>Inside create_input(context)</strong><p>Write to<br><code>context.output_dir / "number.txt"</code></p><strong>What the next stage receives</strong><p><code>context.result("input", "number")</code><br>returns the path to <code>input/number/number.txt</code>, not the number itself.</p></div>
+    <div class="workspace-context"><strong>Inside write_base_value(context)</strong><p>Write to<br><code>context.output_dir / "base_value.txt"</code></p><strong>What the next stage receives</strong><p><code>context.result("prepare", "write_base_value")</code><br>returns the path to <code>prepare/write_base_value/base_value.txt</code>, not the number itself.</p></div>
   </div>
 </section>
 
 The runner also writes <code>manifest.json</code> after the stage finishes.
-The input function creates only <code>number.txt</code>.
+The input function creates only <code>base_value.txt</code>.
 
-There is no automatically created `input/drm` directory. If the task were named
-`drm`, its folder would be `input/drm`. Names you give stages and tasks determine
-these folders.
+There is no fixed list of stage folders created in advance. Names you give
+stages and tasks determine these directories, and they appear as tasks start.
 
 ## 4. Reuse A Function For Two Tasks
 
@@ -175,8 +190,8 @@ these folders.
 --8<-- "examples/workflows/workflow_basics.py:calculate"
 ```
 
-`context.result("input", "number")` retrieves the **return value** of the earlier
-task. In this example, that value is a `Path` pointing to `number.txt`. Femora
+`context.result("prepare", "write_base_value")` retrieves the **return value** of the earlier
+task. In this example, that value is a `Path` pointing to `base_value.txt`. Femora
 does not copy the file into the new task's folder; both tasks can read it from
 the shared workspace.
 
@@ -207,7 +222,7 @@ the workspace grow as each task runs; the input file stays in its original folde
   <header class="workspace-heading"><span class="workspace-kicker">Snapshot 2 / First calculation finished</span><strong>double reads the input and writes its answer</strong></header>
   <div class="workspace-body">
     <div class="workspace-tree"><code>workspace/</code>
-      <ul><li><code>input/</code><ul><li><code>number/</code><ul><li><code>number.txt</code><span class="workspace-tag">4 / read here</span></li></ul></li></ul></li>
+      <ul><li><code>prepare/</code><ul><li><code>write_base_value/</code><ul><li><code>base_value.txt</code><span class="workspace-tag">4 / read here</span></li></ul></li></ul></li>
       <li class="workspace-new"><code>calculate/</code><ul><li class="workspace-new"><code>double/</code><ul><li class="workspace-new"><code>value.txt</code><span class="workspace-tag">8.0 / new</span></li></ul></li></ul></li>
       <li><code>manifest.json</code></li></ul>
     </div>
@@ -219,7 +234,7 @@ the workspace grow as each task runs; the input file stays in its original folde
   <header class="workspace-heading"><span class="workspace-kicker">Snapshot 3 / Second calculation finished</span><strong>triple gets a different task folder</strong></header>
   <div class="workspace-body">
     <div class="workspace-tree"><code>workspace/</code>
-      <ul><li><code>input/</code><ul><li><code>number/</code><ul><li><code>number.txt</code><span class="workspace-tag">4 / read here</span></li></ul></li></ul></li>
+      <ul><li><code>prepare/</code><ul><li><code>write_base_value/</code><ul><li><code>base_value.txt</code><span class="workspace-tag">4 / read here</span></li></ul></li></ul></li>
       <li><code>calculate/</code><ul><li><code>double/</code><ul><li><code>value.txt</code><span class="workspace-tag">8.0 / kept</span></li></ul></li>
       <li class="workspace-new"><code>triple/</code><ul><li class="workspace-new"><code>value.txt</code><span class="workspace-tag">12.0 / new</span></li></ul></li></ul></li>
       <li><code>manifest.json</code></li></ul>
@@ -248,19 +263,19 @@ This time `context.result(...)` retrieves numbers, not file paths, because
 `calculate` returns `value`.
 
 ```python
-workflow.add("report", tasks=[fm.tasks.Python("summary", write_report)])
+workflow.add("report", tasks=[fm.tasks.Python("write_summary", write_report)])
 ```
 
 <section class="workspace-view" aria-label="Workspace after the report stage">
   <header class="workspace-heading"><span class="workspace-kicker">Snapshot 4 / Report finished</span><strong>The report joins the two returned answers</strong></header>
   <div class="workspace-body">
     <div class="workspace-tree"><code>workspace/</code>
-      <ul><li><code>input/</code><ul><li><code>number/</code><ul><li><code>number.txt</code></li></ul></li></ul></li>
+      <ul><li><code>prepare/</code><ul><li><code>write_base_value/</code><ul><li><code>base_value.txt</code></li></ul></li></ul></li>
       <li><code>calculate/</code><ul><li><code>double/</code><ul><li><code>value.txt</code></li></ul></li><li><code>triple/</code><ul><li><code>value.txt</code></li></ul></li></ul></li>
-      <li class="workspace-new"><code>report/</code><ul><li class="workspace-new"><code>summary/</code><ul><li class="workspace-new"><code>summary.txt</code><span class="workspace-tag">new</span></li></ul></li></ul></li>
+      <li class="workspace-new"><code>report/</code><ul><li class="workspace-new"><code>write_summary/</code><ul><li class="workspace-new"><code>summary.txt</code><span class="workspace-tag">new</span></li></ul></li></ul></li>
       <li><code>manifest.json</code></li></ul>
     </div>
-    <div class="workspace-context"><strong>Inside write_report(context)</strong><p><code>context.output_dir</code><br>is <code>workspace/report/summary</code>.</p><p><code>context.result("calculate", "double")</code><br>gives <code>8.0</code>.</p><p><code>context.result("calculate", "triple")</code><br>gives <code>12.0</code>.</p><p>It uses these return values directly; it does not need to read the two <code>value.txt</code> files.</p></div>
+    <div class="workspace-context"><strong>Inside write_report(context)</strong><p><code>context.output_dir</code><br>is <code>workspace/report/write_summary</code>.</p><p><code>context.result("calculate", "double")</code><br>gives <code>8.0</code>.</p><p><code>context.result("calculate", "triple")</code><br>gives <code>12.0</code>.</p><p>It uses these return values directly; it does not need to read the two <code>value.txt</code> files.</p></div>
   </div>
 </section>
 
@@ -278,7 +293,7 @@ your task return values or simulation recorder files.
 ## 6. Select The Files To Return
 
 ```python
-workflow.outputs("report/summary/summary.txt", "calculate/*/value.txt")
+workflow.outputs("report/write_summary/summary.txt", "calculate/*/value.txt")
 ```
 
 These are **paths relative to the workspace**, not your local checkout. This
@@ -286,7 +301,7 @@ line selects the summary and both calculation files for the result package.
 
 | Pattern | Selects |
 | --- | --- |
-| `report/summary/summary.txt` | One exact file |
+| `report/write_summary/summary.txt` | One exact file |
 | `calculate/*/value.txt` | `value.txt` in each task folder under `calculate` |
 | `**/stdout.log` | External-program logs at any depth in the workspace |
 | `build/*/results/**/*` | Files recursively inside each case's raw results folder |
@@ -323,10 +338,151 @@ your terminal's current directory. Femora resolves it to an absolute path
 before passing it to tasks. The example performs tiny Python calculations;
 it requires no solver or remote login.
 
-## 8. Run Independent Tasks In Parallel
+The main guard is important: process workers import the module to find the
+callbacks. It prevents that import from starting another execution. Keep the
+callbacks and `build_workflow()` at module scope, outside the guard.
+
+`fm.execute()` returns a [RunResult](../reference/jobs/RunResult/index.md).
+`run.result("report", "write_summary")` is the reporting callback's return value,
+which is a `Path` in this example. `run.manifest` identifies the execution
+record, and `run.artifacts` lists files selected by `workflow.outputs(...)`.
+Use a fresh workspace for another run; execute does not automatically clear
+an existing directory or resume a previous execution.
+
+???+ note "A failed execution still has diagnostics"
+    A task failure stops later stages. The runner raises
+    [WorkflowExecutionError](../reference/jobs/WorkflowExecutionError/index.md)
+    with a partial run result in `error.run`; inspect its manifest and the task
+    logs. Files already written are not rolled back or automatically retried.
+    A successful process exit also does not certify numerical accuracy.
+
+## 8. Inspect The Workspace And Diagnose A Failure
+
+After a successful run, our example has this layout:
+
+```text
+example_outputs/workflow_basics/
+    prepare/
+        write_base_value/base_value.txt    configuration written as shared data
+    calculate/
+        double/value.txt                  first calculation's saved value
+        triple/value.txt                  second calculation's saved value
+    report/
+        write_summary/summary.txt          report combining both answers
+    manifest.json                         execution record written by the runner
+```
+
+The stage/task folders are created as tasks start; the callbacks create the
+files inside them. There is no automatic `results/`, `logs/`, or `errors/`
+directory. For a finite-element task, recorder files go where the model's
+recorder configuration says, not necessarily in the solver task directory.
+
+External `Command` and `OpenSees` tasks also get `stdout.log` in their task
+directory, combining the program's stdout and stderr. An OpenSees task gets an
+internal `.femora-driver.tcl` launcher there as well. Python callback tasks do
+**not** automatically get a `stdout.log`; write any task-specific diagnostic
+files explicitly. Their exceptions are captured in the execution record.
+
+### What The Manifest Records
+
+Open `run.manifest` as JSON. Its top-level entries are:
+
+| Entry | Meaning |
+| --- | --- |
+| `workflow` | The workflow's descriptive name |
+| `backend` | Execution strategy used for this run, such as `local` |
+| `capacity` | Validated core-reservation budget used by the runner |
+| `stages` | Records grouped by stage, then task name |
+| `artifacts` | Workspace-relative file paths matching `workflow.outputs(...)` |
+
+A task record has `status`, reserved `cores`, and an `offset` for allocation
+launches (`null` locally). Failed tasks also have an `error` string. Status
+values describe runner activity, not engineering accuracy. The manifest does
+not contain callback return values, response histories, or a complete saved
+Python exception/traceback.
+
+The runner writes the manifest after a stage completes, or when its execution
+validation rejects a stage. It is not a continuously updated scheduler log.
+If the process is killed before a write, it may be absent or reflect only
+earlier completed stages.
+
+### Try A Controlled Failure
+
+Keep the same functions and factory, but replace the execution block for a
+separate test run with this one. The deliberately invalid value cannot be
+converted to a number by `calculate()`:
+
+```python
+import json
+from femora.jobs import WorkflowExecutionError
+
+if __name__ == "__main__":
+    try:
+        fm.execute(
+            build_workflow(), workspace="example_outputs/workflow_failure",
+            inputs={"base_value": "invalid"}, cores=1,
+        )
+    except WorkflowExecutionError as error:
+        print(str(error))
+        print("Execution record:", error.run.manifest)
+        record = json.loads(error.run.manifest.read_text(encoding="utf-8"))
+        print(record["stages"]["calculate"]["double"])
+```
+
+The error message identifies the stage and task, followed by the callback's
+message. In the manifest, the relevant part is:
+
+```json
+{
+  "prepare": {
+    "write_base_value": {"status": "finished", "cores": 1, "offset": null}
+  },
+  "calculate": {
+    "double": {
+      "status": "failed",
+      "cores": 1,
+      "offset": null,
+      "error": "could not convert string to float: 'invalid'"
+    }
+  }
+}
+```
+
+This is the `stages` section, not the entire file. Preparation succeeded and
+its data file remains. The `double` task's directory exists, but its `value.txt`
+was never written. Because this stage is sequential, `triple` was not started;
+the report stage was not reached, so neither has a record or a new task folder.
+Already-started siblings in a parallel stage would instead be allowed to finish.
+
+`error.run` is a partial `RunResult`. It provides the workspace, manifest,
+completed task return values, and any selected artifacts that already exist.
+Looking up a failed or unstarted task's return value raises `KeyError`.
+
+For an external program failure, the error also points to its `stdout.log`
+and includes a tail of that log when available. Read the full log for context;
+the manifest's error string is only a summary. Failures before a workflow task
+starts, such as remote environment setup or source-import failure, may require
+application/terminal logs instead of a task manifest.
+
+## 9. Understand Cores, Ranks, And Parallel Stages
+
+A **core reservation** is the amount of CPU capacity a task declares it needs.
+An MPI **rank** is a participating process in a parallel program. These are
+related but not interchangeable concepts: one describes resources, the other
+describes how the program runs.
+
+For example, `Python(..., cores=4)` reserves four cores but does not start four
+Python workers or add threads to a serial callback. By contrast,
+`OpenSees(..., ranks=8)` asks the MPI launcher to start eight solver processes;
+its task core reservation equals its rank count. An MPI command explicitly
+sets both `cores` and `ranks`, which must match for the current launcher model.
+
+### Start Independent Work Together
 
 Use `parallel=True` only when tasks in that stage can run independently.
-For example, after building three Tcl models:
+For example, after building three Tcl models, a solver stage could run them
+together. The following MPI example requires an existing compatible allocation
+backend, unlike the small local Python calculation above:
 
 ```python
 workflow.add(
@@ -345,10 +501,38 @@ The Tcl paths point into the shared workspace. The models must already have
 been exported with partitioning appropriate for their requested rank counts;
 `ranks=16` does not repartition a model.
 
-This stage needs `8 + 16 + 16 = 40` rank slots simultaneously. In the current
-TACC backend each MPI rank uses one CPU slot. With a 48-slot allocation, eight
-slots remain unused during this stage. The backend assigns non-overlapping
-`ibrun` offsets and reuses the allocation for subsequent stages.
+Assume the execution environment has **48 allocated cores** and uses one CPU
+core per MPI rank for this example. The three tasks need `8 + 16 + 16 = 40`
+cores together, leaving eight unreserved during the solve stage. The 48-core
+budget is not a property of a particular machine or provider.
+
+Now change the request or one task's ranks and ask what happens:
+
+| Execution budget | Solver ranks | Scheduling | What happens |
+| --- | --- | --- | --- |
+| 48 cores | 8, 16, 16 | Parallel | Needs 40; fits with 8 cores unreserved |
+| 32 cores | 8, 16, 16 | Parallel | Needs 40; rejected before tasks start, rather than running a subset |
+| 48 cores | 8, 16, 32 | Parallel | Needs 56; rejected despite each individual task fitting |
+| 48 cores | 8, 16, 32 | Sequential | Needs at most 32 at once; the tasks run one after another |
+
+Later stages reuse the available cores; you do not sum reservations across
+the whole workflow. Core reservations are scheduling checks, not automatic
+OS-level limits on arbitrary callback code. A program must still respect its
+thread/process settings. MPI ranks also do not repartition an exported model.
+
+### A Backend Connects The Workflow To Its Environment
+
+The workflow describes the procedure; a backend determines how tasks launch
+in the environment where that procedure executes. That environment could be a
+local computer, an HPC allocation, or cloud compute resources with a suitable
+adapter. Resource requests and launchers differ; the task/stage ideas do not.
+
+Do not infer that every cloud provider is implemented. The supplied execution
+routes are local execution and the TACC allocation backend. Other cloud/HPC
+routes require appropriate implementations and environments. The
+[backend reference](../reference/jobs/TACC/index.md) documents the concrete
+allocation implementation and its restrictions. The **Jobs** page explains
+the separate platform that requests remote resources.
 
 An `OpenSees` task returns a `ProcessResult`, not the model's displacement:
 
@@ -360,8 +544,8 @@ solver_task_folder = solve.output_dir
 
 ### Use A Custom OpenSees Build For One Task
 
-The Stampede3 app loads its tested OpenSees module as the default. Override it
-only for a model that requires a personalized build:
+A task can override the executable selected by its execution environment.
+For example, use a personalized build for one model without changing another:
 
 ```python
 workflow.add(
@@ -377,13 +561,13 @@ workflow.add(
             "custom",
             "build/custom/model.tcl",
             ranks=16,
-            executable="/work2/YOUR_PROJECT/YOUR_USER/opensees/bin/OpenSeesMP",
+            executable="/path/to/your/OpenSeesMP",
         ),
     ],
 )
 ```
 
-The task override takes precedence over `FEMORA_OPENSEES` and the module-loaded
+The task override takes precedence over `FEMORA_OPENSEES` and the environment's
 `OpenSeesMP`; other tasks keep using the default. The custom executable must be
 visible and executable on every allocated node and must support the requested
 MPI launch. The resolved path is written to that task's `stdout.log` as
@@ -403,9 +587,13 @@ you built the model. Those locations need not be inside the solver task folder.
 your function run five times or use five CPUs. Your Python code must implement
 its own parallelism.
 
-The local runner supports parallel Python callbacks. The current TACC backend
-requires callbacks to use sequential stages and `cores=1`. For an MPI-aware
-Python script on TACC, use a `Command` task:
+For the small calculation example, a parallel calculation stage with two
+one-core callbacks needs `cores=2`; the original sequential version needs only
+`cores=1`. The local runner supports that concurrent Python execution.
+
+Backend capabilities still matter: the supplied TACC allocation backend
+requires Python callbacks in sequential stages with `cores=1`. For an MPI-aware
+Python script using that allocation launcher, use a `Command` task:
 
 ```python
 workflow.add(
@@ -423,128 +611,12 @@ workflow.add(
 )
 ```
 
-This reserves 13 slots. The command runs from `workspace/mixed/python-analysis`,
+With one CPU core per MPI rank, this reserves 13 cores for 13 processes.
+The command runs from `workspace/mixed/python-analysis`,
 so `../../scripts/mpi_analysis.py` reaches `workspace/scripts/mpi_analysis.py`.
 That script must be staged or created earlier and actually support MPI, for
 example using `mpi4py`. An ordinary Python script will otherwise run five copies.
 MPI execution requires the TACC allocation backend, not the local runner.
-
-## 9. Submit The Same Workflow To TACC
-
-Replace the small example's final `fm.execute(...)` block with:
-
-```python
-if __name__ == "__main__":
-    job = fm.submit(
-        function=build_workflow,
-        platform="tacc",
-        settings={
-            "app_id": "YOUR_REGISTERED_FEMORA_APP_ID",
-            "system": "stampede3",
-            "queue": "skx-dev",
-            "allocation": "YOUR_ALLOCATION",
-            "nodes": 1,
-            "cores_per_node": 48,
-            "minutes": 20,
-        },
-        inputs={"number": 4},
-    )
-    print(f"Job UUID: {job.id}")
-```
-
-Use a Femora Tapis app you can access and your own allocation. These settings
-belong to the **TACC adapter**, not the workflow. Other platforms can provide
-their own adapters and settings without changing how you define the tasks;
-currently the named remote provider is `"tacc"`.
-
-Here is what happens:
-
-1. Your computer packages the Python source file and `inputs` into a bundle.
-   It does not run `build_workflow` or build large models first.
-2. Femora prompts for your DesignSafe login, uploads the bundle, and submits
-   the job through Tapis.
-3. Once the scheduler starts the job, the app loads the remote environment and
-   replays the bundle. It calls `build_workflow` there.
-4. The remote runner executes the stages. The example creates `number.txt`,
-   `value.txt`, and `summary.txt` **on the cluster**.
-5. The app packages the selected outputs for download.
-
-Keep `fm.submit` inside `if __name__ == "__main__":`. That guard prevents the
-remote import of your source from submitting another job. Keep task functions
-and the factory at the top level, outside the guard. Use named functions and
-`kwargs`, not lambdas or nested functions.
-
-!!! note "Environments are separate from input files"
-    Bundling source does not install Python packages or include OpenSees. The
-    remote environment must already provide the required dependencies. Do not
-    put passwords or tokens into source, input dictionaries, or uploaded files.
-
-### Sending An Existing File
-
-The tiny example creates its input remotely, so it needs no uploaded data file.
-When your workflow needs a file that already exists on your computer, add a
-`files` mapping to `fm.submit`:
-
-```python
-from pathlib import Path
-
-files={
-    "motions/input.acc": Path(__file__).with_name("input.acc"),
-}
-```
-
-This is a dictionary entry, written as **destination: source**:
-
-| Side | Meaning |
-| --- | --- |
-| `"motions/input.acc"` | Destination relative to the remote workspace |
-| `Path(__file__).with_name("input.acc")` | Existing local file next to your workflow Python file |
-
-`__file__` refers to your Python source file. `with_name(...)` replaces its
-filename while keeping its directory. This avoids relying on the folder where
-you opened the terminal.
-
-<section class="workspace-view" aria-label="Workspace after staging an uploaded file">
-  <header class="workspace-heading"><span class="workspace-kicker">Before the first task / Optional uploaded input</span><strong>The app places your file in the shared workspace</strong></header>
-  <div class="workspace-body">
-    <div class="workspace-tree"><code>workspace/</code><ul><li class="workspace-new"><code>motions/</code><ul><li class="workspace-new"><code>input.acc</code><span class="workspace-tag">uploaded</span></li></ul></li></ul></div>
-    <div class="workspace-context"><strong>Any task can read this file</strong><p><code>context.workspace / "motions/input.acc"</code></p><p>This is not a task folder. It comes from the destination you chose in <code>files</code>.</p></div>
-  </div>
-</section>
-
-Your remote function reads it using `context.workspace / "motions/input.acc"`.
-It does not use the original Windows path. Explicitly include additional
-scripts or data files your workflow needs; imports are not automatically
-collected into the bundle. Only replay bundles from sources you trust: they
-execute Python code.
-
-## 10. Track And Download The Job
-
-Submission returns a job handle immediately; it does not wait for the run to
-finish. To reconnect later, even from another computer, open:
-
-```bash
-femora jobs track
-```
-
-Press **L** to log in and discover your Femora Tapis jobs, use the arrow keys to
-select a job, and press **Enter** for details. Press **R** to refresh its status
-or **D** to download completed outputs. Downloaded archives are not automatically
-extracted. Do not resubmit the workflow merely to check progress.
-
-For a non-interactive listing:
-
-```bash
-femora jobs list --remote
-```
-
-Without `--remote`, the list uses your local tracking cache. In Python,
-`fm.jobs.list()` reads that cache; supplying an authenticated platform to
-`fm.jobs.list(platform=platform)` discovers remote jobs.
-
-If a stage fails, later stages do not run. Already-running tasks in a parallel
-stage are allowed to finish. Check the manifest and program logs; fixing the
-source does not change an already submitted job.
 
 ## Apply This To A Real Model
 
@@ -556,3 +628,14 @@ task creates response plots and a comparison movie on the cluster.
 The useful habit is to ask three questions for each task: **What does it need?
 Where does it write? What does it return?** Once those are clear, the workflow
 is simply the order in which that work should happen.
+
+## API Details And Next Step
+
+Use the [Workflow reference](../reference/jobs/Workflow/index.md) for stage and
+artifact-selection options, [execute()](../reference/jobs/execute/index.md) for
+execution settings, and the [TACC backend](../reference/jobs/TACC/index.md) for
+allocation-launch requirements. These signatures are separate from the
+concepts taught through this example.
+
+To submit this same procedure remotely, continue to [Jobs](jobs.md). The
+workflow still describes the work; a job is one submitted request to execute it.

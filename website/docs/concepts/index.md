@@ -215,9 +215,15 @@ Mesh parts are source geometry before assembly. The assembler combines them into
 
     Arrange patterns, recorders, actions, and analyses into the final executable timeline.
 
--   :material-server-network: **[Workflows and Remote Jobs](workflows.md)**
+-   :material-source-branch: **[Workflows](workflows.md)**
 
-    Build a workflow step by step, understand task contexts and folders, and submit work to a remote cluster.
+    Follow a small worked example to understand tasks, contexts, stages,
+    execution, and output files.
+
+-   :material-cloud-upload-outline: **[Jobs](jobs.md)**
+
+    Submit the same workflow remotely, understand resource requests and bundles,
+    then track the job and retrieve its results.
 
 </div>
 

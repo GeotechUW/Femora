@@ -13,9 +13,37 @@ class TACC:
 
     Machine and queue selection belong to allocation/submission settings.
     Python callbacks run on the coordinator in sequential stages only.
+
+    Example:
+        Inside an existing compatible compute allocation:
+
+        ```python
+        from femora import jobs
+        def run_in_allocation(workflow):
+            return jobs.execute(workflow, workspace="allocation-run",
+                                backend=jobs.backends.TACC())
+        ```
+
+    Note:
+        Requires Linux, Slurm allocation variables, ibrun, task_affinity, and
+        one CPU per rank slot. This object does not authenticate or request nodes.
     """
 
+    __doc_controls__ = {"summary": True, "members": ["capacity"]}
+
     def capacity(self, requested: int | None) -> int:
+        """Validate the allocation and resolve available rank slots.
+
+        Args:
+            requested (int | None): Explicit capacity not exceeding SLURM_NTASKS,
+                or None for all allocated slots.
+
+        Returns:
+            slots (int): Validated capacity.
+
+        Raises:
+            ValueError: Allocation, launcher tools, threads per task, or request is invalid.
+        """
         if os.name != "posix" or not (os.environ.get("SLURM_JOB_ID") or os.environ.get("SLURM_JOBID")):
             raise ValueError("TACC execution requires a Linux Slurm compute allocation")
         try:

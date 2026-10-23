@@ -15,6 +15,22 @@ def _get(obj, field, default=None):
 
 @dataclass(frozen=True)
 class TACCSettings:
+    """Scheduler resource request, separate from workflow task definitions.
+
+    Args:
+        system (str): Tapis execution-system ID.
+        queue (str): Logical queue name from that system's metadata.
+        allocation (str): Project/allocation charged for the job.
+        nodes (int): Requested node count.
+        cores_per_node (int): Requested CPU slots per node.
+        minutes (int): Wall-clock limit in minutes, not seconds.
+
+    Note:
+        Discover queue limits using TACCValidator. This object does not reserve
+        resources or check allocation balance, software, input access, or memory.
+    """
+
+    __doc_controls__ = {"members": []}
     system: str
     queue: str
     allocation: str
@@ -25,6 +41,23 @@ class TACCSettings:
 
 @dataclass(frozen=True)
 class QueueLimits:
+    """Queue bounds read from live Tapis system metadata.
+
+    Attributes:
+        name (str): Logical queue name used in TACCSettings.
+        hpc_queue (str | None): Native scheduler queue name if supplied.
+        min_nodes (int | None): Minimum node count.
+        max_nodes (int | None): Maximum node count.
+        min_cores_per_node (int | None): Minimum CPU slots per node.
+        max_cores_per_node (int | None): Maximum CPU slots per node.
+        min_minutes (int | None): Minimum wall-clock minutes.
+        max_minutes (int | None): Maximum wall-clock minutes.
+
+    Note:
+        None means unavailable metadata, not an unlimited allocation.
+    """
+
+    __doc_controls__ = {"members": []}
     name: str
     hpc_queue: str | None
     min_nodes: int | None
@@ -50,19 +83,62 @@ class TACCValidator:
     The caller owns authentication and selects the Tapis tenant. No tapipy import
     or DesignSafe endpoint is needed here. Limits come from the selected system,
     not a hardcoded hardware table. Missing limits are explicitly unverified.
+
+    Args:
+        client (object): Authenticated Tapis client with system metadata access.
+
+    Example:
+        With an already authenticated client and an existing workflow:
+
+        ```python
+        from femora.jobs.platforms import TACCSettings, TACCValidator
+        def check_resources(client, workflow):
+            validator = TACCValidator(client)
+            queues = validator.queues("stampede3")
+            settings = TACCSettings("stampede3", "YOUR_QUEUE", "YOUR_PROJECT", 1, 1, 10)
+            report = validator.validate(workflow, settings)
+            report.raise_for_errors()
+            return queues, report
+        ```
     """
+
+    __doc_controls__ = {"summary": True, "members": ["queues", "validate", "validate_resources"]}
 
     def __init__(self, client):
         self._client = client
 
     def queues(self, system: str) -> tuple[QueueLimits, ...]:
+        """Read queue bounds from the selected system; performs no remote writes.
+
+        Args:
+            system (str): Tapis execution-system ID.
+
+        Returns:
+            queues (tuple[QueueLimits, ...]): Available logical queues and metadata bounds.
+        """
         return _queues(self._client.systems.getSystem(systemId=system))
 
     def validate(self, workflow: Workflow, settings: TACCSettings) -> ValidationReport:
+        """Check actual stage capacity and requested resources without submission.
+
+        Args:
+            workflow (Workflow): Concrete workflow to inspect.
+            settings (TACCSettings): Requested scheduler resources.
+
+        Returns:
+            report (ValidationReport): Errors, warnings, and unverified conditions.
+        """
         return self._validate(settings, workflow)
 
     def validate_resources(self, settings: TACCSettings) -> ValidationReport:
-        """Validate a staged job without importing/executing its Python bundle."""
+        """Validate resources without importing/executing a Python bundle.
+
+        Args:
+            settings (TACCSettings): Requested scheduler resources.
+
+        Returns:
+            report (ValidationReport): Findings; workflow capacity remains unverified.
+        """
         return self._validate(settings, None)
 
     def _validate(self, settings: TACCSettings, workflow: Workflow | None) -> ValidationReport:
@@ -131,6 +207,8 @@ class TACCValidator:
 class SubmissionValidationError(ValueError):
     """Safe-to-display preflight failure, containing no SDK request details."""
 
+    __doc_controls__ = {"members": []}
+
     def __init__(self, report):
         self.report = report
         super().__init__("\n".join(f"{i.field}: {i.message}" for i in report.errors))
@@ -139,16 +217,32 @@ class SubmissionValidationError(ValueError):
 class TACCSubmitter:
     """Validated submission of an already staged Tapis job request.
 
-    This is the transport adapter for the future full Platform implementation.
+    This is the lower-level transport used by TACCPlatform.
     It does not upload bundles, execute user Python locally, or register apps.
     Authentication stays with the injected client. No automatic write retries.
+
+    Args:
+        client (object): Authenticated Tapis client.
+
+    Note:
+        Ordinary callers should use jobs.submit() or TACCPlatform instead.
     """
+
+    __doc_controls__ = {"summary": True, "members": ["preflight", "submit_request"]}
 
     def __init__(self, client):
         self._client = client
         self.validator = TACCValidator(client)
 
     def preflight(self, request):
+        """Copy and validate an already staged Tapis request without submitting it.
+
+        Args:
+            request (dict): Tapis request with execution system and resources.
+
+        Returns:
+            checked (tuple[dict, ValidationReport]): Normalized request and findings.
+        """
         data = deepcopy(request)
         issues = []
 
@@ -204,7 +298,22 @@ class TACCSubmitter:
         return data, ValidationReport(tuple(issues))
 
     def submit_request(self, request, *, on_validation=None):
-        """Re-read live limits on each submission; callbacks only observe the report."""
+        """Revalidate and submit an already staged request; no automatic retries.
+
+        Args:
+            request (dict): Tapis submission request.
+            on_validation (Callable | None): Observer receiving the validation report.
+
+        Returns:
+            response (object): Raw Tapis submission response.
+
+        Raises:
+            SubmissionValidationError: Known preflight errors block submission.
+
+        Warning:
+            Performs a remote write. Transport errors may leave the submission
+            outcome uncertain; inspect remote jobs before retrying.
+        """
         data, report = self.preflight(request)
         if on_validation is not None:
             on_validation(report)

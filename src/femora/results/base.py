@@ -26,7 +26,29 @@ CELL_FRAME = "cell_frame"
 
 
 class ResultReader(ABC):
-    """Interface implemented by each supported recorder format."""
+    """Advanced interface for implementing a new recorder-file reader.
+
+    Most users should use open_results(), not subclass this interface. A reader
+    supplies a single file/partition's geometry, sample coordinates, and fields.
+    Advertise only implemented capabilities; unsupported operations raise
+    UnsupportedResultOperation by default.
+
+    Args:
+        path: File path stored by the base class. Concrete readers own validation
+            and file handles, and must release resources in close().
+
+    Note:
+        Indices passed to history/frame methods are zero-based mesh indices,
+        not solver entity tags. Fields and sample coordinates retain file units.
+        Register an implementation with femora.results.register_reader() to use
+        it through open_results(). Context-manager exit calls close().
+    """
+
+    __doc_controls__ = {"members": [
+        "capabilities", "supports", "times", "number_of_steps",
+        "available_point_responses", "available_cell_responses", "mesh",
+        "point_history", "cell_history", "point_frame", "cell_frame", "close",
+    ]}
 
     def __init__(self, path: Union[str, Path]) -> None:
         self.path = Path(path)
