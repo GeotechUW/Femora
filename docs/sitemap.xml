@@ -985,10 +985,6 @@
          <lastmod>2026-10-23</lastmod>
     </url>
     <url>
-         <loc>https://femora.io/docs/reference/core/element_group/</loc>
-         <lastmod>2026-10-23</lastmod>
-    </url>
-    <url>
          <loc>https://femora.io/docs/reference/core/Action/</loc>
          <lastmod>2026-10-23</lastmod>
     </url>
@@ -1021,10 +1017,6 @@
          <lastmod>2026-10-23</lastmod>
     </url>
     <url>
-         <loc>https://femora.io/docs/reference/core/CompactRetagPolicy/</loc>
-         <lastmod>2026-10-23</lastmod>
-    </url>
-    <url>
          <loc>https://femora.io/docs/reference/core/ConstraintManager/</loc>
          <lastmod>2026-10-23</lastmod>
     </url>
@@ -1053,19 +1045,7 @@
          <lastmod>2026-10-23</lastmod>
     </url>
     <url>
-         <loc>https://femora.io/docs/reference/core/EventBus/</loc>
-         <lastmod>2026-10-23</lastmod>
-    </url>
-    <url>
          <loc>https://femora.io/docs/reference/core/FemoraEvent/</loc>
-         <lastmod>2026-10-23</lastmod>
-    </url>
-    <url>
-         <loc>https://femora.io/docs/reference/core/FemoraPart/</loc>
-         <lastmod>2026-10-23</lastmod>
-    </url>
-    <url>
-         <loc>https://femora.io/docs/reference/core/FemoraPartRegistry/</loc>
          <lastmod>2026-10-23</lastmod>
     </url>
     <url>
@@ -1229,18 +1209,6 @@
          <lastmod>2026-10-23</lastmod>
     </url>
     <url>
-         <loc>https://femora.io/docs/reference/core/TaggedComponentManager/</loc>
-         <lastmod>2026-10-23</lastmod>
-    </url>
-    <url>
-         <loc>https://femora.io/docs/reference/core/TaggedObject/</loc>
-         <lastmod>2026-10-23</lastmod>
-    </url>
-    <url>
-         <loc>https://femora.io/docs/reference/core/TaggingPolicy/</loc>
-         <lastmod>2026-10-23</lastmod>
-    </url>
-    <url>
          <loc>https://femora.io/docs/reference/core/TimeSeries/</loc>
          <lastmod>2026-10-23</lastmod>
     </url>
@@ -1314,6 +1282,10 @@
     </url>
     <url>
          <loc>https://femora.io/docs/reference/core/analysis/TransientIntegrator/</loc>
+         <lastmod>2026-10-23</lastmod>
+    </url>
+    <url>
+         <loc>https://femora.io/docs/reference/core/analysis/registry-operations/</loc>
          <lastmod>2026-10-23</lastmod>
     </url>
     <url>
