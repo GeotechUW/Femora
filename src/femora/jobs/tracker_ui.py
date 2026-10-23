@@ -4,11 +4,13 @@ from pathlib import Path
 from dataclasses import replace
 import json
 
+from requests.exceptions import RequestException
+
 from textual import work
 from textual.app import App, ComposeResult
 from textual.containers import Vertical
 from textual.screen import ModalScreen
-from textual.widgets import Button, DataTable, Footer, Header, Input, Static
+from textual.widgets import Button, DataTable, Footer, Header, Input, Static, TextArea
 
 from .tracking import JobRecord, JobRegistry, connect, sync, _CONNECTORS
 
@@ -37,16 +39,19 @@ class Prompt(ModalScreen):
 
 
 class Details(ModalScreen):
-    BINDINGS = [("escape", "dismiss", "Back"), ("enter", "dismiss", "Back")]
+    BINDINGS = [("escape", "dismiss", "Back")]
 
     def __init__(self, text):
         super().__init__()
         self.text = text
 
     def compose(self):
-        with Vertical(id="dialog"):
-            yield Static(self.text, markup=False)
+        with Vertical(id="details-dialog"):
+            yield TextArea(self.text, read_only=True, id="details-text")
             yield Button("Back", id="back")
+
+    def on_mount(self):
+        self.query_one(TextArea).focus()
 
     def on_button_pressed(self, event):
         self.dismiss()
@@ -60,10 +65,14 @@ class JobTracker(App):
     ModalScreen { align: center middle; background: $background 70%; }
     #dialog { width: 85%; height: auto; max-height: 85%; overflow-y: auto;
               padding: 1 2; border: round $accent; background: $surface; }
+    #details-dialog { width: 85%; height: 85%; padding: 1 2;
+                      border: round $accent; background: $surface; }
+    #details-text { height: 1fr; }
     """
     BINDINGS = [("q", "quit", "Quit"), ("l", "login", "Login"),
                 ("r", "refresh_jobs", "Refresh"), ("d", "download", "Download"),
-                ("c", "cancel_job", "Cancel")]
+                ("c", "cancel_job", "Cancel"), ("h", "hide_job", "Hide local"),
+                ("x", "cleanup_job", "Clean remote")]
 
     def __init__(self, registry=None, poll_interval=30, tenant="https://designsafe.tapis.io", app_id=None):
         super().__init__()
@@ -112,6 +121,18 @@ class JobTracker(App):
 
     def notice(self, text):
         self.query_one("#notice", Static).update(text)
+
+    def show_download_progress(self, phase, count, total):
+        if phase == "validating":
+            self.notice("Download received. Validating ZIP...")
+            return
+        label = "Receiving" if phase == "receiving" else "Saving"
+        amount = f"{count / (1024 * 1024):.1f} MiB"
+        if total:
+            percent = min(100, 100 * count / total)
+            self.notice(f"{label}: {amount} / {total / (1024 * 1024):.1f} MiB ({percent:.0f}%)")
+        else:
+            self.notice(f"{label}: {amount} (total size not provided by server)")
 
     def action_login(self):
         record = self.selected()
@@ -185,6 +206,36 @@ class JobTracker(App):
                          lambda value: self.start("cancel", record) if value == record.id else
                          self.notice("Cancellation not requested."))
 
+    def action_hide_job(self):
+        record = self.selected()
+        if not record or self.busy:
+            return
+        self.push_screen(Prompt(f"Remove this job from the local tracker only?\n"
+                                f"My Data and scratch files will not be deleted.\n"
+                                f"Type the full UUID to confirm:\n{record.id}"),
+                         lambda value: self.hide_job(record) if value == record.id else
+                         self.notice("Job was not removed from the tracker."))
+
+    def hide_job(self, record):
+        if self.registry.hide(record.key):
+            self.reload_rows()
+            self.notice("Job hidden locally. Remote job and files are unchanged.")
+
+    def action_cleanup_job(self):
+        record = self.selected()
+        if self.ready(record):
+            self.start("cleanup_preview", record)
+
+    def show_cleanup_prompt(self, record, plan):
+        scratch = plan.scratch[1] if plan.scratch else "(not reported; skipped)"
+        archive = plan.archive[1] if plan.archive else "(not reported; skipped)"
+        self.push_screen(Prompt(
+            f"Delete this finished job's output folders and hide it in Tapis?\n"
+            f"Stampede3 scratch: {scratch}\nDesignSafe My Data: {archive}\n"
+            f"This cannot be undone. Type DELETE {record.id} to confirm:"),
+            lambda value: self.start("cleanup", record, plan)
+            if value == f"DELETE {record.id}" else self.notice("Remote cleanup cancelled."))
+
     def ready(self, record):
         if not record or self.busy:
             return False
@@ -219,16 +270,50 @@ class JobTracker(App):
                     details = job.details()
                     self.call_from_thread(self.show_details, job.record, details)
                 elif operation == "download":
-                    job.download(value)
+                    self.call_from_thread(self.notice, "Connecting to Tapis for download...")
+                    job.download(value, progress=lambda phase, count, total:
+                                 self.call_from_thread(self.show_download_progress, phase, count, total))
+                    self.call_from_thread(self.notice, f"Download complete: {value}")
+                    return
                 elif operation == "cancel":
                     if job.status().state not in {"succeeded", "failed", "cancelled"}:
                         job.cancel()
                         self.call_from_thread(self.notice, "Cancellation requested, not confirmed. Refresh to verify.")
                         return
+                elif operation == "cleanup_preview":
+                    plan = job.cleanup_plan()
+                    self.call_from_thread(self.show_cleanup_prompt, record, plan)
+                    return
+                elif operation == "cleanup":
+                    job.cleanup(value)
+                    self.registry.hide(record.key)
+                    self.call_from_thread(self.notice, "Remote output cleanup completed; job hidden in Tapis and locally.")
+                    return
             self.call_from_thread(self.notice, f"{operation.capitalize()} completed. Statuses show their last check time.")
         except Exception as error:
-            self.call_from_thread(self.notice, f"{operation.capitalize()} failed ({type(error).__name__}); "
-                                  "private details omitted. No automatic retry or resubmission.")
+            if operation == "download":
+                if isinstance(error, FileExistsError):
+                    message = "Download not started: ZIP or .part already exists. Choose a new destination."
+                elif isinstance(error, RequestException):
+                    status = getattr(getattr(error, "response", None), "status_code", None)
+                    detail = f"HTTP {status}" if status else type(error).__name__
+                    message = f"Download transfer failed ({detail}). A .part file may remain; choose a new destination."
+                elif isinstance(error, OSError):
+                    message = f"Download failed while writing locally ({type(error).__name__}, errno={error.errno}). " \
+                              "Check free space and destination permissions; a .part file may remain."
+                else:
+                    message = f"Download failed ({type(error).__name__}). A .part file may remain."
+                self.call_from_thread(self.notice, message)
+            elif operation == "cleanup_preview":
+                reason = str(error) if isinstance(error, ValueError) else type(error).__name__
+                self.call_from_thread(self.notice, f"Cleanup unavailable: {reason}. No files changed.")
+            elif operation == "cleanup":
+                self.call_from_thread(self.notice, f"Cleanup stopped ({type(error).__name__}). "
+                                      "Some files may already be removed; inspect the job before retrying.")
+            else:
+                self.call_from_thread(self.notice, f"{operation.capitalize()} failed ({type(error).__name__}); "
+                                      "private details omitted. No automatic retry or resubmission.")
         finally:
-            self.call_from_thread(self.reload_rows)
+            if operation != "cleanup_preview":
+                self.call_from_thread(self.reload_rows)
             self.busy = False

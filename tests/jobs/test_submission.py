@@ -11,6 +11,7 @@ import pytest
 import femora as fm
 from femora.jobs.platforms import TACCPlatform, TACCSettings, TACCJob, RemoteSubmissionError
 from femora.jobs.platforms.tacc import SubmissionValidationError
+from femora.jobs.platforms.tacc_remote import JobCleanupPlan
 
 
 @pytest.fixture
@@ -127,12 +128,87 @@ def test_job_status_and_reconnect(client, native, state):
     client.jobs.cancelJob.assert_called_once_with(jobUuid="known-id")
 
 
+JOB_UUID = "94a706b0-0306-4cbb-88ca-17e9d18b2a91-007"
+
+
+def cleanup_job(client):
+    client.username = "test-user"
+    client.jobs.getJob.return_value = {
+        "owner": "test-user", "status": "FINISHED", "execSystemId": "stampede3",
+        "execSystemExecDir": f"/scratch/08189/test-user/tapis/{JOB_UUID}",
+        "archiveSystemId": "designsafe.storage.default",
+        "archiveSystemDir": f"/test-user/tapis-jobs-archive/2026-09-28Z/{JOB_UUID}",
+    }
+    return TACCJob(JOB_UUID, client)
+
+
+def test_cleanup_removes_only_job_folders_then_hides_in_tapis(client):
+    job = cleanup_job(client)
+    plan = job.cleanup_plan()
+    assert plan == JobCleanupPlan(JOB_UUID,
+        ("stampede3", f"/scratch/08189/test-user/tapis/{JOB_UUID}"),
+        ("designsafe.storage.default", f"/test-user/tapis-jobs-archive/2026-09-28Z/{JOB_UUID}"))
+    client.files.listFiles.side_effect = None
+    client.files.listFiles.return_value = ["output"]
+    assert job.cleanup(plan) == (plan.scratch[1], plan.archive[1])
+    assert [call.kwargs for call in client.files.delete.call_args_list] == [
+        {"systemId": system, "path": path} for system, path in (plan.scratch, plan.archive)]
+    client.jobs.hideJob.assert_called_once_with(jobUuid=JOB_UUID)
+    names = [call[0] for call in client.mock_calls]
+    assert names.index("files.delete") < names.index("jobs.hideJob")
+
+
+def test_cleanup_skips_missing_folders_and_still_hides(client):
+    job = cleanup_job(client)
+    plan = job.cleanup_plan()
+    assert job.cleanup(plan) == ()
+    client.files.delete.assert_not_called()
+    client.jobs.hideJob.assert_called_once_with(jobUuid=JOB_UUID)
+
+
+@pytest.mark.parametrize("field,value", [
+    ("owner", "someone-else"), ("status", "RUNNING"),
+    ("execSystemExecDir", "/scratch/08189/test-user/tapis"),
+    ("execSystemExecDir", f"/scratch/08189/test-user/tapis/{JOB_UUID}/output"),
+    ("execSystemExecDir", f"/scratch/08189/other/tapis/{JOB_UUID}"),
+    ("archiveSystemDir", "/test-user/tapis-jobs-archive"),
+    ("archiveSystemDir", f"/test-user/tapis-jobs-archive/2026-09-28Z/{JOB_UUID}/output"),
+    ("archiveSystemId", "other-system"),
+])
+def test_cleanup_rejects_unsafe_or_active_job_without_writes(client, field, value):
+    job = cleanup_job(client)
+    client.jobs.getJob.return_value[field] = value
+    with pytest.raises(ValueError):
+        job.cleanup_plan()
+    client.files.delete.assert_not_called()
+    client.jobs.hideJob.assert_not_called()
+
+
+def test_cleanup_rechecks_paths_and_stops_on_delete_error(client):
+    job = cleanup_job(client)
+    plan = job.cleanup_plan()
+    client.jobs.getJob.return_value["archiveSystemDir"] = None
+    with pytest.raises(ValueError, match="changed"):
+        job.cleanup(plan)
+    client.files.delete.assert_not_called()
+    client.jobs.hideJob.assert_not_called()
+
+    cleanup_job(client)
+    client.files.listFiles.side_effect = None
+    client.files.listFiles.return_value = ["output"]
+    client.files.delete.side_effect = PermissionError("denied")
+    with pytest.raises(PermissionError):
+        job.cleanup(plan)
+    client.jobs.hideJob.assert_not_called()
+
+
 def test_job_download_no_redirect_no_overwrite(client, tmp_path, monkeypatch):
     import requests
     buffer = io.BytesIO()
     with ZipFile(buffer, "w") as z:
         z.writestr("results.zip", b"nested archive")
     response = Mock(status_code=200)
+    response.headers = {"Content-Length": str(len(buffer.getvalue()))}
     response.iter_content.return_value = [buffer.getvalue()]
     response.__enter__ = Mock(return_value=response)
     response.__exit__ = Mock(return_value=False)
@@ -142,12 +218,37 @@ def test_job_download_no_redirect_no_overwrite(client, tmp_path, monkeypatch):
     client.access_token.access_token = "fake"
     job = TACCJob("id", client)
     path = tmp_path / "out.zip"
-    assert job.download(path) == path
+    progress = Mock()
+    assert job.download(path, progress=progress) == path
     assert path.read_bytes() == buffer.getvalue()
+    events = [call.args for call in progress.call_args_list]
+    assert events[0] == ("receiving", 0, len(buffer.getvalue()))
+    assert ("receiving", len(buffer.getvalue()), len(buffer.getvalue())) in events
+    assert ("validating", len(buffer.getvalue()), len(buffer.getvalue())) in events
+    assert events[-1] == ("saving", len(buffer.getvalue()), len(buffer.getvalue()))
     assert get.call_args.kwargs["allow_redirects"] is False
     with pytest.raises(FileExistsError):
         job.download(path)
     assert get.call_count == 1
+
+
+def test_job_download_progress_without_content_length(client, tmp_path, monkeypatch):
+    import requests
+    buffer = io.BytesIO()
+    with ZipFile(buffer, "w") as archive:
+        archive.writestr("result.txt", "ok")
+    response = Mock(status_code=200)
+    response.headers = {}
+    response.iter_content.return_value = [buffer.getvalue()]
+    response.__enter__ = Mock(return_value=response)
+    response.__exit__ = Mock(return_value=False)
+    monkeypatch.setattr(requests, "get", Mock(return_value=response))
+    client.jobs.getJob.return_value = {"status": "FINISHED"}
+    client.access_token.access_token = "fake"
+    progress = Mock()
+    TACCJob("id", client).download(tmp_path / "out.zip", progress=progress)
+    assert ("receiving", 0, None) in [call.args for call in progress.call_args_list]
+    assert ("receiving", len(buffer.getvalue()), None) in [call.args for call in progress.call_args_list]
 
 
 def factory_for_packaging():

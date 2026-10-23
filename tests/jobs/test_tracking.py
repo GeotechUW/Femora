@@ -145,6 +145,41 @@ def test_background_refresh_details_and_download(store, tmp_path):
     asyncio.run(exercise())
 
 
+def test_download_collision_reports_partial_file(store, tmp_path):
+    from femora.jobs.tracker_ui import JobTracker
+    from textual.widgets import Static
+    record = add("job", registry=store)
+    target = Mock()
+    target.job.return_value.download.side_effect = FileExistsError("existing partial")
+
+    async def exercise():
+        app = JobTracker(registry=store)
+        app.connections[app.connection_key(record)] = target
+        async with app.run_test(size=(120, 40)):
+            app.start("download", record, str(tmp_path / "job.zip"))
+            await app.workers.wait_for_complete()
+            assert "ZIP or .part already exists" in str(app.query_one("#notice", Static).render())
+    asyncio.run(exercise())
+
+
+def test_tracker_download_progress_with_and_without_total(store):
+    from femora.jobs.tracker_ui import JobTracker
+    from textual.widgets import Static
+
+    async def exercise():
+        app = JobTracker(registry=store)
+        async with app.run_test(size=(120, 40)):
+            notice = app.query_one("#notice", Static)
+            app.show_download_progress("receiving", 1024 * 1024, 2 * 1024 * 1024)
+            assert "50%" in str(notice.render())
+            app.show_download_progress("receiving", 1024 * 1024, None)
+            assert "1.0 MiB" in str(notice.render())
+            assert "total size not provided" in str(notice.render())
+            app.show_download_progress("validating", 1024 * 1024, None)
+            assert "Validating ZIP" in str(notice.render())
+    asyncio.run(exercise())
+
+
 def test_tacc_discovery_paginates_filters_and_normalizes():
     client = Mock(base_url="https://designsafe.tapis.io", username="user")
     client.jobs.getJobList.side_effect = [
@@ -203,6 +238,89 @@ def test_remote_discovery_rebuilds_empty_cache_and_updates_without_deleting(stor
     with pytest.raises(RuntimeError):
         sync(target, registry=store)
     assert store.get("remote").state == "succeeded"
+
+
+def test_hidden_job_stays_hidden_after_remote_discovery(store):
+    target = Mock()
+    target.tracking_metadata.return_value = {"platform": "tacc", "connection": {
+        "username": "user", "base_url": "https://designsafe.tapis.io"}}
+    summary = JobSummary("remote", "study", "2026-01-01T00:00:00Z",
+                         JobStatus("running", "RUNNING"))
+    target.list_jobs.return_value = [summary]
+    record = sync(target, registry=store)[0]
+    assert store.hide(record.key)
+    assert not store.hide(record.key)
+    assert JobRegistry(store.path).list() == []
+    assert sync(target, registry=JobRegistry(store.path)) == []
+    assert store.list() == []
+    with pytest.raises(ValueError, match="hidden"):
+        add("remote", connection=record.connection, registry=store)
+    target.job.assert_not_called()
+
+
+def test_tracker_hide_confirmation_and_keyboard_details(store):
+    from femora.jobs.tracker_ui import JobTracker, Details, Prompt
+    from textual.widgets import DataTable, Input, TextArea
+    record = add("job", registry=store)
+
+    async def exercise():
+        app = JobTracker(registry=store)
+        async with app.run_test(size=(120, 40)) as pilot:
+            app.show_details(record, {"lines": list(range(200))})
+            await pilot.pause()
+            assert isinstance(app.screen, Details)
+            area = app.screen.query_one(TextArea)
+            assert app.focused is area
+            await pilot.press("pagedown")
+            assert area.scroll_y > 0
+            await pilot.press("escape")
+            await pilot.press("h")
+            assert isinstance(app.screen, Prompt)
+            app.screen.query_one(Input).value = "wrong"
+            await pilot.press("enter")
+            assert app.query_one(DataTable).row_count == 1
+            await pilot.press("h")
+            app.screen.query_one(Input).value = record.id
+            await pilot.press("enter")
+            assert app.query_one(DataTable).row_count == 0
+            assert store.is_hidden(record.key)
+    asyncio.run(exercise())
+
+
+def test_tracker_remote_cleanup_requires_confirmation(store):
+    from femora.jobs.platforms.tacc_remote import JobCleanupPlan
+    from femora.jobs.tracker_ui import JobTracker, Prompt
+    from textual.widgets import DataTable, Input
+    record = add("94a706b0-0306-4cbb-88ca-17e9d18b2a91-007", registry=store)
+    target = Mock()
+    plan = JobCleanupPlan(record.id, ("stampede3", f"/scratch/08189/user/tapis/{record.id}"), None)
+    target.job.return_value.cleanup_plan.return_value = plan
+
+    async def exercise():
+        app = JobTracker(registry=store)
+        app.connections[app.connection_key(record)] = target
+        async with app.run_test(size=(120, 40)) as pilot:
+            await pilot.press("x")
+            await app.workers.wait_for_complete()
+            await pilot.pause()
+            assert isinstance(app.screen, Prompt)
+            assert plan.scratch[1] in app.screen.text
+            app.screen.query_one(Input).value = record.id
+            await pilot.press("enter")
+            target.job.return_value.cleanup.assert_not_called()
+            assert app.query_one(DataTable).row_count == 1
+
+            await pilot.press("x")
+            await app.workers.wait_for_complete()
+            await pilot.pause()
+            app.screen.query_one(Input).value = f"DELETE {record.id}"
+            await pilot.press("enter")
+            await app.workers.wait_for_complete()
+            await pilot.pause()
+            target.job.return_value.cleanup.assert_called_once_with(plan)
+            assert app.query_one(DataTable).row_count == 0
+            assert store.is_hidden(record.key)
+    asyncio.run(exercise())
 
 
 def test_empty_tracker_login_discovers_remote_jobs(store, monkeypatch):
