@@ -58,6 +58,21 @@ main{position:relative;z-index:2;height:100%;display:flex;flex-direction:column;
 #motion .i-play{display:none}
 #motion[aria-pressed="false"] .i-stop{display:none}
 #motion[aria-pressed="false"] .i-play{display:block}
+/* Ask AI dropdown */
+button.btn{font-family:inherit;cursor:pointer}
+.ai-wrap{position:relative;display:inline-flex}
+.btn .ai-chev{width:14px;height:14px;margin:0 0 0 8px;transition:transform .2s}
+#ask-ai[aria-expanded="true"] .ai-chev{transform:rotate(180deg)}
+#ask-ai[aria-expanded="true"]{border-color:var(--accent)}
+.ai-menu{position:absolute;z-index:20;top:calc(100% + 10px);left:50%;transform:translateX(-50%);width:max-content;min-width:250px;max-width:min(88vw,320px);padding:8px;border:1px solid var(--border);border-radius:18px;background:rgba(var(--bg-rgb),.95);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:0 18px 50px rgba(0,0,0,.22);animation:aiIn .14s ease-out}
+.ai-menu.up{top:auto;bottom:calc(100% + 10px)}
+@keyframes aiIn{from{opacity:0}to{opacity:1}}
+.ai-opt{display:flex;flex-direction:column;gap:3px;align-items:flex-start;text-align:left;width:100%;padding:11px 13px;border-radius:12px;border:1px solid transparent;color:var(--fg);font:inherit;text-decoration:none;transition:background .15s,border-color .15s}
+.ai-opt:hover,.ai-opt:focus-visible{background:var(--secondary);border-color:var(--border)}
+.ai-opt b{font-weight:600;font-size:.94rem}
+.ai-opt span{font-size:.8rem;line-height:1.4;opacity:.7}
+.ai-note{margin:6px 13px 5px;font-size:.74rem;line-height:1.45;opacity:.6;text-align:left}
+@media(prefers-reduced-motion:reduce){.ai-menu{animation:none}.btn .ai-chev{transition:none}}
 </style>
 </head>
 <body>
@@ -94,6 +109,14 @@ main{position:relative;z-index:2;height:100%;display:flex;flex-direction:column;
     <div class="actions">
       <a class="btn primary" href="/docs/"><svg viewBox="0 0 24 24" style="fill:none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4.5A1.5 1.5 0 0 1 5.5 3H20v15H5.5A1.5 1.5 0 0 0 4 19.5z"/><path d="M4 19.5A1.5 1.5 0 0 0 5.5 21H20"/></svg>Documentation</a>
       <a class="btn" href="/tools"><svg viewBox="0 0 24 24" style="fill:none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.7 6.3a4 4 0 0 0-5-5l2.1 2.1-8.4 8.4-2.1-2.1a4 4 0 0 0 5 5l8.4-8.4Z"/><path d="m13 11 7.5 7.5a1.4 1.4 0 0 1-2 2L11 13"/></svg>Explore Tools</a>
+
+      <div class="ai-wrap">
+        <button class="btn" id="ask-ai" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="ai-menu"><svg viewBox="0 0 24 24" style="fill:none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/></svg>Ask AI<svg class="ai-chev" viewBox="0 0 24 24" style="fill:none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+        <div class="ai-menu" id="ai-menu" role="menu" aria-label="Ask AI about Femora" hidden>
+          <div id="ai-options"></div>
+          <p class="ai-note">AI-generated code can be wrong. Check it before you run it.</p>
+        </div>
+      </div>
     </div>
   </div>
 </main>
@@ -382,6 +405,44 @@ function frame(now){
 let rz;addEventListener('resize',()=>{clearTimeout(rz);rz=setTimeout(setup,200)});
 setup();
 if(!reduce)startLoop();
+})();
+</script>
+<script>
+/* Ask AI dropdown. To add or change an assistant, edit AI_OPTIONS only (name, description, url). */
+(()=>{
+const AI_OPTIONS=[
+  {name:'Gemini',desc:'Femora assistant. Needs a Google account.',url:'https://gemini.google.com/gem/1J36ZJR9jguyD9D-NhSCugy8GNaRYv-M0?usp=sharing'}
+];
+const $=id=>document.getElementById(id), btn=$('ask-ai'), menu=$('ai-menu'), list=$('ai-options');
+const items=()=>[...list.querySelectorAll('.ai-opt')];
+
+AI_OPTIONS.forEach(o=>{
+  const a=document.createElement('a');
+  a.className='ai-opt';a.href=o.url;a.target='_blank';a.rel='noopener';a.setAttribute('role','menuitem');
+  const b=document.createElement('b');b.textContent=o.name;
+  const s=document.createElement('span');s.textContent=o.desc;
+  a.append(b,s);a.addEventListener('click',()=>close_());list.appendChild(a)});
+
+/* keep the menu on screen: flip above the button if there is no room below, nudge sideways on narrow screens */
+function place(){
+  menu.classList.remove('up');menu.style.transform='';
+  let r=menu.getBoundingClientRect();
+  if(r.bottom>innerHeight-8&&btn.getBoundingClientRect().top>r.height+20)menu.classList.add('up');
+  r=menu.getBoundingClientRect();
+  const dx=r.left<12?12-r.left:(r.right>innerWidth-12?innerWidth-12-r.right:0);
+  if(dx)menu.style.transform='translateX(calc(-50% + '+dx+'px))'}
+function open_(focusFirst){menu.hidden=false;btn.setAttribute('aria-expanded','true');place();if(focusFirst&&items()[0])items()[0].focus()}
+function close_(back){menu.hidden=true;btn.setAttribute('aria-expanded','false');if(back===true)btn.focus()}
+
+btn.addEventListener('click',()=>menu.hidden?open_(false):close_());
+btn.addEventListener('keydown',e=>{if(e.key==='ArrowDown'){e.preventDefault();open_(true)}});
+menu.addEventListener('keydown',e=>{
+  const it=items(),i=it.indexOf(document.activeElement);
+  if(e.key==='ArrowDown'){e.preventDefault();it[(i+1)%it.length].focus()}
+  else if(e.key==='ArrowUp'){e.preventDefault();it[(i-1+it.length)%it.length].focus()}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!menu.hidden)close_(true)});
+document.addEventListener('click',e=>{if(!menu.hidden&&!e.target.closest('.ai-wrap'))close_()});
+addEventListener('resize',()=>{if(!menu.hidden)place()});
 })();
 </script>
 </body>
