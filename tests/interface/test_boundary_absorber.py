@@ -19,7 +19,7 @@ def mesh_maker():
     return mm
 
 
-def _make_box_meshpart(mm: Model):
+def _make_box_meshpart(mm: Model, divisions=1):
     mat = mm.material.add(
         ElasticIsotropicMaterial(user_name="mat", E=200e3, nu=0.3, rho=0.0)
     )
@@ -33,9 +33,9 @@ def _make_box_meshpart(mm: Model):
         y_max=1.0,
         z_min=0.0,
         z_max=1.0,
-        nx=1,
-        ny=1,
-        nz=1,
+        nx=divisions,
+        ny=divisions,
+        nz=divisions,
     )
     mm.assembler.create_section(meshparts=["box"], num_partitions=1, merge_points=False)
     return mm
@@ -83,3 +83,35 @@ def test_interface_manager_has_boundary_namespace(mesh_maker):
 
 def test_meshmaker_has_no_drm_runtime(mesh_maker):
     assert not hasattr(mesh_maker, "drm")
+
+
+def test_metis_absorber_has_exact_non_power_of_two_partition_count(mesh_maker):
+    pytest.importorskip("pymetis")
+    _make_box_meshpart(mesh_maker, divisions=4)
+    mesh_maker.interface.boundary.absorber(
+        num_layers=2, num_partitions=54, partition_algo="metis",
+        geometry="Rectangular", boundary_type="Rayleigh",
+        rayleigh_damping=0.95, match_damping=False,
+    )
+    mesh_maker.assembler.assemble(merge_points=False, progress_callback=lambda *_: None)
+    mesh = mesh_maker.assembled_mesh
+    absorber = mesh.cell_data["AbsorbingRegion"] != 0
+    np.testing.assert_array_equal(np.unique(mesh.cell_data["Core"][absorber]), np.arange(1, 55))
+    np.testing.assert_array_equal(np.unique(mesh.cell_data["Core"][~absorber]), [0])
+
+
+def test_metis_absorber_rejects_empty_partitions(mesh_maker, monkeypatch):
+    from femora.components.partitioner import PartitionerError, PartitionerRegistry
+
+    _make_box_meshpart(mesh_maker, divisions=4)
+    monkeypatch.setattr(
+        PartitionerRegistry, "partition",
+        lambda mesh, num_partitions, **kwargs: np.zeros(mesh.n_cells, dtype=int),
+    )
+    mesh_maker.interface.boundary.absorber(
+        num_layers=1, num_partitions=3, partition_algo="metis",
+        geometry="Rectangular", boundary_type="Rayleigh",
+        rayleigh_damping=0.95, match_damping=False,
+    )
+    with pytest.raises(PartitionerError, match="nonempty partitions"):
+        mesh_maker.assembler.assemble(merge_points=False, progress_callback=lambda *_: None)

@@ -35,6 +35,7 @@ from pykdtree.kdtree import KDTree as pykdtree
 from pyvista import Cube, MultiBlock, StructuredGrid
 
 from femora.constants import FEMORA_MAX_NDF
+from femora.components.partitioner import PartitionerError, PartitionerRegistry
 
 if TYPE_CHECKING:
     from femora.core.model import Model
@@ -71,7 +72,10 @@ def _normalize_absorber_kwargs(
     Args:
         num_layers: Number of absorbing cell layers.
         num_partitions: Number of domain partitions/cores for parallel processing.
-        partition_algo: Partitioning algorithm. Must be "kd-tree" or "metis".
+        partition_algo: "kd-tree" uses VTK's spatial partitioner, which may
+            round the requested count upward. "metis" uses the shared mesh
+            partitioner, requires pymetis, and checks for the exact requested
+            number of nonempty absorber partitions.
         geometry: Boundary layer geometry. Must be "Rectangular" or "Cylindrical".
         boundary_type: Boundary absorber formulation type. One of "PML", "Rayleigh", or "ASDA".
         rayleigh_damping: Rayleigh damping factor. Defaults to 0.95.
@@ -121,8 +125,6 @@ def _normalize_absorber_kwargs(
         raise ValueError("Geometry should be one of ['Rectangular', 'Cylindrical']")
     if partition_algo not in ["kd-tree", "metis"]:
         raise ValueError("Partition algorithm should be one of ['kd-tree', 'metis']")
-    if partition_algo == "metis":
-        raise NotImplementedError("Metis partitioning algorithm is not implemented yet")
     if geometry == "Cylindrical":
         raise NotImplementedError("Cylindrical absorbing layer is not implemented yet")
     if boundary_type not in ["PML", "Rayleigh", "ASDA"]:
@@ -404,13 +406,23 @@ def apply_rectangular_absorbing_layer(mesh_maker: "Model", config: dict) -> bool
             absorbing.cell_data["ElementTag"][absorbing.cell_data["ElementTag"] == tag] = pml_tags[tag]
 
     if num_partitions > 1:
-        partitions = absorbing.partition(num_partitions, generate_global_id=True, as_composite=True)
-
-        for i, partition in enumerate(partitions):
-            ids = partition.cell_data["vtkGlobalCellIds"]
-            absorbing.cell_data["Core"][ids] = i + num_partitions_existing + 1
-
-        del partitions
+        if partition_algo == "metis":
+            labels = PartitionerRegistry.partition(
+                absorbing, num_partitions, partitioner=partition_algo,
+            )
+            if len(unique(labels)) != num_partitions:
+                raise PartitionerError(
+                    f"Absorber METIS partitioning requested {num_partitions} "
+                    f"nonempty partitions, but produced {len(unique(labels))}."
+                )
+            absorbing.cell_data["Core"] = labels + num_partitions_existing + 1
+        else:
+            # Preserve the existing VTK KD-tree layout for existing models.
+            partitions = absorbing.partition(num_partitions, generate_global_id=True, as_composite=True)
+            for i, partition in enumerate(partitions):
+                ids = partition.cell_data["vtkGlobalCellIds"]
+                absorbing.cell_data["Core"][ids] = i + num_partitions_existing + 1
+            del partitions
 
     elif num_partitions == 1:
         absorbing.cell_data["Core"] = full(absorbing.n_cells, num_partitions_existing + 1, dtype=int)
