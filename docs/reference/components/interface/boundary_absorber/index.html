@@ -21,7 +21,7 @@
       
       
       <link rel="icon" href="../../../../assets/femora-logo.svg">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.0">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.2">
     
     
       
@@ -4986,6 +4986,95 @@
   
     <nav class="md-nav" aria-label="Classes">
       <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#femora.components.interface.boundary_absorber.PartitionerError" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PartitionerError
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#femora.components.interface.boundary_absorber.PartitionerRegistry" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PartitionerRegistry
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="PartitionerRegistry">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#femora.components.interface.boundary_absorber.PartitionerRegistry-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Methods:
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Methods:">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#femora.components.interface.boundary_absorber.PartitionerRegistry.register" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        register
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#femora.components.interface.boundary_absorber.PartitionerRegistry.get_available_types" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        get_available_types
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#femora.components.interface.boundary_absorber.PartitionerRegistry.validate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        validate
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#femora.components.interface.boundary_absorber.PartitionerRegistry.partition" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        partition
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
         
           <li class="md-nav__item">
   <a href="#femora.components.interface.boundary_absorber.Model" class="md-nav__link">
@@ -18959,6 +19048,95 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#femora.components.interface.boundary_absorber.PartitionerError" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PartitionerError
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#femora.components.interface.boundary_absorber.PartitionerRegistry" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PartitionerRegistry
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="PartitionerRegistry">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#femora.components.interface.boundary_absorber.PartitionerRegistry-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Methods:
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Methods:">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#femora.components.interface.boundary_absorber.PartitionerRegistry.register" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        register
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#femora.components.interface.boundary_absorber.PartitionerRegistry.get_available_types" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        get_available_types
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#femora.components.interface.boundary_absorber.PartitionerRegistry.validate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        validate
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#femora.components.interface.boundary_absorber.PartitionerRegistry.partition" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        partition
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#femora.components.interface.boundary_absorber.Model" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -19304,6 +19482,572 @@
 </div>
 
 <h3 id="femora.components.interface.boundary_absorber-classes">Classes</h3>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h4 id="femora.components.interface.boundary_absorber.PartitionerError" class="doc doc-heading">
+            <span class="doc doc-object-name doc-class-name">PartitionerError</span>
+
+
+</h4>
+
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><span title="RuntimeError">RuntimeError</span></code></p>
+
+
+
+        <p>Raised when a partitioning method fails or returns invalid output.</p>
+<p>This exception is raised when validation of partitioner output formats, min/max 
+indices, or array shapes fails, or if METIS is requested but pymetis is not 
+available.</p>
+
+
+
+
+
+
+
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h4 id="femora.components.interface.boundary_absorber.PartitionerRegistry" class="doc doc-heading">
+            <span class="doc doc-object-name doc-class-name">PartitionerRegistry</span>
+
+
+</h4>
+
+
+    <div class="doc doc-contents ">
+
+
+
+        <p>Registry and manager for Femora mesh partitioners.</p>
+<p>This registry maintains a collection of partitioner algorithms (both built-in 
+and optional dependency-based, like METIS) that map a PyVista UnstructuredGrid's 
+mesh cells to integer partition IDs in <code>[0, num_partitions - 1]</code>.</p>
+
+
+<p><span class="doc-section-title">Attributes:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td><code><span title="femora.components.interface.boundary_absorber.PartitionerRegistry._partitioners">_partitioners</span></code></td>
+            <td>
+                  <code><span title="typing.Dict">Dict</span>[<span title="str">str</span>, <span title="femora.components.partitioner.partitioner._RegisteredPartitioner">_RegisteredPartitioner</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Internal registry map 
+storing registered partitioner functions and their availability checks.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<details class="example" open>
+  <summary>Example</summary>
+  <div class="highlight"><pre><span></span><code><a id="femora.components.interface.boundary_absorber.PartitionerRegistry--__codelineno-0-1" name="femora.components.interface.boundary_absorber.PartitionerRegistry--__codelineno-0-1" href="#femora.components.interface.boundary_absorber.PartitionerRegistry--__codelineno-0-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">pyvista</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pv</span>
+<a id="femora.components.interface.boundary_absorber.PartitionerRegistry--__codelineno-0-2" name="femora.components.interface.boundary_absorber.PartitionerRegistry--__codelineno-0-2" href="#femora.components.interface.boundary_absorber.PartitionerRegistry--__codelineno-0-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">femora.components.partitioner.partitioner</span><span class="w"> </span><span class="kn">import</span> <span class="n">PartitionerRegistry</span>
+<a id="femora.components.interface.boundary_absorber.PartitionerRegistry--__codelineno-0-3" name="femora.components.interface.boundary_absorber.PartitionerRegistry--__codelineno-0-3" href="#femora.components.interface.boundary_absorber.PartitionerRegistry--__codelineno-0-3"></a>
+<a id="femora.components.interface.boundary_absorber.PartitionerRegistry--__codelineno-0-4" name="femora.components.interface.boundary_absorber.PartitionerRegistry--__codelineno-0-4" href="#femora.components.interface.boundary_absorber.PartitionerRegistry--__codelineno-0-4"></a><span class="c1"># Construct a simple VTK grid and partition its cells</span>
+<a id="femora.components.interface.boundary_absorber.PartitionerRegistry--__codelineno-0-5" name="femora.components.interface.boundary_absorber.PartitionerRegistry--__codelineno-0-5" href="#femora.components.interface.boundary_absorber.PartitionerRegistry--__codelineno-0-5"></a><span class="n">grid</span> <span class="o">=</span> <span class="n">pv</span><span class="o">.</span><span class="n">UnstructuredGrid</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+<a id="femora.components.interface.boundary_absorber.PartitionerRegistry--__codelineno-0-6" name="femora.components.interface.boundary_absorber.PartitionerRegistry--__codelineno-0-6" href="#femora.components.interface.boundary_absorber.PartitionerRegistry--__codelineno-0-6"></a><span class="n">labels</span> <span class="o">=</span> <span class="n">PartitionerRegistry</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span>
+<a id="femora.components.interface.boundary_absorber.PartitionerRegistry--__codelineno-0-7" name="femora.components.interface.boundary_absorber.PartitionerRegistry--__codelineno-0-7" href="#femora.components.interface.boundary_absorber.PartitionerRegistry--__codelineno-0-7"></a>    <span class="n">grid</span><span class="p">,</span>
+<a id="femora.components.interface.boundary_absorber.PartitionerRegistry--__codelineno-0-8" name="femora.components.interface.boundary_absorber.PartitionerRegistry--__codelineno-0-8" href="#femora.components.interface.boundary_absorber.PartitionerRegistry--__codelineno-0-8"></a>    <span class="n">num_partitions</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+<a id="femora.components.interface.boundary_absorber.PartitionerRegistry--__codelineno-0-9" name="femora.components.interface.boundary_absorber.PartitionerRegistry--__codelineno-0-9" href="#femora.components.interface.boundary_absorber.PartitionerRegistry--__codelineno-0-9"></a>    <span class="n">partitioner</span><span class="o">=</span><span class="s2">"hilbert"</span><span class="p">,</span>
+<a id="femora.components.interface.boundary_absorber.PartitionerRegistry--__codelineno-0-10" name="femora.components.interface.boundary_absorber.PartitionerRegistry--__codelineno-0-10" href="#femora.components.interface.boundary_absorber.PartitionerRegistry--__codelineno-0-10"></a><span class="p">)</span>
+</code></pre></div>
+</details>
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+<h5 id="femora.components.interface.boundary_absorber.PartitionerRegistry-functions">Methods:</h5>
+
+<div class="doc doc-object doc-function">
+
+
+<h6 id="femora.components.interface.boundary_absorber.PartitionerRegistry.register" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">register</span>
+
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-staticmethod"><code>staticmethod</code></small>
+  </span>
+
+</h6>
+<div class="doc-signature highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">register</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">ndarray</span><span class="p">],</span> <span class="o">*</span><span class="p">,</span> <span class="n">is_available</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Callable</span><span class="p">[[],</span> <span class="nb">bool</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Register a custom partitioner algorithm in Femora.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>name</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Unique string identifier for the partitioner (case-insensitive).</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>func</code>
+            </td>
+            <td>
+                  <code><span title="typing.Callable">Callable</span>[..., <span title="numpy.ndarray">ndarray</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A callable of type PartitionerFunc mapping a PyVista UnstructuredGrid 
+and partition count to a 1D NumPy array of cell partition IDs.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>is_available</code>
+            </td>
+            <td>
+                  <code><span title="typing.Optional">Optional</span>[<span title="typing.Callable">Callable</span>[[], <span title="bool">bool</span>]]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Optional callback returning True if the partitioner's 
+system dependencies are met. Defaults to None (always available).</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="ValueError">ValueError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If <code>name</code> is empty or whitespace-only.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h6 id="femora.components.interface.boundary_absorber.PartitionerRegistry.get_available_types" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">get_available_types</span>
+
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-staticmethod"><code>staticmethod</code></small>
+  </span>
+
+</h6>
+<div class="doc-signature highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">get_available_types</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">include_unavailable</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Get the names of all registered partitioner algorithms.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>include_unavailable</code>
+            </td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If True, returns all registered algorithms 
+even if their external library dependencies (like pymetis) are 
+missing. Defaults to False.</p>
+              </div>
+            </td>
+            <td>
+                  <code>False</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="typing.List">List</span>[<span title="str">str</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>List[str]: A sorted list of registered partitioner name keys.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h6 id="femora.components.interface.boundary_absorber.PartitionerRegistry.validate" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">validate</span>
+
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-staticmethod"><code>staticmethod</code></small>
+  </span>
+
+</h6>
+<div class="doc-signature highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">validate</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Validate if a partitioner name is registered and available.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>name</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The case-insensitive name of the partitioner to validate.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="ValueError">ValueError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If the partitioner name is not registered.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="ImportError">ImportError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If the partitioner requires missing external dependencies.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h6 id="femora.components.interface.boundary_absorber.PartitionerRegistry.partition" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">partition</span>
+
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-staticmethod"><code>staticmethod</code></small>
+  </span>
+
+</h6>
+<div class="doc-signature highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">partition</span><span class="p">(</span><span class="n">mesh</span><span class="p">:</span> <span class="n">UnstructuredGrid</span><span class="p">,</span> <span class="n">num_partitions</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">partitioner</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">'kd-tree'</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Partition a mesh's cells into a specified number of balanced domains.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>mesh</code>
+            </td>
+            <td>
+                  <code><span title="pyvista.UnstructuredGrid">UnstructuredGrid</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The PyVista UnstructuredGrid representing the global assembled mesh.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>num_partitions</code>
+            </td>
+            <td>
+                  <code><span title="int">int</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Target number of partitions/cores (must be &gt;= 1).</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>partitioner</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Registered case-insensitive name of the partitioning algorithm 
+to use. Defaults to "kd-tree".</p>
+              </div>
+            </td>
+            <td>
+                  <code>&#39;kd-tree&#39;</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>**kwargs</code>
+            </td>
+            <td>
+                  <code><span title="typing.Any">Any</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Extra parameters passed to the underlying partitioner function.</p>
+              </div>
+            </td>
+            <td>
+                  <code>{}</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="numpy.ndarray">ndarray</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>np.ndarray: A 1D integer NumPy array of shape <code>(mesh.n_cells,)</code> mapping 
+each cell index to a partition ID in <code>[0, num_partitions - 1]</code>.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="ValueError">ValueError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If <code>num_partitions</code> is less than 1.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="PartitionerError (femora.components.partitioner.partitioner.PartitionerError)" href="../../partitioner/PartitionerError/#femora.components.partitioner.partitioner.PartitionerError">PartitionerError</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If the partitioning function fails, returns an incorrect 
+array shape, or produces out-of-bound partition IDs.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div>
 
 <div class="doc doc-object doc-class">
 
@@ -20746,7 +21490,10 @@ definitions through the model's managers before assembling again.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Partitioning algorithm. Must be "kd-tree" or "metis".</p>
+                <p>"kd-tree" uses VTK's spatial partitioner, which may
+round the requested count upward. "metis" uses the shared mesh
+partitioner, requires pymetis, and checks for the exact requested
+number of nonempty absorber partitions.</p>
               </div>
             </td>
             <td>
@@ -21068,7 +21815,7 @@ inconsistent, or if boundary element types or materials are incompatible.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="October 30, 2026 11:34:03 UTC">October 30, 2026</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="November 20, 2026 08:47:12 UTC">November 20, 2026</span>
   </span>
 
     
@@ -21078,7 +21825,7 @@ inconsistent, or if boundary element types or materials are incompatible.</p>
     <span class="md-icon" title="Created">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M14.47 15.08 11 13V7h1.5v5.25l3.08 1.83c-.41.28-.79.62-1.11 1m-1.39 4.84c-.36.05-.71.08-1.08.08-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8c0 .37-.03.72-.08 1.08.69.1 1.33.32 1.92.64.1-.56.16-1.13.16-1.72 0-5.5-4.5-10-10-10S2 6.5 2 12s4.47 10 10 10c.59 0 1.16-.06 1.72-.16-.32-.59-.54-1.23-.64-1.92M18 15v3h-3v2h3v3h2v-3h3v-2h-3v-3z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="October 30, 2026 11:34:03 UTC">October 30, 2026</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="November 20, 2026 08:47:12 UTC">November 20, 2026</span>
   </span>
 
     
@@ -21170,7 +21917,7 @@ inconsistent, or if boundary element types or materials are incompatible.</p>
       <script id="__config" type="application/json">{"annotate": null, "base": "../../../..", "features": ["navigation.tabs", "navigation.footer", "content.code.copy", "content.code.annotate"], "search": "../../../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../../../../assets/javascripts/bundle.c21346df.min.js"></script>
+      <script src="../../../../assets/javascripts/bundle.a5f9d56c.min.js"></script>
       
         <script src="../../../../javascripts/results-api.js"></script>
       
